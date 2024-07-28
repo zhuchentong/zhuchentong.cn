@@ -1,0 +1,23 @@
+{
+  "name": "astro-quickstart",
+  "type": "module",
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro check && astro build",
+    "preview": "astro preview",
+    "astro": "astro",
+    "docker:nginx":"docker run -d -p 8080:80 --name astro-nginx -v ./dist:/usr/share/nginx/html"
+  },
+  "dependencies": {
+    "@astrojs/check": "^0.8.3",
+    "astro": "^4.12.2",
+    "typescript": "^5.5.4"
+  },
+  "devDependencies": {
+    "@unocss/reset": "^0.61.6",
+    "unocss": "^0.61.6",
+    "zx": "^8.1.4"
+  }
+}
