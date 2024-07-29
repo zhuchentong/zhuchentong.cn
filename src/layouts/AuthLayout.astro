@@ -1,0 +1,19 @@
+---
+import BaseLayout from './BaseLayout.astro'
+import type { Props as BaseLayoutProps } from './BaseLayout.astro'
+
+export interface Props extends BaseLayoutProps {
+  isNeedLogin?: boolean
+}
+
+const { title, description, isNeedLogin } = Astro.props
+const user = Astro.locals.user
+
+if (isNeedLogin && !user) {
+  return Astro.redirect('/login')
+}
+---
+
+<BaseLayout title={title} description={description}>
+  <slot />
+</BaseLayout>

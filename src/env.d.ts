@@ -1,8 +1,9 @@
 /// <reference types="astro/client" />
-
+declare interface User {}
 
 declare namespace App {
   interface Locals {
-    test: number
+    userToken?: string
+    user?: User
   }
 }
