@@ -1,11 +1,12 @@
 ---
+import { LayoutConfig } from '@/config/layout.config'
 import HeaderAction from './HeaderAction.astro'
 import HeaderLogo from './HeaderLogo.astro'
 import HeaderMenu from './HeaderMenu.astro'
+import { toPxString } from '@/shared/common/px'
 ---
-
 <header class="sticky relative">
-  <nav class="bg-red flex">
+  <nav class="bg-red flex items-center gap-4 px-4" style={{height: toPxString(LayoutConfig.header.height)}}>
     <HeaderLogo />
     <HeaderMenu />
     <HeaderAction />

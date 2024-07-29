@@ -5,10 +5,10 @@ import Vue from "@astrojs/vue";
 
 // https://astro.build/config
 export default defineConfig({
-  // output: 'server',
-  // adapter: node({
-  //   mode: "standalone"
-  // }),
+  output: 'server',
+  adapter: node({
+    mode: "standalone"
+  }),
   integrations: [
     Vue({
       jsx: true
@@ -16,8 +16,5 @@ export default defineConfig({
     UnoCSS({
       injectReset: true
     }),
-  ],
-  devToolbar: {
-    enabled: true
-  }
+  ]
 });

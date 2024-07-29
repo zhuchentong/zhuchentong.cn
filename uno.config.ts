@@ -62,7 +62,7 @@ function customBreakpoints() {
 
 function importIconsFromSvg() {
   return FileSystemIconLoader(
-    './src/assets/svgs',
+    './src/assets/svg',
     svg => svg.replace(/#fff/, 'currentColor'),
   )
 }
