@@ -13,7 +13,7 @@ const { title, description } = Astro.props
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="en" class="light">
   <head>
     <meta charset="UTF-8" />
     <meta name="description" content={description ?? title} />
@@ -23,10 +23,10 @@ const { title, description } = Astro.props
     <title>{title}</title>
     <Favicons />
     <ViewTransitions fallback="swap" />
+    <Theme />
   </head>
   <body>
     <slot />
-    <Theme />
   </body>
 </html>
 <style is:global>
@@ -42,9 +42,9 @@ const { title, description } = Astro.props
     );
   }
   html {
-    font-family: system-ui, sans-serif;
-    background: #13151a;
-    background-size: 224px;
+    /* font-family: system-ui, sans-serif; */
+    background: var(--backgroundColor);
+    /* background-size: 224px; */
   }
   code {
     font-family:
