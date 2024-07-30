@@ -7,9 +7,25 @@ import DarkTheme from '@/components/themes/DarkTheme.astro'
 <DarkTheme />
 
 <style is:global>
-  html {
+  body {
     background-color: var(--background-color);
     color: var(--forground-color);
+  }
+
+  a {
+    cursor: pointer;
+    &:link {
+      color: var(--foreground-color);
+    }
+    &:visited {
+      color: var(--foreground-color);
+    }
+    &:hover {
+      color: var(--foreground-color);
+    }
+    &:active {
+      color: var(--foreground-color);
+    }
   }
 </style>
 
@@ -17,8 +33,15 @@ import DarkTheme from '@/components/themes/DarkTheme.astro'
   import * as AppStore from '@/stores/app.store'
 
   AppStore.theme.subscribe((value) => {
+    // update root
     document.documentElement.classList.remove('dark')
     document.documentElement.classList.remove('light')
     document.documentElement.classList.add(value)
+    document.querySelectorAll('[data-bs-theme]')
+
+    // update all elements with data-bs-theme
+    document.querySelectorAll('[data-bs-theme]').forEach((element) => {
+      element.setAttribute('data-bs-theme', value)
+    })
   })
 </script>

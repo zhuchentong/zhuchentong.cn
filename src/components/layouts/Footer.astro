@@ -7,14 +7,23 @@ const theme = {
 }
 ---
 
-<footer class="" style={{ height: toPxString(LayoutConfig.footer.height) }}>
-  <div>Made by <a>zhuchentong</a> · All rights reserved.</div>
-  <div class="links"></div>
+<footer
+  class="border-gray-200 border-t flex flex-col justify-center px-8"
+  style={{ height: toPxString(LayoutConfig.footer.height) }}
+>
+  <div class="flex items-center justify-between text-14px">
+    <div>Made by <a>zhuchentong</a> · All rights reserved.</div>
+    <div class="links">
+      <a
+        class="icon-park-outline:github text-24px"
+        href="https://github.com/zhuchentong"></a>
+    </div>
+  </div>
 </footer>
 
 <style>
   footer {
     background-color: var(--background-color);
-    color: var(--forground-color);
+    color: var(--footer-forground-color);
   }
 </style>

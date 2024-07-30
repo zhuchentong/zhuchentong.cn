@@ -10,17 +10,17 @@ export const NavBarLinks = [
     link: '/',
   },
   {
-    text: '资讯',
-    link: '/',
+    text: '关于',
+    link: '/about',
   },
   {
-    text: '产品',
-    links: [{
-      text: '产品1',
-      link: '/products/1',
+    text: 'Demo',
+    children: [{
+      text: '图标',
+      link: '/demo/icon',
     }, {
-      text: '产品2',
-      link: '/products/2',
+      text: '组件',
+      link: '/demo/component',
     }],
   },
 ] as NavBarItem[]

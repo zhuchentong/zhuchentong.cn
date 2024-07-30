@@ -5,13 +5,25 @@ import Header from '@/components/layouts/Header.astro'
 import Footer from '@/components/layouts/Footer.astro'
 import Content from '@/components/layouts/Content.astro'
 
-interface Props extends AuthLayoutProps {}
+interface Props extends AuthLayoutProps {
+  paddingX?: number
+  paddingY?: number
+  spaceX?: string
+  spaceY?: string
+}
+
+const { paddingX, paddingY, spaceX, spaceY } = Astro.props
 ---
 
 <AuthLayout {...Astro.props}>
   <main>
     <Header />
-    <Content>
+    <Content
+      paddingX={paddingX}
+      paddingY={paddingY}
+      spaceX={spaceX}
+      spaceY={spaceY}
+    >
       <slot />
     </Content>
     <Footer />

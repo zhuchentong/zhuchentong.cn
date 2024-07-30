@@ -2,9 +2,9 @@
 import { onMounted, ref } from 'vue'
 import { useIntervalFn } from '@vueuse/core'
 
-const a = ref(1)
+const counter = ref(1)
 useIntervalFn(() => {
-  a.value += 1
+  counter.value += 1
 }, 1000, {
   immediate: true,
 })
@@ -15,7 +15,6 @@ onMounted(() => {
 
 <template>
   <div class="text-red">
-    2131- {{ a }}
+    Counter: - {{ counter }}
   </div>
-  <i class="icon-park-outline:delete" />
 </template>

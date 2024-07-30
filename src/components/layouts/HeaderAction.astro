@@ -1,14 +1,25 @@
 ---
 import ThemeToggle from '@/components/widgets/ThemeToggle.vue'
-
-const theme = Astro.cookies.get('theme')?.value as 'light' | 'dark'
 ---
 
-<section class="flex gap-4 px-2">
-  <div class="theme-action">
+<section class="flex gap-4 px-2 items-center">
+  <div class="mobile:block desktop:hidden text-0">
+    <button
+      class="navbar-toggler"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#navbarNavDropdown"
+      aria-controls="navbarNavDropdown"
+      aria-expanded="false"
+      aria-label="Toggle navigation"
+    >
+      <i class="icon-park-outline:hamburger-button text-16px"></i>
+    </button>
+  </div>
+  <div>
     <ThemeToggle client:only="vue" />
   </div>
-  <div class="auth-action flex gap-2">
+  <div class="auth-action text-14px flex items-end gap-2 text-baseline">
     <div>登录</div>
     <div>|</div>
     <div>注册</div>

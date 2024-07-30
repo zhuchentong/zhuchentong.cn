@@ -14,8 +14,8 @@ function onToggleTheme() {
 </script>
 
 <template>
-  <div class="cursor-pointer" @click="onToggleTheme">
-    <i :class="{ 'dark-icon': theme === 'dark', 'light-icon': theme === 'light' }" />
+  <div class="cursor-pointer text-0" @click="onToggleTheme">
+    <i class="text-16px" :class="{ 'dark-icon': theme === 'dark', 'light-icon': theme === 'light' }" />
   </div>
 </template>
 

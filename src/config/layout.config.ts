@@ -3,6 +3,6 @@ export const LayoutConfig = {
     height: 80,
   },
   footer: {
-    height: 200,
+    height: 60,
   },
 } as const

@@ -1,11 +1,25 @@
 ---
 import { LayoutConfig } from '@/config/layout.config'
 import { toPxString } from '@/shared/common/px'
+
+interface Props {
+  paddingX?: number
+  paddingY?: number
+  spaceX?: number
+  spaceY?: number
+}
+
+const { paddingX = 20, paddingY = 20, spaceX, spaceY } = Astro.props
 ---
 
 <section
   id="content"
+  class:list={[
+    { [`space-x-${spaceX}`]: !!spaceX },
+    { [`space-y-${spaceY}`]: !!spaceY },
+  ]}
   style={{
+    padding: `${toPxString(paddingY)} ${toPxString(paddingX)}`,
     minHeight: `calc(100vh - ${toPxString(LayoutConfig.header.height + LayoutConfig.footer.height)})`,
   }}
 >

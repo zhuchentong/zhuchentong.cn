@@ -18,4 +18,7 @@ export default defineConfig({
       injectReset: true,
     }),
   ],
+  devToolbar: {
+    enabled: false,
+  },
 })

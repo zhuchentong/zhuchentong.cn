@@ -1,5 +1,67 @@
 ---
-
+import { NavBarLinks } from '@/config/header.config'
+import { useStore } from '@/stores'
+const store = useStore()
 ---
 
-<section class="flex-auto bg-blue desktop:block mobile:hidden">menu</section>
+<section class="flex-auto">
+  <div
+    class="navbar-container mobile:absolute desktop:static left-0 right-0 top-60px"
+  >
+    <nav class="navbar navbar-expand-lg" data-bs-theme={store.app.theme.value}>
+      <div class="container-fluid">
+        <div class="collapse navbar-collapse" id="navbarNavDropdown">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            {
+              NavBarLinks.map((item) =>
+                item.children?.length ? (
+                  <li class="nav-item dropdown">
+                    <a
+                      class="nav-link dropdown-toggle"
+                      href="#"
+                      role="button"
+                      data-bs-toggle="dropdown"
+                      aria-expanded="false"
+                    >
+                      {item.text}
+                    </a>
+                    <ul class="dropdown-menu">
+                      {item.children.map((child) => (
+                        <li>
+                          <a class="dropdown-item" href={child.link}>
+                            {child.text}
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  </li>
+                ) : (
+                  <li class="nav-item">
+                    <a
+                      class="nav-link active"
+                      aria-current="page"
+                      href={item.link}
+                    >
+                      {item.text}
+                    </a>
+                  </li>
+                ),
+              )
+            }
+          </ul>
+        </div>
+      </div>
+    </nav>
+  </div>
+</section>
+
+<style>
+  .navbar {
+    padding: 0 20px !important;
+    background-color: var(--background-color);
+
+    .navbar-collapse {
+      padding: 20px 0 !important;
+    }
+  }
+</style>
