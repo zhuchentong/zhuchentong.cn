@@ -4,7 +4,7 @@ import Test1 from '@/components/pages/index/Test1.vue'
 ---
 
 <MainLayout title="Welcome to Astro.">
-  <div class="text-yellow">ttt111</div>
+  {Array.from(Array(100), (_, i) => <div class="text-yellow">ttt{i}</div>)}
   <Test1 client:load />
 </MainLayout>
 

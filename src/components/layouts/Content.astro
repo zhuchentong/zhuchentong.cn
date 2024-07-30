@@ -1,0 +1,13 @@
+---
+import { LayoutConfig } from '@/config/layout.config'
+import { toPxString } from '@/shared/common/px'
+---
+
+<section
+  id="content"
+  style={{
+    minHeight: `calc(100vh - ${toPxString(LayoutConfig.header.height + LayoutConfig.footer.height)})`,
+  }}
+>
+  <slot />
+</section>

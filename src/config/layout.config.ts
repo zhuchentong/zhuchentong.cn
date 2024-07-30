@@ -1,8 +1,8 @@
 export const LayoutConfig = {
   header: {
-    height: 80
+    height: 80,
   },
   footer: {
-    header: 200
-  }
+    height: 200,
+  },
 } as const

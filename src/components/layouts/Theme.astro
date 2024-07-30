@@ -5,3 +5,20 @@ import DarkTheme from '@/components/themes/DarkTheme.astro'
 
 <LightTheme />
 <DarkTheme />
+
+<style is:global>
+  html {
+    background-color: var(--background-color);
+    color: var(--forground-color);
+  }
+</style>
+
+<script>
+  import * as AppStore from '@/stores/app.store'
+
+  AppStore.theme.subscribe((value) => {
+    document.documentElement.classList.remove('dark')
+    document.documentElement.classList.remove('light')
+    document.documentElement.classList.add(value)
+  })
+</script>

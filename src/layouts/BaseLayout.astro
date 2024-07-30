@@ -1,7 +1,8 @@
 ---
 import Favicons from '@/components/layouts/Favicons.astro'
 import Theme from '@/components/layouts/Theme.astro'
-import { ViewTransitions } from 'astro:transitions'
+import * as AppStore from '@/shared/common/stores/app.store'
+import { useStore } from '@/stores'
 import '@/styles/default.scss'
 
 export interface Props {
@@ -10,10 +11,12 @@ export interface Props {
 }
 
 const { title, description } = Astro.props
+const store = useStore()
+const theme = store.app.theme
 ---
 
 <!doctype html>
-<html lang="en" class="light">
+<html lang="en" class={theme.value}>
   <head>
     <meta charset="UTF-8" />
     <meta name="description" content={description ?? title} />
@@ -22,39 +25,9 @@ const { title, description } = Astro.props
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
     <Favicons />
-    <ViewTransitions fallback="swap" />
     <Theme />
   </head>
   <body>
     <slot />
   </body>
 </html>
-<style is:global>
-  :root {
-    --accent: 136, 58, 234;
-    --accent-light: 224, 204, 250;
-    --accent-dark: 49, 10, 101;
-    --accent-gradient: linear-gradient(
-      45deg,
-      rgb(var(--accent)),
-      rgb(var(--accent-light)) 30%,
-      white 60%
-    );
-  }
-  html {
-    /* font-family: system-ui, sans-serif; */
-    background: var(--backgroundColor);
-    /* background-size: 224px; */
-  }
-  code {
-    font-family:
-      Menlo,
-      Monaco,
-      Lucida Console,
-      Liberation Mono,
-      DejaVu Sans Mono,
-      Bitstream Vera Sans Mono,
-      Courier New,
-      monospace;
-  }
-</style>

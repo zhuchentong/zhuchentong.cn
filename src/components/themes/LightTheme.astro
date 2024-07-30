@@ -2,9 +2,26 @@
 
 ---
 
-<style>
+<style is:global lang="scss">
   html.light {
-    --forgroundColor: rgb(221 243 228);
-    --backgroundColor: rgb(24 121 78);
+    --forground-color-rgb: 33, 33, 33;
+    --background-color-rgb: 255, 255, 255;
+    --forground-color: rgb(--forground-color-rgb);
+    --background-color: rgb(--background-color-rgb);
+  }
+
+  a {
+    &:link {
+      color: var(--foreground-color);
+    }
+    &:visited {
+      color: var(--foreground-color);
+    }
+    &:hover {
+      color: var(--foreground-color);
+    }
+    &:active {
+      color: var(--foreground-color);
+    }
   }
 </style>

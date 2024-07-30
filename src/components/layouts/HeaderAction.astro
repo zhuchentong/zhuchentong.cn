@@ -1,11 +1,12 @@
 ---
 import ThemeToggle from '@/components/widgets/ThemeToggle.vue'
 
-const theme = Astro.cookies.get('theme')?.value as 'light'|'dark'
+const theme = Astro.cookies.get('theme')?.value as 'light' | 'dark'
 ---
+
 <section class="flex gap-4 px-2">
   <div class="theme-action">
-    <ThemeToggle client:load value={theme||'light'}></ThemeToggle>
+    <ThemeToggle client:only="vue" />
   </div>
   <div class="auth-action flex gap-2">
     <div>登录</div>

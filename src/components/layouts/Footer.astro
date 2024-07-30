@@ -1,5 +1,20 @@
 ---
+import { LayoutConfig } from '@/config/layout.config'
+import { toPxString } from '@/shared/common/px'
 
+const theme = {
+  backgroundColor: '#333',
+}
 ---
 
-<footer class="bg-#fff">123</footer>
+<footer class="" style={{ height: toPxString(LayoutConfig.footer.height) }}>
+  <div>Made by <a>zhuchentong</a> · All rights reserved.</div>
+  <div class="links"></div>
+</footer>
+
+<style>
+  footer {
+    background-color: var(--background-color);
+    color: var(--forground-color);
+  }
+</style>

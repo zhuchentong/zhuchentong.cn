@@ -3,16 +3,17 @@ import type { Props as AuthLayoutProps } from './BaseLayout.astro'
 import AuthLayout from './AuthLayout.astro'
 import Header from '@/components/layouts/Header.astro'
 import Footer from '@/components/layouts/Footer.astro'
+import Content from '@/components/layouts/Content.astro'
 
 interface Props extends AuthLayoutProps {}
 ---
 
 <AuthLayout {...Astro.props}>
-  <main class="flex flex-col min-h-full">
+  <main>
     <Header />
-    <section class="flex-auto content">
+    <Content>
       <slot />
-    </section>
+    </Content>
     <Footer />
   </main>
 </AuthLayout>
