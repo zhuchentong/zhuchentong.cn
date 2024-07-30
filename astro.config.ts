@@ -1,9 +1,9 @@
-import { defineConfig } from 'astro/config';
-import node from '@astrojs/node';
-import UnoCSS from 'unocss/astro';
-import Vue from '@astrojs/vue';
+import { defineConfig, passthroughImageService } from 'astro/config'
+import node from '@astrojs/node'
+import UnoCSS from 'unocss/astro'
+import Vue from '@astrojs/vue'
 
-import vercel from "@astrojs/vercel/serverless";
+import vercel from '@astrojs/vercel/serverless'
 
 // https://astro.build/config
 export default defineConfig({
@@ -11,11 +11,14 @@ export default defineConfig({
   adapter: vercel(),
   integrations: [Vue({
     jsx: true,
-    appEntrypoint: '/src/pages/_app'
+    appEntrypoint: '/src/pages/_app',
   }), UnoCSS({
-    injectReset: true
+    injectReset: true,
   })],
+  image: {
+    service: passthroughImageService(),
+  },
   devToolbar: {
-    enabled: false
-  }
-});
+    enabled: false,
+  },
+})
