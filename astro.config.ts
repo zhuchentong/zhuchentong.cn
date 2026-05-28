@@ -7,6 +7,7 @@ import UnoCSS from 'unocss/astro'
 
 // https://astro.build/config
 export default defineConfig({
+  site: 'https://www.zhuchentong.cn',
   output: 'server',
   adapter: node({
     mode: 'standalone',
