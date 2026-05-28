@@ -1,7 +1,9 @@
 // scripts/fonts/download.mjs
-import fs from 'fs'
-import path from 'path'
-import { fileURLToPath } from 'url'
+import { Buffer } from 'node:buffer'
+import fs from 'node:fs'
+import path from 'node:path'
+import process from 'node:process'
+import { fileURLToPath } from 'node:url'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const sourceDir = path.resolve(__dirname, 'source')
@@ -38,11 +40,13 @@ for (const { name, url, required } of fonts) {
   console.log(`Downloading: ${name}...`)
   try {
     const res = await fetch(url)
-    if (!res.ok) throw new Error(`HTTP ${res.status}`)
+    if (!res.ok)
+      throw new Error(`HTTP ${res.status}`)
     const buf = Buffer.from(await res.arrayBuffer())
     fs.writeFileSync(dest, buf)
     console.log(`  ✓ ${name} (${(buf.length / 1024 / 1024).toFixed(1)} MB)`)
-  } catch (err) {
+  }
+  catch (err) {
     if (required) {
       console.error(`  ✗ Failed to download required font: ${name}`, err)
       process.exit(1)
