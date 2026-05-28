@@ -3,7 +3,7 @@ declare interface User {}
 
 declare namespace App {
   interface Locals {
-    theme?: 'light'|'dark'
+    theme?: 'light' | 'dark'
     userToken?: string
     user?: User
   }

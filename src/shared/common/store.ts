@@ -1,5 +1,5 @@
-import { setPersistentEngine } from '@nanostores/persistent'
 import type { AstroCookies } from 'astro'
+import { setPersistentEngine } from '@nanostores/persistent'
 import * as cookies from './cookies'
 
 export function defineStore<T>(setup: () => T): T {
@@ -11,10 +11,10 @@ function setupStoreCookiePersistent(setCookie: (name: string, value: string) => 
   let listeners: ((e: { key: string, newValue?: string }) => void)[] = []
 
   const events = {
-    addEventListener(key: string, callback: PersistentListener) {
+    addEventListener(_key: string, callback: PersistentListener) {
       listeners.push(callback)
     },
-    removeEventListener(key: string, callback: PersistentListener) {
+    removeEventListener(_key: string, callback: PersistentListener) {
       listeners = listeners.filter(i => i !== callback)
     },
     perKey: false,

@@ -18,12 +18,7 @@ const { paddingX, paddingY, spaceX, spaceY } = Astro.props
 <AuthLayout {...Astro.props}>
   <main>
     <Header />
-    <Content
-      paddingX={paddingX}
-      paddingY={paddingY}
-      spaceX={spaceX}
-      spaceY={spaceY}
-    >
+    <Content paddingX={paddingX} paddingY={paddingY} spaceX={spaceX} spaceY={spaceY}>
       <slot />
     </Content>
     <Footer />

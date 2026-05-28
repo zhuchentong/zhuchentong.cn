@@ -1,15 +1,15 @@
-// uno.config.ts
-import { defineConfig, presetUno } from 'unocss'
 import { FileSystemIconLoader } from '@iconify/utils/lib/loader/node-loaders'
-import transformerDirective from '@unocss/transformer-directives'
-import presetIcons from '@unocss/preset-icons'
 import presetAttributify from '@unocss/preset-attributify'
+import presetIcons from '@unocss/preset-icons'
+import transformerDirective from '@unocss/transformer-directives'
 import transformerVariantGroup from '@unocss/transformer-variant-group'
+// uno.config.ts
+import { defineConfig, presetWind4 } from 'unocss'
 import { breakpoints } from './package.json'
 
 export default defineConfig({
   presets: [
-    presetUno(),
+    presetWind4(),
     presetAttributify({
       prefix: 'css:',
       prefixedOnly: true,
@@ -32,7 +32,7 @@ export default defineConfig({
   ],
   transformers: [
     transformerDirective(),
-    transformerVariantGroup() as any,
+    transformerVariantGroup(),
   ],
   theme: {
     breakpoints: {

@@ -19,6 +19,7 @@ Lint/format is ESLint only via `@antfu/eslint-config` with astro, vue, unocss, a
 **SSR app** served by the Node adapter in standalone mode. Dockerfile exposes port 4000.
 
 **Rendering stack:**
+
 - Astro pages (`.astro`) in `src/pages/`
 - Vue 3 components (`.vue`) integrated via `@astrojs/vue` with JSX enabled and `inheritAttrs: false` globally
 - UnoCSS for utility classes with attributify mode (prefix `css:`), icon presets, and custom SVG icons from `src/assets/svg/`
@@ -32,6 +33,7 @@ Lint/format is ESLint only via `@antfu/eslint-config` with astro, vue, unocss, a
 **Path alias:** `@/*` maps to `./src/*`
 
 **Component organization:**
+
 - `src/components/layouts/` — structural (header, footer, bootstrap, favicons)
 - `src/components/pages/` — per-page components, grouped by route in subdirectories
 - `src/components/widgets/` — interactive Vue widgets (e.g. theme toggle)

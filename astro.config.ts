@@ -1,7 +1,7 @@
-import { defineConfig, passthroughImageService } from 'astro/config'
 import node from '@astrojs/node'
-import UnoCSS from 'unocss/astro'
 import Vue from '@astrojs/vue'
+import { defineConfig, passthroughImageService } from 'astro/config'
+import UnoCSS from 'unocss/astro'
 
 // import vercel from '@astrojs/vercel/serverless'
 
