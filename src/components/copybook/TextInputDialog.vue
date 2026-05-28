@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { useStore } from '@nanostores/vue'
 import { ref, watch } from 'vue'
+import { Button } from '@/components/ui/button'
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { copybookText } from '@/stores/copybook.store'
 
 const props = defineProps<{
@@ -23,49 +25,27 @@ function confirm() {
   text.value = localText.value
   emit('close')
 }
-
-function cancel() {
-  emit('close')
-}
-
-function onOverlayClick(e: MouseEvent) {
-  if (e.target === e.currentTarget)
-    cancel()
-}
-
-function onKeydown(e: KeyboardEvent) {
-  if (e.key === 'Escape')
-    cancel()
-}
 </script>
 
 <template>
-  <Teleport to="body">
-    <div v-if="visible" class="flex items-center inset-0 justify-center fixed z-50" @click="onOverlayClick" @keydown="onKeydown">
-      <div class="bg-black/40 inset-0 absolute" />
-      <div class="rounded-lg bg-white flex flex-col max-h-80vh w-480px shadow-xl relative" @click.stop>
-        <div class="px-5 py-4 border-b border-gray-100">
-          <h3 class="text-base text-gray-800 font-medium">
-            输入汉字
-          </h3>
-        </div>
-        <div class="p-5 flex-1 overflow-auto">
-          <textarea
-            v-model="localText"
-            class="text-base p-3 border border-gray-200 rounded-md h-200px w-full resize-none focus:outline-none focus:border-blue-400"
-            placeholder="请输入要练习的汉字"
-            @keydown.escape.stop="cancel"
-          />
-        </div>
-        <div class="px-5 py-3 border-t border-gray-100 flex gap-3 justify-end">
-          <button class="text-sm text-gray-600 px-4 py-1.5 rounded-md hover:text-gray-800 hover:bg-gray-100" @click="cancel">
-            取消
-          </button>
-          <button class="text-sm text-white px-4 py-1.5 rounded-md bg-blue-500 hover:bg-blue-600" @click="confirm">
-            确定
-          </button>
-        </div>
-      </div>
-    </div>
-  </Teleport>
+  <Dialog :open="visible" @update:open="emit('close')">
+    <DialogContent class="sm:max-w-[480px]">
+      <DialogHeader>
+        <DialogTitle>输入汉字</DialogTitle>
+      </DialogHeader>
+      <textarea
+        v-model="localText"
+        class="min-h-[200px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-ring"
+        placeholder="请输入要练习的汉字"
+      />
+      <DialogFooter>
+        <Button variant="outline" @click="emit('close')">
+          取消
+        </Button>
+        <Button @click="confirm">
+          确定
+        </Button>
+      </DialogFooter>
+    </DialogContent>
+  </Dialog>
 </template>

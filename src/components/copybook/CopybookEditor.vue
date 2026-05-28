@@ -5,7 +5,7 @@ import ControlPanel from './ControlPanel.vue'
 
 <template>
   <div class="flex h-full overflow-hidden">
-    <aside class="p-4 border-r border-gray-200 w-300px overflow-y-auto">
+    <aside class="p-4 border-r border-gray-200 w-[300px] overflow-y-auto">
       <ControlPanel />
     </aside>
     <CanvasPreview />

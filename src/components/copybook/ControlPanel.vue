@@ -1,6 +1,11 @@
 <script setup lang="ts">
+import type { GridType } from '@/interfaces/copybook'
 import { useStore } from '@nanostores/vue'
 import { ref } from 'vue'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Slider } from '@/components/ui/slider'
+import { Switch } from '@/components/ui/switch'
 import { FONT_WEIGHTS, GRID_TYPES } from '@/config/copybook.config'
 import {
   copybookFontOffsetY,
@@ -63,33 +68,18 @@ const showLineColorPicker = ref(false)
         显示
       </h4>
       <div class="space-y-2">
-        <label class="flex gap-2 cursor-pointer items-center">
-          <input
-            type="checkbox"
-            class="rounded"
-            :checked="highlightFirst"
-            @change="copybookHighlightFirst.set(($event.target as HTMLInputElement).checked)"
-          >
-          <span>首字高亮</span>
-        </label>
-        <label class="flex gap-2 cursor-pointer items-center">
-          <input
-            type="checkbox"
-            class="rounded"
-            :checked="insertEmptyRow"
-            @change="copybookInsertEmptyRow.set(($event.target as HTMLInputElement).checked)"
-          >
-          <span>插入空行</span>
-        </label>
-        <label class="flex gap-2 cursor-pointer items-center">
-          <input
-            type="checkbox"
-            class="rounded"
-            :checked="insertEmptyCol"
-            @change="copybookInsertEmptyCol.set(($event.target as HTMLInputElement).checked)"
-          >
-          <span>插入空列</span>
-        </label>
+        <div class="flex gap-2 items-center">
+          <Switch :model-value="highlightFirst" @update:model-value="copybookHighlightFirst.set($event)" />
+          <Label>首字高亮</Label>
+        </div>
+        <div class="flex gap-2 items-center">
+          <Switch :model-value="insertEmptyRow" @update:model-value="copybookInsertEmptyRow.set($event)" />
+          <Label>插入空行</Label>
+        </div>
+        <div class="flex gap-2 items-center">
+          <Switch :model-value="insertEmptyCol" @update:model-value="copybookInsertEmptyCol.set($event)" />
+          <Label>插入空列</Label>
+        </div>
       </div>
     </section>
 
@@ -99,46 +89,31 @@ const showLineColorPicker = ref(false)
       </h4>
       <div class="space-y-3">
         <div>
-          <label class="text-gray-600 mb-1 block">方格类型</label>
-          <select
-            :value="gridType"
-            class="text-sm px-3 py-1.5 border border-gray-200 rounded-md bg-white w-full"
-            @change="copybookGridType.set(($event.target as HTMLSelectElement).value as any)"
-          >
-            <option v-for="gt in GRID_TYPES" :key="gt.value" :value="gt.value">
-              {{ gt.label }}
-            </option>
-          </select>
+          <Label class="text-muted-foreground mb-1 block">方格类型</Label>
+          <Select :model-value="gridType" @update:model-value="copybookGridType.set($event as GridType)">
+            <SelectTrigger class="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem v-for="gt in GRID_TYPES" :key="gt.value" :value="gt.value">
+                {{ gt.label }}
+              </SelectItem>
+            </SelectContent>
+          </Select>
         </div>
         <div>
-          <div class="text-gray-600 mb-1 flex justify-between">
-            <span>方格大小</span>
-            <span>{{ gridSize }}mm</span>
+          <div class="text-muted-foreground mb-1 flex justify-between">
+            <Label>方格大小</Label>
+            <Label>{{ gridSize }}mm</Label>
           </div>
-          <input
-            type="range"
-            :value="gridSize"
-            :min="6"
-            :max="60"
-            :step="1"
-            class="w-full"
-            @input="copybookGridSize.set(Number(($event.target as HTMLInputElement).value))"
-          >
+          <Slider :model-value="[gridSize]" :min="6" :max="60" :step="1" @update:model-value="copybookGridSize.set($event![0])" />
         </div>
         <div>
-          <div class="text-gray-600 mb-1 flex justify-between">
-            <span>行间距</span>
-            <span>{{ rowGap }}mm</span>
+          <div class="text-muted-foreground mb-1 flex justify-between">
+            <Label>行间距</Label>
+            <Label>{{ rowGap }}mm</Label>
           </div>
-          <input
-            type="range"
-            :value="rowGap"
-            :min="0"
-            :max="10"
-            :step="1"
-            class="w-full"
-            @input="copybookRowGap.set(Number(($event.target as HTMLInputElement).value))"
-          >
+          <Slider :model-value="[rowGap]" :min="0" :max="10" :step="1" @update:model-value="copybookRowGap.set($event![0])" />
         </div>
         <button
           class="px-3 py-1.5 text-left border border-gray-200 rounded-md w-full hover:bg-gray-50"
@@ -161,46 +136,31 @@ const showLineColorPicker = ref(false)
           字体选择...
         </button>
         <div>
-          <label class="text-gray-600 mb-1 block">字体粗细</label>
-          <select
-            :value="fontWeight"
-            class="text-sm px-3 py-1.5 border border-gray-200 rounded-md bg-white w-full"
-            @change="copybookFontWeight.set(($event.target as HTMLSelectElement).value)"
-          >
-            <option v-for="fw in FONT_WEIGHTS" :key="fw.value" :value="fw.value">
-              {{ fw.label }}
-            </option>
-          </select>
+          <Label class="text-muted-foreground mb-1 block">字体粗细</Label>
+          <Select :model-value="fontWeight" @update:model-value="copybookFontWeight.set($event)">
+            <SelectTrigger class="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem v-for="fw in FONT_WEIGHTS" :key="fw.value" :value="fw.value">
+                {{ fw.label }}
+              </SelectItem>
+            </SelectContent>
+          </Select>
         </div>
         <div>
-          <div class="text-gray-600 mb-1 flex justify-between">
-            <span>字体大小</span>
-            <span>{{ fontSize }}%</span>
+          <div class="text-muted-foreground mb-1 flex justify-between">
+            <Label>字体大小</Label>
+            <Label>{{ fontSize }}%</Label>
           </div>
-          <input
-            type="range"
-            :value="fontSize"
-            :min="48"
-            :max="128"
-            :step="1"
-            class="w-full"
-            @input="copybookFontSize.set(Number(($event.target as HTMLInputElement).value))"
-          >
+          <Slider :model-value="[fontSize]" :min="48" :max="128" :step="1" @update:model-value="copybookFontSize.set($event![0])" />
         </div>
         <div>
-          <div class="text-gray-600 mb-1 flex justify-between">
-            <span>上下偏移</span>
-            <span>{{ fontOffsetY }}%</span>
+          <div class="text-muted-foreground mb-1 flex justify-between">
+            <Label>上下偏移</Label>
+            <Label>{{ fontOffsetY }}%</Label>
           </div>
-          <input
-            type="range"
-            :value="fontOffsetY"
-            :min="-50"
-            :max="50"
-            :step="1"
-            class="w-full"
-            @input="copybookFontOffsetY.set(Number(($event.target as HTMLInputElement).value))"
-          >
+          <Slider :model-value="[fontOffsetY]" :min="-50" :max="50" :step="1" @update:model-value="copybookFontOffsetY.set($event![0])" />
         </div>
       </div>
     </section>
@@ -211,22 +171,14 @@ const showLineColorPicker = ref(false)
       </h4>
       <div class="space-y-3">
         <div>
-          <div class="text-gray-600 mb-1 flex justify-between">
-            <span>描红数量</span>
-            <span>{{ traceCount }}</span>
+          <div class="text-muted-foreground mb-1 flex justify-between">
+            <Label>描红数量</Label>
+            <Label>{{ traceCount }}</Label>
           </div>
-          <input
-            type="range"
-            :value="traceCount"
-            :min="1"
-            :max="20"
-            :step="1"
-            class="w-full"
-            @input="copybookTraceCount.set(Number(($event.target as HTMLInputElement).value))"
-          >
+          <Slider :model-value="[traceCount]" :min="1" :max="20" :step="1" @update:model-value="copybookTraceCount.set($event![0])" />
         </div>
         <div class="flex gap-2 items-center">
-          <span class="text-gray-600">描红颜色</span>
+          <Label class="text-muted-foreground">描红颜色</Label>
           <button
             class="border border-gray-200 rounded-md h-7 w-7"
             :style="{ backgroundColor: traceColor === 'black' ? '#000' : traceColor }"
@@ -234,7 +186,7 @@ const showLineColorPicker = ref(false)
           />
         </div>
         <div class="flex gap-2 items-center">
-          <span class="text-gray-600">线条颜色</span>
+          <Label class="text-muted-foreground">线条颜色</Label>
           <button
             class="border border-gray-200 rounded-md h-7 w-7"
             :style="{ backgroundColor: lineColor === 'black' ? '#000' : lineColor }"

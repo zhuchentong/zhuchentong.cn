@@ -23,4 +23,8 @@ export const NavBarLinks = [
       link: '/demo/component',
     }],
   },
+  {
+    text: '字帖',
+    link: '/copybook/hanzi',
+  },
 ] as NavBarItem[]

@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { useStore } from '@nanostores/vue'
 import { ref } from 'vue'
+import { Button } from '@/components/ui/button'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { exportPDF, exportPNG } from '@/composables/copybook/useExport'
 import { A4_HEIGHT_MM, A4_WIDTH_MM } from '@/shared/copybook/constants'
 import {
@@ -21,7 +23,6 @@ import {
   copybookTraceCount,
 } from '@/stores/copybook.store'
 
-const showMenu = ref(false)
 const exporting = ref(false)
 
 const text = useStore(copybookText)
@@ -66,7 +67,6 @@ function getParams() {
 }
 
 async function handleExportPDF() {
-  showMenu.value = false
   exporting.value = true
   try {
     await exportPDF(getParams())
@@ -77,45 +77,32 @@ async function handleExportPDF() {
 }
 
 function handleExportPNG() {
-  showMenu.value = false
   exportPNG(getParams())
 }
 
 function handlePrint() {
-  showMenu.value = false
   window.print()
-}
-
-function toggleMenu() {
-  showMenu.value = !showMenu.value
-}
-
-function closeMenu() {
-  showMenu.value = false
 }
 </script>
 
 <template>
-  <div class="relative" @mouseleave="closeMenu">
-    <button
-      class="text-sm text-white px-4 py-1.5 rounded-md bg-blue-500 flex gap-1 items-center hover:bg-blue-600 disabled:opacity-50"
-      :disabled="exporting"
-      @click="toggleMenu"
-    >
-      {{ exporting ? '导出中...' : '导出' }}
-      <span class="text-xs">▼</span>
-    </button>
-    <div v-if="showMenu" class="mt-1 py-1 border border-gray-200 rounded-md bg-white min-w-120px shadow-lg right-0 top-full absolute z-10">
-      <button class="text-sm px-4 py-2 text-left w-full hover:bg-gray-50" @click="handleExportPDF">
+  <DropdownMenu>
+    <DropdownMenuTrigger as-child>
+      <Button :disabled="exporting">
+        {{ exporting ? '导出中...' : '导出' }}
+      </Button>
+    </DropdownMenuTrigger>
+    <DropdownMenuContent align="end">
+      <DropdownMenuItem @click="handleExportPDF">
         导出 PDF
-      </button>
-      <button class="text-sm px-4 py-2 text-left w-full hover:bg-gray-50" @click="handleExportPNG">
+      </DropdownMenuItem>
+      <DropdownMenuItem @click="handleExportPNG">
         导出 PNG
-      </button>
-      <div class="my-1 border-t border-gray-100" />
-      <button class="text-sm px-4 py-2 text-left w-full hover:bg-gray-50" @click="handlePrint">
+      </DropdownMenuItem>
+      <DropdownMenuSeparator />
+      <DropdownMenuItem @click="handlePrint">
         打印
-      </button>
-    </div>
-  </div>
+      </DropdownMenuItem>
+    </DropdownMenuContent>
+  </DropdownMenu>
 </template>

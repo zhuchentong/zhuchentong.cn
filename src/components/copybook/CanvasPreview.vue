@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { useStore } from '@nanostores/vue'
 import { onBeforeUnmount, onMounted, ref, watchEffect } from 'vue'
+import { useFontLoader } from '@/composables/copybook/useFontLoader'
 import { renderGrid } from '@/composables/copybook/useGridRenderer'
 import { A4_HEIGHT_MM, A4_WIDTH_MM } from '@/shared/copybook/constants'
 import {
-  copybookFontFamily,
   copybookFontOffsetY,
   copybookFontSize,
   copybookFontWeight,
@@ -27,7 +27,6 @@ const gridType = useStore(copybookGridType)
 const gridSize = useStore(copybookGridSize)
 const rowGap = useStore(copybookRowGap)
 const margin = useStore(copybookMargin)
-const fontFamily = useStore(copybookFontFamily)
 const fontWeight = useStore(copybookFontWeight)
 const fontSize = useStore(copybookFontSize)
 const fontOffsetY = useStore(copybookFontOffsetY)
@@ -37,6 +36,8 @@ const lineColor = useStore(copybookLineColor)
 const highlightFirst = useStore(copybookHighlightFirst)
 const insertEmptyRow = useStore(copybookInsertEmptyRow)
 const insertEmptyCol = useStore(copybookInsertEmptyCol)
+
+const { resolvedFontName } = useFontLoader()
 
 const A4_CSS_WIDTH = 794
 const A4_CSS_HEIGHT = 1123
@@ -67,7 +68,7 @@ function draw() {
     marginRight: margin.value.right,
     marginBottom: margin.value.bottom,
     marginLeft: margin.value.left,
-    fontFamily: fontFamily.value,
+    fontFamily: resolvedFontName.value,
     fontWeight: fontWeight.value,
     fontSize: fontSize.value,
     fontOffsetY: fontOffsetY.value,

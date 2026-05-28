@@ -1,10 +1,8 @@
 ---
-import Bootstrap from '@/components/layouts/Bootstrap.astro'
 import Favicons from '@/components/layouts/Favicons.astro'
 import Theme from '@/components/layouts/Theme.astro'
-import { Font } from 'astro:assets'
 import { useStore } from '@/stores'
-import '@/styles/index.scss'
+import '@/styles/globals.css'
 
 export interface Props {
   title: string
@@ -26,16 +24,22 @@ const theme = store.app.theme
     <title>{title}</title>
     <Favicons />
     <Theme />
-    <Bootstrap />
-    <Font cssVariable="--font-ma-shan-zheng" preload />
   </head>
   <body class="flex flex-col h-screen overflow-hidden">
-    <nav class="h-48px flex items-center border-b border-gray-200 px-4 gap-6 bg-white shrink-0">
+    <nav class="h-[48px] flex items-center border-b border-gray-200 px-4 gap-6 bg-white shrink-0">
       <a href="/" class="text-sm text-gray-500 hover:text-gray-800">← 首页</a>
       <span class="text-sm font-medium text-gray-800">汉字字帖</span>
     </nav>
     <div class="flex-1 overflow-hidden">
       <slot />
     </div>
+    <style>
+      @media print {
+        nav, aside { display: none !important; }
+        .flex-1 { overflow: visible !important; }
+        .bg-gray-100 { background: white !important; padding: 0 !important; }
+        .shadow-lg { box-shadow: none !important; }
+      }
+    </style>
   </body>
 </html>
