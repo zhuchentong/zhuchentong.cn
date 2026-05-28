@@ -6,7 +6,7 @@ import process from 'node:process'
 import { fileURLToPath } from 'node:url'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const sourceDir = path.resolve(__dirname, 'source')
+const sourceDir = path.resolve(__dirname, '../../src/assets/fonts')
 
 if (!fs.existsSync(sourceDir)) {
   fs.mkdirSync(sourceDir, { recursive: true })
@@ -14,7 +14,7 @@ if (!fs.existsSync(sourceDir)) {
 
 const fonts = [
   {
-    name: 'MaShanZheng-Regular.ttf',
+    name: 'MaShanZhengMaoBiKaiShu.ttf',
     url: 'https://raw.githubusercontent.com/google/fonts/main/ofl/mashanzheng/MaShanZheng-Regular.ttf',
     required: true,
   },
@@ -55,7 +55,7 @@ for (const { name, url, required } of fonts) {
   }
 }
 
-console.log('\nDone. Files in scripts/fonts/source/:')
+console.log('\nDone. Files in src/assets/fonts/:')
 for (const f of fs.readdirSync(sourceDir)) {
   const stat = fs.statSync(path.join(sourceDir, f))
   console.log(`  ${f} (${(stat.size / 1024 / 1024).toFixed(1)} MB)`)

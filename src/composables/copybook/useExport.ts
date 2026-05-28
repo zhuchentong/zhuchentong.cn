@@ -9,7 +9,7 @@ function createExportCanvas(params: RenderParams): HTMLCanvasElement {
   const ctx = canvas.getContext('2d')!
   const pxPerMM = EXPORT_DPI / MM_PER_INCH
   ctx.scale(pxPerMM, pxPerMM)
-  renderGrid(ctx, params)
+  renderGrid(ctx, { ...params, pxPerMM })
   return canvas
 }
 

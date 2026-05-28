@@ -1,13 +1,14 @@
 ---
 import { LayoutConfig } from '@/config/layout.config'
 import { toPxString } from '@/shared/common/px'
+import Icon from '@/components/widgets/Icon.vue'
 ---
 
 <footer
   class="border-gray-200 border-t flex flex-col justify-center px-8"
   style={{ height: toPxString(LayoutConfig.footer.height) }}
 >
-  <div class="flex items-center text-14px">
+  <div class="flex items-center text-[14px]">
     <div class="flex-1 text-left">
       Made by <a>zhuchentong</a> · All rights reserved.
     </div>
@@ -15,14 +16,16 @@ import { toPxString } from '@/shared/common/px'
       <a href="https://beian.miit.gov.cn/" target="_blank">陕ICP备17002993号-1</a>
     </div>
     <div class="links flex-1 text-right">
-      <a class="icon-park-outline:github text-24px" href="https://github.com/zhuchentong"></a>
+      <a class="text-[24px]" href="https://github.com/zhuchentong">
+        <Icon icon="icon-park-outline:github" client:load />
+      </a>
     </div>
   </div>
 </footer>
 
 <style>
   footer {
-    background-color: var(--background-color);
-    color: var(--footer-forground-color);
+    background-color: var(--background);
+    color: var(--footer-foreground);
   }
 </style>

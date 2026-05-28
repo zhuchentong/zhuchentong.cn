@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Icon } from '@iconify/vue'
 import { useStore } from '@nanostores/vue'
 import * as AppStore from '../../stores/app.store'
 
@@ -14,16 +15,8 @@ function onToggleTheme() {
 </script>
 
 <template>
-  <div class="text-0 cursor-pointer" @click="onToggleTheme">
-    <i class="text-16px" :class="{ 'dark-icon': theme === 'dark', 'light-icon': theme === 'light' }" />
+  <div class="cursor-pointer" @click="onToggleTheme">
+    <Icon v-if="theme === 'dark'" icon="icon-park-outline:moon" class="text-[16px]" />
+    <Icon v-else icon="icon-park-outline:sun-one" class="text-[16px]" />
   </div>
 </template>
-
-<style scoped>
-.dark-icon {
-  @apply icon-park-outline:moon;
-}
-.light-icon {
-  @apply icon-park-outline:sun-one;
-}
-</style>

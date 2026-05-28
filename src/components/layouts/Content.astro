@@ -14,10 +14,11 @@ const { paddingX = 20, paddingY = 20, spaceX, spaceY } = Astro.props
 
 <section
   id="content"
-  class:list={[{ [`space-x-${spaceX}`]: !!spaceX }, { [`space-y-${spaceY}`]: !!spaceY }]}
   style={{
     padding: `${toPxString(paddingY)} ${toPxString(paddingX)}`,
     minHeight: `calc(100vh - ${toPxString(LayoutConfig.header.height + LayoutConfig.footer.height)})`,
+    columnGap: spaceX ? `${spaceX * 0.25}rem` : undefined,
+    rowGap: spaceY ? `${spaceY * 0.25}rem` : undefined,
   }}
 >
   <slot />

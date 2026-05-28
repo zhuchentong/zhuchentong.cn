@@ -6,17 +6,17 @@ import AvatarImage from '@/assets/images/avatar.jpg'
 
 <MainLayout title="首页">
   <section class="py-20 space-y-20">
-    <div class="w-80% m-auto">
-      <h1 class="leading-loose! mobile:text-48px desktop:text-72px">
+    <div class="w-[80%] m-auto">
+      <h1 class="leading-loose! max-md:text-[48px] md:text-[72px]">
         The QuickStart Template Use
-        <span class="text-[--primary-color-1]">Astro</span>
+        <span class="text-[--primary]">Astro</span>
         And
-        <span class="text-[--primary-color-1]">Vue</span>
+        <span class="text-[--primary]">Vue</span>
         For Content Site
       </h1>
     </div>
     <div>
-      <Image src={AvatarImage} alt="avatar" class="m-auto rounded-full desktop:w-400px mobile:w-200px" />
+      <Image src={AvatarImage} alt="avatar" class="m-auto rounded-full md:w-[400px] max-md:w-[200px]" />
     </div>
   </section>
 </MainLayout>

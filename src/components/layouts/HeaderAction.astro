@@ -1,25 +1,17 @@
 ---
+import { NavBarLinks } from '@/config/header.config'
+import MobileMenu from '@/components/widgets/MobileMenu.vue'
 import ThemeToggle from '@/components/widgets/ThemeToggle.vue'
 ---
 
 <section class="flex gap-4 px-2 items-center">
-  <div class="mobile:block desktop:hidden text-0">
-    <button
-      class="navbar-toggler"
-      type="button"
-      data-bs-toggle="collapse"
-      data-bs-target="#navbarNavDropdown"
-      aria-controls="navbarNavDropdown"
-      aria-expanded="false"
-      aria-label="Toggle navigation"
-    >
-      <i class="icon-park-outline:hamburger-button text-16px"></i>
-    </button>
+  <div class="block md:hidden">
+    <MobileMenu items={NavBarLinks} client:load />
   </div>
   <div>
     <ThemeToggle client:only="vue" />
   </div>
-  <div class="auth-action text-14px flex items-end gap-2 text-baseline">
+  <div class="auth-action text-[14px] flex items-end gap-2 text-baseline">
     <div>登录</div>
     <div>|</div>
     <div>注册</div>

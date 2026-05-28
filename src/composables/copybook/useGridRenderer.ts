@@ -99,24 +99,19 @@ export function drawChar(
   color: string,
   fontFamily: string,
   fontWeight: string,
+  pxPerMM: number,
 ) {
-  const fontSize = cellSize * fontSizePercent / 100
+  const fontSize = cellSize * fontSizePercent / 100 / pxPerMM
   ctx.fillStyle = color
   const resolvedFamily = resolveFontFamily(fontFamily)
-  ctx.font = `${fontWeight} ${fontSize}mm ${resolvedFamily}`
+  ctx.font = `${fontWeight} ${fontSize}px ${resolvedFamily}`
   ctx.textAlign = 'center'
   ctx.textBaseline = 'middle'
   ctx.fillText(char, x + cellSize / 2, y + cellSize / 2 + cellSize * offsetY / 100)
 }
 
-function resolveFontFamily(cssVariableOrName: string): string {
-  if (cssVariableOrName.startsWith('--')) {
-    const value = getComputedStyle(document.documentElement)
-      .getPropertyValue(cssVariableOrName)
-      .trim()
-    return value || 'serif'
-  }
-  return cssVariableOrName
+function resolveFontFamily(fontName: string): string {
+  return fontName || 'serif'
 }
 
 export function renderGrid(ctx: CanvasRenderingContext2D, params: RenderParams) {
@@ -141,6 +136,7 @@ export function renderGrid(ctx: CanvasRenderingContext2D, params: RenderParams) 
     insertEmptyCol,
     paperWidth,
     paperHeight,
+    pxPerMM,
   } = params
 
   ctx.fillStyle = '#ffffff'
@@ -177,7 +173,7 @@ export function renderGrid(ctx: CanvasRenderingContext2D, params: RenderParams) 
 
         const isFirstChar = highlightFirst && trace === 0
         const color = isFirstChar ? '#000000' : traceColor
-        drawChar(ctx, chars[charIndex], traceX, y, gridSize, fontSize, fontOffsetY, color, fontFamily, fontWeight)
+        drawChar(ctx, chars[charIndex], traceX, y, gridSize, fontSize, fontOffsetY, color, fontFamily, fontWeight, pxPerMM)
       }
 
       charIndex++

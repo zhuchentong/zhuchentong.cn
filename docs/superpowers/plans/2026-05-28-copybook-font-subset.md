@@ -39,6 +39,7 @@
 ## Task 1: 安装 fontmin 并创建目录结构
 
 **Files:**
+
 - Modify: `package.json`（新增 devDependency）
 - Modify: `.gitignore`
 
@@ -76,15 +77,16 @@ git commit -m "chore(copybook): add fontmin dependency and font directories"
 ## Task 2: 创建字体下载脚本
 
 **Files:**
+
 - Create: `scripts/fonts/download.mjs`
 
 - [ ] **Step 1: 创建下载脚本**
 
 ```js
 // scripts/fonts/download.mjs
-import fs from 'fs'
-import path from 'path'
-import { fileURLToPath } from 'url'
+import fs from 'node:fs'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const sourceDir = path.resolve(__dirname, 'source')
@@ -121,11 +123,13 @@ for (const { name, url, required } of fonts) {
   console.log(`Downloading: ${name}...`)
   try {
     const res = await fetch(url)
-    if (!res.ok) throw new Error(`HTTP ${res.status}`)
+    if (!res.ok)
+      throw new Error(`HTTP ${res.status}`)
     const buf = Buffer.from(await res.arrayBuffer())
     fs.writeFileSync(dest, buf)
     console.log(`  ✓ ${name} (${(buf.length / 1024 / 1024).toFixed(1)} MB)`)
-  } catch (err) {
+  }
+  catch (err) {
     if (required) {
       console.error(`  ✗ Failed to download required font: ${name}`, err)
       process.exit(1)
@@ -161,6 +165,7 @@ git commit -m "feat(copybook): add font download script from Google Fonts"
 ## Task 3: 创建 GB2312 字符表生成脚本
 
 **Files:**
+
 - Create: `scripts/fonts/gen-gb2312.mjs`
 - Create: `scripts/fonts/gb2312-chars.txt`（由脚本生成）
 
@@ -231,16 +236,17 @@ git commit -m "feat(copybook): add GB2312 charset generator with precise GBK dec
 ## Task 4: 创建 fontmin 子集化脚本
 
 **Files:**
+
 - Create: `scripts/fonts/subset.mjs`
 
 - [ ] **Step 1: 创建子集化脚本**
 
 ```js
+import fs from 'node:fs'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 // scripts/fonts/subset.mjs
 import Fontmin from 'fontmin'
-import fs from 'fs'
-import path from 'path'
-import { fileURLToPath } from 'url'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const sourceDir = path.resolve(__dirname, 'source')
@@ -250,7 +256,8 @@ const charFile = path.resolve(__dirname, 'gb2312-chars.txt')
 const text = fs.readFileSync(charFile, 'utf-8')
 let cjkCount = 0
 for (const ch of text) {
-  if (/[\u4e00-\u9fff]/.test(ch)) cjkCount++
+  if (/[\u4E00-\u9FFF]/.test(ch))
+    cjkCount++
 }
 console.log(`Loading ${text.length} characters (${cjkCount} CJK) for subsetting`)
 
@@ -325,6 +332,7 @@ node scripts/fonts/subset.mjs
 ```
 
 Expected:
+
 - MaShanZheng-Regular.woff2 (~500-800 KB)
 - NotoSerifSC-Regular.woff2 (~600-1000 KB，如源字体存在)
 - NotoSansSC-Regular.woff2 (~500-900 KB，如源字体存在)
@@ -343,6 +351,7 @@ git commit -m "feat(copybook): add font subsetting script and woff2 outputs"
 ## Task 5: 配置 Astro font 系统
 
 **Files:**
+
 - Modify: `astro.config.ts`
 
 - [ ] **Step 1: 确认字体产物存在**
@@ -392,6 +401,7 @@ pnpm dev
 ```
 
 在浏览器 DevTools 中检查：
+
 - Network 面板有 `MaShanZheng-Regular.woff2` 请求
 - Elements 面板 `:root` 上有 `--font-ma-shan-zheng` CSS 变量
 

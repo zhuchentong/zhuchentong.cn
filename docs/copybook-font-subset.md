@@ -10,11 +10,11 @@
 
 中文字体全量文件极大：
 
-| 字体 | 全量 TTF | 全量 woff2 | 用途 |
-|------|----------|-----------|------|
-| Ma Shan Zheng（马善政楷） | ~5.7 MB | ~4 MB | 楷体风格（字帖首选） |
-| Noto Serif SC | ~14 MB | ~8 MB | 宋体风格 |
-| Noto Sans SC | ~10 MB | ~6 MB | 黑体风格 |
+| 字体                      | 全量 TTF | 全量 woff2 | 用途                 |
+| ------------------------- | -------- | ---------- | -------------------- |
+| Ma Shan Zheng（马善政楷） | ~5.7 MB  | ~4 MB      | 楷体风格（字帖首选） |
+| Noto Serif SC             | ~14 MB   | ~8 MB      | 宋体风格             |
+| Noto Sans SC              | ~10 MB   | ~6 MB      | 黑体风格             |
 
 通过子集化提取 GB2312 常用汉字（6,763 字），单文件 woff2 约 500KB-1MB。
 
@@ -24,15 +24,15 @@
 
 ### 为什么选 fontmin
 
-| 维度 | fontmin | @zeir/font-subset |
-|------|---------|-------------------|
-| 维护状态 | 活跃（2025-08 更新） | 停更（2022-09） |
-| 维护者 | 百度 EFE 团队 | 个人开发者 |
-| 子集化方式 | 按文本内容精确提取字形 | 按 unicode-range 分片切割 |
-| 输出格式 | woff2 / woff / eot / svg / css | 仅 woff2 |
-| 精确子集 | `glyph({ text: '你好世界' })` | 不支持按文本提取 |
-| ESM 支持 | v2.x 支持，Node 16+ | ESM 但依赖较旧 |
-| CLI | `fontmin -t "文本" font.ttf` | 无 |
+| 维度       | fontmin                        | @zeir/font-subset         |
+| ---------- | ------------------------------ | ------------------------- |
+| 维护状态   | 活跃（2025-08 更新）           | 停更（2022-09）           |
+| 维护者     | 百度 EFE 团队                  | 个人开发者                |
+| 子集化方式 | 按文本内容精确提取字形         | 按 unicode-range 分片切割 |
+| 输出格式   | woff2 / woff / eot / svg / css | 仅 woff2                  |
+| 精确子集   | `glyph({ text: '你好世界' })`  | 不支持按文本提取          |
+| ESM 支持   | v2.x 支持，Node 16+            | ESM 但依赖较旧            |
+| CLI        | `fontmin -t "文本" font.ttf`   | 无                        |
 
 ### 核心优势
 
@@ -125,10 +125,10 @@ fs.writeFileSync('scripts/fonts/gb2312-chars.txt', chars)
 创建 `scripts/fonts/subset.mjs`：
 
 ```js
+import fs from 'node:fs'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 import Fontmin from 'fontmin'
-import fs from 'fs'
-import path from 'path'
-import { fileURLToPath } from 'url'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const sourceDir = path.resolve(__dirname, 'source')
@@ -169,7 +169,8 @@ for (const { file, required } of fonts) {
       .run((err, files) => {
         if (err) {
           console.error(`Error processing ${file}:`, err)
-          if (required) process.exit(1)
+          if (required)
+            process.exit(1)
           resolve()
           return
         }
@@ -276,6 +277,7 @@ import { Font } from 'astro:assets'
 ```
 
 Astro 会自动：
+
 - 生成 `@font-face` 声明
 - 添加 `preload` 链接
 - 设置 fallback 字体链

@@ -1,4 +1,5 @@
 import type { GridType } from '@/interfaces/copybook'
+import { FONTS } from './fonts.config'
 
 export const DEFAULT_TEXT = '你好世界'
 
@@ -12,11 +13,11 @@ export const GRID_TYPES: { label: string, value: GridType }[] = [
   { label: '作文格', value: 'zuowen' },
 ]
 
-export const FONT_FAMILIES = [
-  { label: '楷体', cssVariable: '--font-ma-shan-zheng', fallback: 'KaiTi, STKaiti, serif' },
-  { label: '宋体', cssVariable: '--font-noto-serif-sc', fallback: 'SimSun, STSong, serif' },
-  { label: '黑体', cssVariable: '--font-noto-sans-sc', fallback: 'SimHei, STHeiti, sans-serif' },
-]
+export const FONT_FAMILIES = FONTS.map(f => ({
+  label: f.label,
+  id: f.id,
+  fallback: f.fallback,
+}))
 
 export const FONT_WEIGHTS = [
   { label: '常规', value: 'normal' },

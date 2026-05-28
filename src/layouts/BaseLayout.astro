@@ -1,9 +1,8 @@
 ---
-import Bootstrap from '@/components/layouts/Bootstrap.astro'
 import Favicons from '@/components/layouts/Favicons.astro'
 import Theme from '@/components/layouts/Theme.astro'
 import { useStore } from '@/stores'
-import '@/styles/index.scss'
+import '@/styles/globals.css'
 
 export interface Props {
   title: string
@@ -26,7 +25,6 @@ const theme = store.app.theme
     <title>前端小馆 | {title}</title>
     <Favicons />
     <Theme />
-    <Bootstrap />
   </head>
   <body>
     <slot />

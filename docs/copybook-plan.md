@@ -12,13 +12,13 @@
 
 ## 阶段概览
 
-| 阶段 | 名称 | 难度 | 预估工时 |
-|------|------|------|----------|
-| P1 | 基础骨架 + Canvas 渲染 | 低 | 1-2h |
-| P2 | 控制面板 UI + 状态联动 | 中 | 2-3h |
-| P3 | 7 种方格类型绘制 | 中 | 1-2h |
-| P4 | 导出功能 | 中 | 1-2h |
-| P5 | UI 打磨 + 字体集成 + 打印样式 | 中 | 1-2h |
+| 阶段 | 名称                          | 难度 | 预估工时 |
+| ---- | ----------------------------- | ---- | -------- |
+| P1   | 基础骨架 + Canvas 渲染        | 低   | 1-2h     |
+| P2   | 控制面板 UI + 状态联动        | 中   | 2-3h     |
+| P3   | 7 种方格类型绘制              | 中   | 1-2h     |
+| P4   | 导出功能                      | 中   | 1-2h     |
+| P5   | UI 打磨 + 字体集成 + 打印样式 | 中   | 1-2h     |
 
 > **字体子集化**为独立前置任务，详见 [docs/copybook-font-subset.md](./copybook-font-subset.md)
 
@@ -69,6 +69,7 @@
 ### Task 1: 创建类型定义、配置常量和渲染常量
 
 **Files:**
+
 - Create: `src/interfaces/copybook.ts`
 - Create: `src/config/copybook.config.ts`
 - Create: `src/shared/copybook/constants.ts`
@@ -197,14 +198,15 @@ git commit -m "feat(copybook): add type definitions, config constants and render
 ### Task 2: 创建 Nanostore 状态
 
 **Files:**
+
 - Create: `src/stores/copybook.store.ts`
 
 - [ ] **Step 1: 创建字帖状态 store**
 
 ```ts
+import type { GridType, Margin } from '@/interfaces/copybook'
 // src/stores/copybook.store.ts
 import { atom } from 'nanostores'
-import type { GridType, Margin } from '@/interfaces/copybook'
 import { DEFAULT_MARGIN, DEFAULT_TEXT } from '@/config/copybook.config'
 
 export const copybookText = atom<string>(DEFAULT_TEXT)
@@ -236,6 +238,7 @@ git commit -m "feat(copybook): add copybook nanostore state"
 ### Task 3: 创建全屏布局
 
 **Files:**
+
 - Create: `src/layouts/CopybookLayout.astro`
 
 - [ ] **Step 1: 创建 CopybookLayout**
@@ -301,6 +304,7 @@ git commit -m "feat(copybook): add full-screen layout without header/footer"
 ### Task 4: 创建页面入口和主编辑器骨架
 
 **Files:**
+
 - Create: `src/pages/copybook/hanzi.astro`
 - Create: `src/components/copybook/CopybookEditor.vue`
 
@@ -324,8 +328,8 @@ import CopybookEditor from '@/components/copybook/CopybookEditor.vue'
 
 ```vue
 <script setup lang="ts">
-import { ref, onMounted, watchEffect } from 'vue'
-import { A4_WIDTH_MM, A4_HEIGHT_MM, MM_PER_INCH } from '@/shared/copybook/constants'
+import { onMounted, ref, watchEffect } from 'vue'
+import { A4_HEIGHT_MM, A4_WIDTH_MM } from '@/shared/copybook/constants'
 
 const canvasRef = ref<HTMLCanvasElement>()
 
@@ -334,7 +338,8 @@ const A4_CSS_HEIGHT = 1123
 
 function setupCanvas() {
   const canvas = canvasRef.value
-  if (!canvas) return
+  if (!canvas)
+    return
   const dpr = Math.max(window.devicePixelRatio || 1, 2)
   canvas.width = A4_CSS_WIDTH * dpr
   canvas.height = A4_CSS_HEIGHT * dpr
@@ -346,7 +351,8 @@ function setupCanvas() {
 
 onMounted(() => {
   const ctx = setupCanvas()
-  if (!ctx) return
+  if (!ctx)
+    return
   // 临时渲染：白色背景
   ctx.fillStyle = '#ffffff'
   ctx.fillRect(0, 0, A4_WIDTH_MM, A4_HEIGHT_MM)
@@ -356,7 +362,9 @@ onMounted(() => {
 <template>
   <div class="flex h-full overflow-hidden">
     <aside class="w-300px border-r border-gray-200 overflow-y-auto p-4">
-      <p class="text-gray-500">控制面板（待实现）</p>
+      <p class="text-gray-500">
+        控制面板（待实现）
+      </p>
     </aside>
     <main class="flex-1 overflow-auto bg-gray-100 p-6 flex justify-center">
       <div class="bg-white shadow-lg" :style="{ width: `${A4_CSS_WIDTH}px`, height: `${A4_CSS_HEIGHT}px` }">
@@ -385,6 +393,7 @@ git commit -m "feat(copybook): add page entry and editor skeleton"
 ### Task 5: 实现 Canvas 基础渲染（田字格 + 文字）
 
 **Files:**
+
 - Create: `src/composables/copybook/useGridRenderer.ts`
 - Modify: `src/components/copybook/CopybookEditor.vue`
 
@@ -521,19 +530,34 @@ function resolveFontFamily(cssVariableOrName: string): string {
 
 export function renderGrid(ctx: CanvasRenderingContext2D, params: RenderParams) {
   const {
-    text, gridType, gridSize, rowGap,
-    marginTop, marginRight, marginBottom, marginLeft,
-    fontFamily, fontWeight, fontSize, fontOffsetY,
-    traceCount, traceColor, lineColor, highlightFirst,
-    insertEmptyRow, insertEmptyCol,
-    paperWidth, paperHeight,
+    text,
+    gridType,
+    gridSize,
+    rowGap,
+    marginTop,
+    marginRight,
+    marginBottom,
+    marginLeft,
+    fontFamily,
+    fontWeight,
+    fontSize,
+    fontOffsetY,
+    traceCount,
+    traceColor,
+    lineColor,
+    highlightFirst,
+    insertEmptyRow,
+    insertEmptyCol,
+    paperWidth,
+    paperHeight,
   } = params
 
   ctx.fillStyle = '#ffffff'
   ctx.fillRect(0, 0, paperWidth, paperHeight)
 
   const chars = Array.from(text)
-  if (chars.length === 0) return
+  if (chars.length === 0)
+    return
 
   const contentWidth = paperWidth - marginLeft - marginRight
   const colStep = insertEmptyCol ? gridSize * 2 : gridSize
@@ -547,14 +571,16 @@ export function renderGrid(ctx: CanvasRenderingContext2D, params: RenderParams) 
   while (charIndex < chars.length) {
     const y = marginTop + currentRow * rowStep
 
-    if (y + gridSize > paperHeight - marginBottom) break
+    if (y + gridSize > paperHeight - marginBottom)
+      break
 
     for (let col = 0; col < colsPerRow && charIndex < chars.length; col++) {
       const x = marginLeft + col * colStep
 
       for (let trace = 0; trace < traceCount; trace++) {
         const traceX = x + trace * gridSize
-        if (traceX + gridSize > paperWidth - marginRight + gridSize * 0.5) continue
+        if (traceX + gridSize > paperWidth - marginRight + gridSize * 0.5)
+          continue
 
         drawGridCell(ctx, traceX, y, gridSize, gridType, lineColor)
 
@@ -570,7 +596,8 @@ export function renderGrid(ctx: CanvasRenderingContext2D, params: RenderParams) 
       const emptyY = y + rowStep - rowHeight
       for (let col = 0; col < colsPerRow * (traceCount); col++) {
         const x = marginLeft + col * gridSize
-        if (x + gridSize > paperWidth - marginRight + gridSize * 0.5) break
+        if (x + gridSize > paperWidth - marginRight + gridSize * 0.5)
+          break
         drawGridCell(ctx, x, emptyY, gridSize, gridType, lineColor)
       }
     }
@@ -584,16 +611,27 @@ export function renderGrid(ctx: CanvasRenderingContext2D, params: RenderParams) 
 
 ```vue
 <script setup lang="ts">
-import { ref, onMounted, watchEffect } from 'vue'
 import { useStore } from '@nanostores/vue'
-import {
-  copybookText, copybookGridType, copybookGridSize, copybookRowGap,
-  copybookMargin, copybookFontFamily, copybookFontWeight, copybookFontSize,
-  copybookFontOffsetY, copybookTraceCount, copybookTraceColor, copybookLineColor,
-  copybookHighlightFirst, copybookInsertEmptyRow, copybookInsertEmptyCol,
-} from '@/stores/copybook.store'
+import { onMounted, ref, watchEffect } from 'vue'
 import { renderGrid } from '@/composables/copybook/useGridRenderer'
-import { A4_WIDTH_MM, A4_HEIGHT_MM } from '@/shared/copybook/constants'
+import { A4_HEIGHT_MM, A4_WIDTH_MM } from '@/shared/copybook/constants'
+import {
+  copybookFontFamily,
+  copybookFontOffsetY,
+  copybookFontSize,
+  copybookFontWeight,
+  copybookGridSize,
+  copybookGridType,
+  copybookHighlightFirst,
+  copybookInsertEmptyCol,
+  copybookInsertEmptyRow,
+  copybookLineColor,
+  copybookMargin,
+  copybookRowGap,
+  copybookText,
+  copybookTraceColor,
+  copybookTraceCount,
+} from '@/stores/copybook.store'
 
 const canvasRef = ref<HTMLCanvasElement>()
 const text = useStore(copybookText)
@@ -617,7 +655,8 @@ const A4_CSS_HEIGHT = 1123
 
 function setupCanvas() {
   const canvas = canvasRef.value
-  if (!canvas) return null
+  if (!canvas)
+    return null
   const dpr = Math.max(window.devicePixelRatio || 1, 2)
   canvas.width = A4_CSS_WIDTH * dpr
   canvas.height = A4_CSS_HEIGHT * dpr
@@ -629,7 +668,8 @@ function setupCanvas() {
 
 function draw() {
   const ctx = setupCanvas()
-  if (!ctx) return
+  if (!ctx)
+    return
   renderGrid(ctx, {
     text: text.value,
     gridType: gridType.value,
@@ -664,7 +704,9 @@ onMounted(() => {
 <template>
   <div class="flex h-full overflow-hidden">
     <aside class="w-300px border-r border-gray-200 overflow-y-auto p-4">
-      <p class="text-gray-500">控制面板（待实现）</p>
+      <p class="text-gray-500">
+        控制面板（待实现）
+      </p>
     </aside>
     <main class="flex-1 overflow-auto bg-gray-100 p-6 flex justify-center">
       <div class="bg-white shadow-lg" :style="{ width: `${A4_CSS_WIDTH}px`, height: `${A4_CSS_HEIGHT}px` }">
@@ -694,12 +736,14 @@ git commit -m "feat(copybook): implement canvas rendering with mm coordinate sys
 ### Task 6: 创建 CanvasPreview 组件
 
 **Files:**
+
 - Create: `src/components/copybook/CanvasPreview.vue`
 - Modify: `src/components/copybook/CopybookEditor.vue`
 
 - [ ] **Step 1: 将 Canvas 渲染抽离为独立组件**
 
 CanvasPreview.vue 负责：
+
 - 管理 Canvas DOM 引用
 - 使用 `useStore` 读取所有 copybook store 状态
 - `watchEffect` 监听所有状态变化，触发重绘
@@ -722,6 +766,7 @@ git commit -m "feat(copybook): extract CanvasPreview component"
 ### Task 7: 创建 TextInputDialog 组件
 
 **Files:**
+
 - Create: `src/components/copybook/TextInputDialog.vue`
 
 - [ ] **Step 1: 实现文本输入对话框**
@@ -743,6 +788,7 @@ git commit -m "feat(copybook): add text input dialog"
 ### Task 8: 创建 MarginDialog 组件
 
 **Files:**
+
 - Create: `src/components/copybook/MarginDialog.vue`
 
 - [ ] **Step 1: 实现页边距设置对话框**
@@ -764,6 +810,7 @@ git commit -m "feat(copybook): add margin settings dialog"
 ### Task 9: 创建 FontPickerDialog 组件
 
 **Files:**
+
 - Create: `src/components/copybook/FontPickerDialog.vue`
 
 - [ ] **Step 1: 实现字体选择对话框**
@@ -784,6 +831,7 @@ git commit -m "feat(copybook): add font picker dialog"
 ### Task 10: 创建 ColorPickerDialog 组件
 
 **Files:**
+
 - Create: `src/components/copybook/ColorPickerDialog.vue`
 
 - [ ] **Step 1: 实现颜色选择对话框**
@@ -805,12 +853,14 @@ git commit -m "feat(copybook): add color picker dialog"
 ### Task 11: 创建 ControlPanel 组件并集成所有子组件
 
 **Files:**
+
 - Create: `src/components/copybook/ControlPanel.vue`
 - Modify: `src/components/copybook/CopybookEditor.vue`
 
 - [ ] **Step 1: 实现 ControlPanel.vue**
 
 包含所有控制项（按顺序）：
+
 1. 文本输入区（只读显示 + 点击弹出 TextInputDialog）
 2. 3 个开关：首字高亮、插入空行、插入空列
 3. 方格类型下拉选择
@@ -850,6 +900,7 @@ git commit -m "feat(copybook): add control panel with all settings"
 ### Task 12: 验证所有方格类型绘制
 
 **Files:**
+
 - Modify: `src/composables/copybook/useGridRenderer.ts`（如需修复）
 
 > **注：** Task 5 的 `drawGridCell` 已实现所有 7 种方格类型的绘制分发逻辑。本 Task 主要是验证和修复。
@@ -857,6 +908,7 @@ git commit -m "feat(copybook): add control panel with all settings"
 - [ ] **Step 1: 验证所有方格类型**
 
 切换 7 种类型逐一确认绘制正确：
+
 - 田字格：外框 + 十字虚线
 - 米字格：田字格 + 对角虚线
 - 回宫格：外框 + 内框
@@ -879,11 +931,13 @@ git commit -m "fix(copybook): fix grid type rendering issues"
 ### Task 13: 实现空行/空列逻辑
 
 **Files:**
+
 - Modify: `src/composables/copybook/useGridRenderer.ts`
 
 - [ ] **Step 1: 验证/修复空行空列逻辑**
 
 Task 5 的 `renderGrid` 已包含空行/空列基础逻辑。验证以下场景：
+
 - `insertEmptyRow`：每个字行后插入一个空白行（仅方格无文字）
 - `insertEmptyCol`：每个字列后插入一个空白列（影响列数计算）
 - 两个开关同时开启
@@ -902,6 +956,7 @@ git commit -m "fix(copybook): fix empty row/col layout calculation"
 ### Task 14: 安装 jsPDF 并实现导出逻辑
 
 **Files:**
+
 - Create: `src/composables/copybook/useExport.ts`
 - Modify: `package.json`（新增依赖）
 
@@ -916,11 +971,11 @@ pnpm add jspdf
 > **关键设计：** 导出时不使用屏幕 Canvas，而是创建离屏 Canvas 以固定 300 DPI 重新渲染，确保不同设备导出质量一致。复用同一套 `renderGrid()` mm 坐标绘制逻辑。
 
 ```ts
+import type { RenderParams } from '@/interfaces/copybook'
 // src/composables/copybook/useExport.ts
 import { jsPDF } from 'jspdf'
+import { A4_HEIGHT_MM, A4_WIDTH_MM, EXPORT_DPI, MM_PER_INCH } from '@/shared/copybook/constants'
 import { renderGrid } from './useGridRenderer'
-import { A4_WIDTH_MM, A4_HEIGHT_MM, EXPORT_DPI, MM_PER_INCH } from '@/shared/copybook/constants'
-import type { RenderParams } from '@/interfaces/copybook'
 
 function createExportCanvas(params: RenderParams): HTMLCanvasElement {
   const canvas = document.createElement('canvas')
@@ -963,6 +1018,7 @@ git commit -m "feat(copybook): add export with offscreen canvas at 300 DPI"
 ### Task 15: 创建 ExportButton 组件并集成打印功能
 
 **Files:**
+
 - Create: `src/components/copybook/ExportButton.vue`
 - Modify: `src/components/copybook/CopybookEditor.vue`
 
@@ -995,6 +1051,7 @@ git commit -m "feat(copybook): add export button with PDF/PNG/print"
 ### Task 16: 控制面板样式优化
 
 **Files:**
+
 - Modify: `src/components/copybook/ControlPanel.vue`
 
 - [ ] **Step 1: 统一控制面板样式**
@@ -1016,6 +1073,7 @@ git commit -m "style(copybook): polish control panel layout"
 ### Task 17: Canvas 预览区优化
 
 **Files:**
+
 - Modify: `src/components/copybook/CanvasPreview.vue`
 
 - [ ] **Step 1: 优化预览区样式**
@@ -1039,6 +1097,7 @@ git commit -m "style(copybook): improve canvas preview area"
 **前置条件：** 字体子集化已完成（详见 [docs/copybook-font-subset.md](./copybook-font-subset.md)），`src/assets/fonts/` 中已有 woff2 文件。
 
 **Files:**
+
 - Modify: `astro.config.ts`
 - Verify: `src/layouts/CopybookLayout.astro`（Task 3 已添加 `<Font />` 组件）
 
@@ -1104,6 +1163,7 @@ export default defineConfig({
 - [ ] **Step 3: 验证 CopybookLayout.astro 中已有 Font 组件**
 
 Task 3 已在 `<head>` 中添加：
+
 ```astro
 <Font cssVariable="--font-ma-shan-zheng" preload />
 <Font cssVariable="--font-noto-serif-sc" />
@@ -1127,6 +1187,7 @@ git commit -m "feat(copybook): integrate Astro font system with fontmin subsets"
 ### Task 19: 打印样式
 
 **Files:**
+
 - Modify: `src/layouts/CopybookLayout.astro`
 
 - [ ] **Step 1: 添加打印样式**
@@ -1135,9 +1196,18 @@ git commit -m "feat(copybook): integrate Astro font system with fontmin subsets"
 
 ```css
 @media print {
-  aside, .toolbar, .copybook-nav { display: none !important; }
-  main { padding: 0 !important; background: white !important; }
-  canvas { box-shadow: none !important; }
+  aside,
+  .toolbar,
+  .copybook-nav {
+    display: none !important;
+  }
+  main {
+    padding: 0 !important;
+    background: white !important;
+  }
+  canvas {
+    box-shadow: none !important;
+  }
 }
 ```
 
@@ -1157,6 +1227,7 @@ git commit -m "style(copybook): add print styles"
 ### Task 20: 更新导航配置
 
 **Files:**
+
 - Modify: `src/config/header.config.ts`
 
 - [ ] **Step 1: 在导航中添加字帖入口**

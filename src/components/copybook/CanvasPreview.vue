@@ -52,13 +52,14 @@ function setupCanvas() {
   const ctx = canvas.getContext('2d')!
   const pxPerMM = (A4_CSS_WIDTH * dpr) / A4_WIDTH_MM
   ctx.scale(pxPerMM, pxPerMM)
-  return ctx
+  return { ctx, pxPerMM }
 }
 
 function draw() {
-  const ctx = setupCanvas()
-  if (!ctx)
+  const result = setupCanvas()
+  if (!result)
     return
+  const { ctx, pxPerMM } = result
   renderGrid(ctx, {
     text: text.value,
     gridType: gridType.value,
@@ -80,6 +81,7 @@ function draw() {
     insertEmptyCol: insertEmptyCol.value,
     paperWidth: A4_WIDTH_MM,
     paperHeight: A4_HEIGHT_MM,
+    pxPerMM,
   })
 }
 
