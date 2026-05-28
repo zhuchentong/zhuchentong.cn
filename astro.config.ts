@@ -1,6 +1,6 @@
 import node from '@astrojs/node'
 import Vue from '@astrojs/vue'
-import { defineConfig, passthroughImageService } from 'astro/config'
+import { defineConfig, fontProviders, passthroughImageService } from 'astro/config'
 import UnoCSS from 'unocss/astro'
 
 // import vercel from '@astrojs/vercel/serverless'
@@ -24,4 +24,19 @@ export default defineConfig({
   devToolbar: {
     enabled: false,
   },
+  fonts: [
+    {
+      provider: fontProviders.local(),
+      name: 'MaShanZheng',
+      cssVariable: '--font-ma-shan-zheng',
+      fallbacks: ['KaiTi', 'STKaiti', 'serif'],
+      options: {
+        variants: [{
+          src: ['./src/assets/fonts/MaShanZheng-Regular.woff2'],
+          weight: 'normal',
+          style: 'normal',
+        }],
+      },
+    },
+  ],
 })
