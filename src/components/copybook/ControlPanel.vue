@@ -18,6 +18,7 @@ import {
   copybookTraceCount,
 } from '@/stores/copybook.store'
 import ColorPickerDialog from './ColorPickerDialog.vue'
+import ExportButton from './ExportButton.vue'
 import FontPickerDialog from './FontPickerDialog.vue'
 import MarginDialog from './MarginDialog.vue'
 import TextInputDialog from './TextInputDialog.vue'
@@ -241,6 +242,10 @@ const showLineColorPicker = ref(false)
           />
         </div>
       </div>
+    </section>
+
+    <section class="pt-2">
+      <ExportButton />
     </section>
 
     <TextInputDialog v-model:visible="showTextDialog" />
