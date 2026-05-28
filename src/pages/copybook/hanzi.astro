@@ -1,0 +1,8 @@
+---
+import CopybookLayout from '@/layouts/CopybookLayout.astro'
+import CopybookEditor from '@/components/copybook/CopybookEditor.vue'
+---
+
+<CopybookLayout title="汉字字帖">
+  <CopybookEditor client:only="vue" />
+</CopybookLayout>
