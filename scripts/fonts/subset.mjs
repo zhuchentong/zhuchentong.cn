@@ -7,7 +7,7 @@ import Fontmin from 'fontmin'
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const sourceDir = path.resolve(__dirname, 'source')
 const destDir = path.resolve(__dirname, '../../src/assets/fonts')
-const charFile = path.resolve(__dirname, 'gb2312-chars.txt')
+const charFile = path.resolve(__dirname, 'chars.txt')
 
 const text = fs.readFileSync(charFile, 'utf-8')
 let cjkCount = 0
