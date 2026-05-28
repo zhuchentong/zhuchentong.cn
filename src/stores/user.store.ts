@@ -1,5 +1,5 @@
-import { map } from 'nanostores'
 import { persistentAtom } from '@nanostores/persistent'
+import { map } from 'nanostores'
 
 interface User {
   name?: string
@@ -17,8 +17,8 @@ function updateUser(value: User) {
 }
 
 export {
-  user,
   token,
   updateUser,
   updateUserToken,
+  user,
 }

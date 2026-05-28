@@ -6,11 +6,7 @@ import HeaderMenu from './HeaderMenu.astro'
 import { toPxString } from '@/shared/common/px'
 ---
 
-<header
-  id="header"
-  class="sticky top-0"
-  style={{ height: toPxString(LayoutConfig.header.height) }}
->
+<header id="header" class="sticky top-0" style={{ height: toPxString(LayoutConfig.header.height) }}>
   <div class="background absolute inset-0"></div>
   <div class="flex items-center gap-4 px-4 absolute inset-0">
     <HeaderLogo />
