@@ -185,11 +185,14 @@ export function renderGrid(ctx: CanvasRenderingContext2D, params: RenderParams) 
 
     if (insertEmptyRow) {
       const emptyY = y + rowStep - rowHeight
-      for (let col = 0; col < colsPerRow * (traceCount); col++) {
-        const x = marginLeft + col * gridSize
-        if (x + gridSize > paperWidth - marginRight + gridSize * 0.5)
-          break
-        drawGridCell(ctx, x, emptyY, gridSize, gridType, lineColor)
+      for (let col = 0; col < colsPerRow; col++) {
+        const x = marginLeft + col * colStep
+        for (let trace = 0; trace < traceCount; trace++) {
+          const traceX = x + trace * gridSize
+          if (traceX + gridSize > paperWidth - marginRight + gridSize * 0.5)
+            continue
+          drawGridCell(ctx, traceX, emptyY, gridSize, gridType, lineColor)
+        }
       }
     }
 
