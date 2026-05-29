@@ -127,11 +127,13 @@ export function calcPageLayout(params: {
   marginTop: number
   marginBottom: number
   paperHeight: number
+  insertEmptyRow?: boolean
 }): PageLayout {
   const contentHeight = params.paperHeight - params.marginTop - params.marginBottom
   const rowHeight = params.gridSize + params.rowGap
   const rowsPerPage = Math.floor(contentHeight / rowHeight) || 1
-  const totalPages = Math.max(1, Math.ceil(params.charCount / rowsPerPage))
+  const charsPerPage = params.insertEmptyRow ? Math.ceil(rowsPerPage / 2) : rowsPerPage
+  const totalPages = Math.max(1, Math.ceil(params.charCount / charsPerPage))
   return { rowsPerPage, totalPages }
 }
 
@@ -170,7 +172,8 @@ export function renderGrid(ctx: CanvasRenderingContext2D, params: RenderParams) 
   const colsPerRow = Math.floor(contentWidth / gridSize) || 1
   const rowHeight = gridSize + rowGap
   const totalRows = Math.floor(contentHeight / rowHeight) || 1
-  const effectiveTraceCount = Math.min(Math.max(traceCount, 0), colsPerRow - 1)
+  const contentCols = insertEmptyCol ? Math.ceil(colsPerRow / 2) : colsPerRow
+  const effectiveTraceCount = Math.min(Math.max(traceCount, 0), contentCols)
   const actualGridWidth = colsPerRow * gridSize
   const actualGridHeight = totalRows * rowHeight - rowGap
   const startX = marginLeft + (contentWidth - actualGridWidth) / 2
@@ -181,7 +184,8 @@ export function renderGrid(ctx: CanvasRenderingContext2D, params: RenderParams) 
     if (y + gridSize > paperHeight - marginBottom + gridSize * 0.5)
       break
 
-    const charIdx = startCharIndex + row
+    const emptyRowsBefore = insertEmptyRow ? Math.ceil(row / 2) : 0
+    const charIdx = startCharIndex + row - emptyRowsBefore
     let contentCol = 0
 
     for (let col = 0; col < colsPerRow; col++) {
@@ -196,11 +200,9 @@ export function renderGrid(ctx: CanvasRenderingContext2D, params: RenderParams) 
       if (isEmpty || charIdx >= chars.length || chars.length === 0)
         continue
 
-      if (contentCol === 0 && highlightFirst) {
-        drawChar(ctx, chars[charIdx], x, y, gridSize, fontSize, fontOffsetY, '#000000', fontFamily, fontWeight)
-      }
-      else if (contentCol > 0 && contentCol <= effectiveTraceCount) {
-        drawChar(ctx, chars[charIdx], x, y, gridSize, fontSize, fontOffsetY, traceColor, fontFamily, fontWeight)
+      if (contentCol < effectiveTraceCount) {
+        const color = (contentCol === 0 && highlightFirst) ? '#000000' : traceColor
+        drawChar(ctx, chars[charIdx], x, y, gridSize, fontSize, fontOffsetY, color, fontFamily, fontWeight)
       }
       contentCol++
     }

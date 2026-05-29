@@ -22,11 +22,13 @@ function getRenderParamsList(params: RenderParams): RenderParams[] {
     marginTop: params.marginTop,
     marginBottom: params.marginBottom,
     paperHeight: params.paperHeight,
+    insertEmptyRow: params.insertEmptyRow,
   })
 
+  const charsPerPage = params.insertEmptyRow ? Math.ceil(rowsPerPage / 2) : rowsPerPage
   const list: RenderParams[] = []
   for (let page = 0; page < totalPages; page++) {
-    list.push({ ...params, startCharIndex: page * rowsPerPage })
+    list.push({ ...params, startCharIndex: page * charsPerPage })
   }
   return list
 }

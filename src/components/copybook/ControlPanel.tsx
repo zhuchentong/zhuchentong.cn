@@ -52,7 +52,9 @@ export default function ControlPanel() {
   const margin = useStore(copybookMargin)
   const fontFamily = useStore(copybookFontFamily)
 
-  const maxTraceCount = Math.max(Math.floor((A4_WIDTH_MM - margin.left - margin.right) / gridSize) - 1, 1)
+  const colsPerRow = Math.floor((A4_WIDTH_MM - margin.left - margin.right) / gridSize) || 1
+  const contentCols = insertEmptyCol ? Math.ceil(colsPerRow / 2) : colsPerRow
+  const maxTraceCount = Math.max(contentCols, 1)
 
   const [showTextDialog, setShowTextDialog] = useState(false)
   const [showMarginDialog, setShowMarginDialog] = useState(false)

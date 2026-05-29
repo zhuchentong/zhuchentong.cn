@@ -52,9 +52,12 @@ export default function CanvasPreview() {
       marginTop: margin.top,
       marginBottom: margin.bottom,
       paperHeight: A4_HEIGHT_MM,
+      insertEmptyRow,
     }),
-    [charCount, gridSize, rowGap, margin.top, margin.bottom],
+    [charCount, gridSize, rowGap, margin.top, margin.bottom, insertEmptyRow],
   )
+
+  const charsPerPage = insertEmptyRow ? Math.ceil(rowsPerPage / 2) : rowsPerPage
 
   const getRenderParams = useCallback((page: number) => ({
     text,
@@ -77,8 +80,8 @@ export default function CanvasPreview() {
     insertEmptyCol,
     paperWidth: A4_WIDTH_MM,
     paperHeight: A4_HEIGHT_MM,
-    startCharIndex: page * rowsPerPage,
-  }), [text, gridType, gridSize, rowGap, margin, resolvedFontName, fontWeight, fontSize, fontOffsetY, traceCount, traceColor, lineColor, highlightFirst, insertEmptyRow, insertEmptyCol, rowsPerPage])
+    startCharIndex: page * charsPerPage,
+  }), [text, gridType, gridSize, rowGap, margin, resolvedFontName, fontWeight, fontSize, fontOffsetY, traceCount, traceColor, lineColor, highlightFirst, insertEmptyRow, insertEmptyCol, charsPerPage])
 
   const drawAllPages = useCallback(() => {
     const dpr = Math.max(window.devicePixelRatio || 1, 2)
@@ -117,8 +120,8 @@ export default function CanvasPreview() {
   }, [])
 
   return (
-    <div className="p-6 bg-gray-100 flex flex-1 justify-center overflow-auto">
-      <div className="flex flex-col items-center gap-6">
+    <div className="p-6 print:p-0 bg-gray-100 flex flex-1 justify-center overflow-auto">
+      <div className="flex flex-col items-center gap-6 print:gap-0">
         {Array.from({ length: totalPages }, (_, page) => (
           <div key={page} className="bg-white shadow-lg print:shadow-none print:my-0" style={{ width: `${A4_CSS_WIDTH}px`, height: `${A4_CSS_HEIGHT}px`, breakAfter: page < totalPages - 1 ? 'page' : 'auto' }}>
             <canvas
