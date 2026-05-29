@@ -1,13 +1,13 @@
 ---
-import Test from '@/components/widgets/Test.vue'
+import Test from '@/components/widgets/Test.tsx'
 import MainLayout from '@/layouts/MainLayout.astro'
 import { Code } from 'astro/components'
 ---
 
 <MainLayout title="组件" spaceY={2}>
   <div class="card">
-    <div class="title">Vue组件</div>
-    <div class="description">可以在代码中直接使用Vue组件进行开发</div>
+    <div class="title">React组件</div>
+    <div class="description">可以在代码中直接使用React组件进行开发</div>
     <div class="code">
       <div class="space-x-2">
         <Test client:load />
@@ -15,7 +15,7 @@ import { Code } from 'astro/components'
       <Code
         class="p-2 rounded"
         code={`
-import Test from '@/components/widgets/Test.vue'
+import Test from '@/components/widgets/Test.tsx'
 
 <Test client:load />
         `}
@@ -23,7 +23,7 @@ import Test from '@/components/widgets/Test.vue'
         theme="github-dark"
       />
       <div>
-        <a href="https://docs.astro.build/en/guides/integrations-guide/vue/">相关文档：@astrojs/ vue </a>
+        <a href="https://docs.astro.build/en/guides/integrations-guide/react/">相关文档：@astrojs/react</a>
       </div>
     </div>
   </div>
@@ -32,13 +32,18 @@ import Test from '@/components/widgets/Test.vue'
 <style>
   .card {
     z-index: -1;
-    @apply: rounded-lg p-4 bg-[#2d3748] text-white;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    background-color: #2d3748;
+    color: white;
 
     .title {
       padding: 10px 0;
     }
     .code {
-      @apply space-y-10px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
     }
   }
 </style>

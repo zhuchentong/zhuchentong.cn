@@ -1,13 +1,15 @@
 ---
-
+import Icon from '@/components/widgets/Icon.tsx'
 ---
 
 <section>
-  <a class="logo icon-svg:logo text-48px" href="/"></a>
+  <a class="logo text-[48px]" href="/">
+    <Icon icon="icon-svg:logo" client:load />
+  </a>
 </section>
 
 <style>
   .logo {
-    color: var(--logo-color);
+    color: var(--logo);
   }
 </style>
