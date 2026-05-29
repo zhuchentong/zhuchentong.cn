@@ -5,7 +5,6 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import { exportPDF, exportPNG } from '@/composables/copybook/useExport'
 import { A4_HEIGHT_MM, A4_WIDTH_MM, EXPORT_DPI, MM_PER_INCH } from '@/shared/copybook/constants'
 import {
-  copybookFontFamily,
   copybookFontOffsetY,
   copybookFontSize,
   copybookFontWeight,
@@ -16,6 +15,7 @@ import {
   copybookInsertEmptyRow,
   copybookLineColor,
   copybookMargin,
+  copybookResolvedFont,
   copybookRowGap,
   copybookText,
   copybookTraceColor,
@@ -32,7 +32,7 @@ export default function ExportButton(_props: Props) {
   const gridSize = useStore(copybookGridSize)
   const rowGap = useStore(copybookRowGap)
   const margin = useStore(copybookMargin)
-  const fontFamily = useStore(copybookFontFamily)
+  const fontFamily = useStore(copybookResolvedFont)
   const fontWeight = useStore(copybookFontWeight)
   const fontSize = useStore(copybookFontSize)
   const fontOffsetY = useStore(copybookFontOffsetY)
@@ -79,8 +79,14 @@ export default function ExportButton(_props: Props) {
     }
   }
 
-  function handleExportPNG() {
-    exportPNG(getParams())
+  async function handleExportPNG() {
+    setExporting(true)
+    try {
+      await exportPNG(getParams())
+    }
+    finally {
+      setExporting(false)
+    }
   }
 
   function handlePrint() {

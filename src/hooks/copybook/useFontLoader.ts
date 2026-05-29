@@ -1,7 +1,7 @@
 import { useStore } from '@nanostores/react'
 import { useEffect, useRef, useState } from 'react'
 import { FONT_MAP } from '@/config/fonts.config'
-import { copybookFontFamily, copybookText } from '@/stores/copybook.store'
+import { copybookFontFamily, copybookResolvedFont, copybookText } from '@/stores/copybook.store'
 
 const loadedFonts = new Map<string, string>()
 let fontCounter = 0
@@ -11,10 +11,15 @@ export function useFontLoader() {
   const fontFamily = useStore(copybookFontFamily)
 
   const [fontLoaded, setFontLoaded] = useState(false)
-  const [resolvedFontName, setResolvedFontName] = useState('serif')
+  const [resolvedFontName, setResolvedFontName] = useState(() => copybookResolvedFont.get())
   const [loading, setLoading] = useState(false)
 
   const currentLoadIdRef = useRef(0)
+
+  function setResolved(name: string) {
+    setResolvedFontName(name)
+    copybookResolvedFont.set(name)
+  }
 
   useEffect(() => {
     let cancelled = false
@@ -23,7 +28,7 @@ export function useFontLoader() {
       if (!inputText.trim()) {
         const config = FONT_MAP.get(fontId)
         if (!cancelled) {
-          setResolvedFontName(config?.fallback ?? 'serif')
+          setResolved(config?.fallback ?? 'serif')
           setFontLoaded(false)
         }
         return
@@ -32,7 +37,7 @@ export function useFontLoader() {
       const cacheKey = `${fontId}:${[...new Set(inputText)].sort().join('')}`
       if (loadedFonts.has(cacheKey)) {
         if (!cancelled) {
-          setResolvedFontName(loadedFonts.get(cacheKey)!)
+          setResolved(loadedFonts.get(cacheKey)!)
           setFontLoaded(true)
         }
         return
@@ -59,7 +64,7 @@ export function useFontLoader() {
 
         loadedFonts.set(cacheKey, fontFaceName)
         if (!cancelled) {
-          setResolvedFontName(fontFaceName)
+          setResolved(fontFaceName)
           setFontLoaded(true)
         }
       }
@@ -67,7 +72,7 @@ export function useFontLoader() {
         console.error('Font load error:', err)
         if (!cancelled) {
           const config = FONT_MAP.get(fontId)
-          setResolvedFontName(config?.fallback ?? 'serif')
+          setResolved(config?.fallback ?? 'serif')
           setFontLoaded(false)
         }
       }

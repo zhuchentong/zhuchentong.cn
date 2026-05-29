@@ -31,7 +31,8 @@ function getRenderParamsList(params: RenderParams): RenderParams[] {
   return list
 }
 
-export function exportPNG(params: RenderParams) {
+export async function exportPNG(params: RenderParams) {
+  await document.fonts.ready
   const pages = getRenderParamsList(params)
   pages.forEach((pageParams, index) => {
     const canvas = createExportCanvas(pageParams)
@@ -43,6 +44,7 @@ export function exportPNG(params: RenderParams) {
 }
 
 export async function exportPDF(params: RenderParams) {
+  await document.fonts.ready
   const { jsPDF } = await import('jspdf')
   const pages = getRenderParamsList(params)
   // eslint-disable-next-line new-cap

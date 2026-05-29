@@ -33,10 +33,15 @@ const theme = store.app.theme
     <div class="flex-1 overflow-hidden">
       <slot />
     </div>
-    <style>
+    <style is:global>
       @media print {
+        @page {
+          size: A4;
+          margin: 0;
+        }
         nav,
-        aside {
+        aside,
+        [data-radix-popper-content-wrapper] {
           display: none !important;
         }
         .flex-1 {
