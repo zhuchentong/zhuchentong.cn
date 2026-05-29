@@ -1,6 +1,6 @@
 ---
 import MainLayout from '@/layouts/MainLayout.astro'
-import Icon from '@/components/widgets/Icon.vue'
+import Icon from '@/components/widgets/Icon.tsx'
 import { Code } from 'astro/components'
 ---
 
@@ -13,8 +13,18 @@ import { Code } from 'astro/components'
         <Icon icon="icon-park-solid:moon" client:load />
         <Icon icon="icon-park:moon" client:load />
       </div>
-      <Code class="p-2 rounded" code={`<Icon icon="icon-park-outline:moon" client:load />`} lang="js" theme="github-dark" />
-      <Code class="p-2 rounded" code={`<Icon icon="icon-park-solid:moon" client:load />`} lang="js" theme="github-dark" />
+      <Code
+        class="p-2 rounded"
+        code={`<Icon icon="icon-park-outline:moon" client:load />`}
+        lang="js"
+        theme="github-dark"
+      />
+      <Code
+        class="p-2 rounded"
+        code={`<Icon icon="icon-park-solid:moon" client:load />`}
+        lang="js"
+        theme="github-dark"
+      />
       <Code class="p-2 rounded" code={`<Icon icon="icon-park:moon" client:load />`} lang="js" theme="github-dark" />
     </div>
   </div>

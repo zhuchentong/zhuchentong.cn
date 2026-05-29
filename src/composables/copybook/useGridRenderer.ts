@@ -45,7 +45,7 @@ export function drawGridCell(
 
 function drawCross(ctx: CanvasRenderingContext2D, x: number, y: number, size: number, color: string) {
   ctx.strokeStyle = color
-  ctx.setLineDash([1.5, 1.5])
+  ctx.setLineDash([0.3, 1])
   ctx.beginPath()
   ctx.moveTo(x + size / 2, y)
   ctx.lineTo(x + size / 2, y + size)
@@ -57,7 +57,7 @@ function drawCross(ctx: CanvasRenderingContext2D, x: number, y: number, size: nu
 
 function drawDiagonals(ctx: CanvasRenderingContext2D, x: number, y: number, size: number, color: string) {
   ctx.strokeStyle = color
-  ctx.setLineDash([1.5, 1.5])
+  ctx.setLineDash([0.3, 1])
   ctx.beginPath()
   ctx.moveTo(x, y)
   ctx.lineTo(x + size, y + size)
@@ -70,13 +70,14 @@ function drawDiagonals(ctx: CanvasRenderingContext2D, x: number, y: number, size
 function drawInnerBox(ctx: CanvasRenderingContext2D, x: number, y: number, size: number, color: string) {
   const inset = size / 3
   ctx.strokeStyle = color
-  ctx.setLineDash([])
+  ctx.setLineDash([0.3, 1])
   ctx.strokeRect(x + inset, y + inset, size - 2 * inset, size - 2 * inset)
+  ctx.setLineDash([])
 }
 
 function drawNineGrid(ctx: CanvasRenderingContext2D, x: number, y: number, size: number, color: string) {
   ctx.strokeStyle = color
-  ctx.setLineDash([])
+  ctx.setLineDash([0.3, 1])
   const step = size / 3
   ctx.beginPath()
   for (let i = 1; i <= 2; i++) {
@@ -86,6 +87,7 @@ function drawNineGrid(ctx: CanvasRenderingContext2D, x: number, y: number, size:
     ctx.lineTo(x + size, y + step * i)
   }
   ctx.stroke()
+  ctx.setLineDash([])
 }
 
 export function drawChar(
@@ -99,9 +101,8 @@ export function drawChar(
   color: string,
   fontFamily: string,
   fontWeight: string,
-  pxPerMM: number,
 ) {
-  const fontSize = cellSize * fontSizePercent / 100 / pxPerMM
+  const fontSize = cellSize * fontSizePercent / 100
   ctx.fillStyle = color
   const resolvedFamily = resolveFontFamily(fontFamily)
   ctx.font = `${fontWeight} ${fontSize}px ${resolvedFamily}`
@@ -112,6 +113,26 @@ export function drawChar(
 
 function resolveFontFamily(fontName: string): string {
   return fontName || 'serif'
+}
+
+export interface PageLayout {
+  rowsPerPage: number
+  totalPages: number
+}
+
+export function calcPageLayout(params: {
+  charCount: number
+  gridSize: number
+  rowGap: number
+  marginTop: number
+  marginBottom: number
+  paperHeight: number
+}): PageLayout {
+  const contentHeight = params.paperHeight - params.marginTop - params.marginBottom
+  const rowHeight = params.gridSize + params.rowGap
+  const rowsPerPage = Math.floor(contentHeight / rowHeight) || 1
+  const totalPages = Math.max(1, Math.ceil(params.charCount / rowsPerPage))
+  return { rowsPerPage, totalPages }
 }
 
 export function renderGrid(ctx: CanvasRenderingContext2D, params: RenderParams) {
@@ -136,62 +157,52 @@ export function renderGrid(ctx: CanvasRenderingContext2D, params: RenderParams) 
     insertEmptyCol,
     paperWidth,
     paperHeight,
-    pxPerMM,
+    startCharIndex = 0,
   } = params
 
   ctx.fillStyle = '#ffffff'
   ctx.fillRect(0, 0, paperWidth, paperHeight)
 
   const chars = Array.from(text)
-  if (chars.length === 0)
-    return
 
   const contentWidth = paperWidth - marginLeft - marginRight
-  const colStep = insertEmptyCol ? gridSize * 2 : gridSize
-  const colsPerRow = Math.floor(contentWidth / colStep) || 1
+  const contentHeight = paperHeight - marginTop - marginBottom
+  const colsPerRow = Math.floor(contentWidth / gridSize) || 1
   const rowHeight = gridSize + rowGap
-  const rowStep = insertEmptyRow ? rowHeight * 2 : rowHeight
+  const totalRows = Math.floor(contentHeight / rowHeight) || 1
+  const effectiveTraceCount = Math.min(Math.max(traceCount, 0), colsPerRow - 1)
+  const actualGridWidth = colsPerRow * gridSize
+  const actualGridHeight = totalRows * rowHeight - rowGap
+  const startX = marginLeft + (contentWidth - actualGridWidth) / 2
+  const startY = marginTop + (contentHeight - actualGridHeight) / 2
 
-  let currentRow = 0
-  let charIndex = 0
-
-  while (charIndex < chars.length) {
-    const y = marginTop + currentRow * rowStep
-
-    if (y + gridSize > paperHeight - marginBottom)
+  for (let row = 0; row < totalRows; row++) {
+    const y = startY + row * rowHeight
+    if (y + gridSize > paperHeight - marginBottom + gridSize * 0.5)
       break
 
-    for (let col = 0; col < colsPerRow && charIndex < chars.length; col++) {
-      const x = marginLeft + col * colStep
+    const charIdx = startCharIndex + row
+    let contentCol = 0
 
-      for (let trace = 0; trace < traceCount; trace++) {
-        const traceX = x + trace * gridSize
-        if (traceX + gridSize > paperWidth - marginRight + gridSize * 0.5)
-          continue
+    for (let col = 0; col < colsPerRow; col++) {
+      const x = startX + col * gridSize
+      if (x + gridSize > paperWidth - marginRight + gridSize * 0.5)
+        break
 
-        drawGridCell(ctx, traceX, y, gridSize, gridType, lineColor)
+      drawGridCell(ctx, x, y, gridSize, gridType, lineColor)
 
-        const isFirstChar = highlightFirst && trace === 0
-        const color = isFirstChar ? '#000000' : traceColor
-        drawChar(ctx, chars[charIndex], traceX, y, gridSize, fontSize, fontOffsetY, color, fontFamily, fontWeight, pxPerMM)
+      const isEmpty = (insertEmptyRow && row % 2 === 1)
+        || (insertEmptyCol && col % 2 === 1)
+      if (isEmpty || charIdx >= chars.length || chars.length === 0)
+        continue
+
+      if (contentCol === 0 && highlightFirst) {
+        drawChar(ctx, chars[charIdx], x, y, gridSize, fontSize, fontOffsetY, '#000000', fontFamily, fontWeight)
       }
-
-      charIndex++
-    }
-
-    if (insertEmptyRow) {
-      const emptyY = y + rowStep - rowHeight
-      for (let col = 0; col < colsPerRow; col++) {
-        const x = marginLeft + col * colStep
-        for (let trace = 0; trace < traceCount; trace++) {
-          const traceX = x + trace * gridSize
-          if (traceX + gridSize > paperWidth - marginRight + gridSize * 0.5)
-            continue
-          drawGridCell(ctx, traceX, emptyY, gridSize, gridType, lineColor)
-        }
+      else if (contentCol > 0 && contentCol <= effectiveTraceCount) {
+        drawChar(ctx, chars[charIdx], x, y, gridSize, fontSize, fontOffsetY, traceColor, fontFamily, fontWeight)
       }
+      contentCol++
     }
-
-    currentRow++
   }
 }

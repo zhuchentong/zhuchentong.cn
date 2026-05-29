@@ -1,7 +1,7 @@
 ---
 import { NavBarLinks } from '@/config/header.config'
-import MobileMenu from '@/components/widgets/MobileMenu.vue'
-import ThemeToggle from '@/components/widgets/ThemeToggle.vue'
+import MobileMenu from '@/components/widgets/MobileMenu.tsx'
+import ThemeToggle from '@/components/widgets/ThemeToggle.tsx'
 ---
 
 <section class="flex gap-4 px-2 items-center">
@@ -9,7 +9,7 @@ import ThemeToggle from '@/components/widgets/ThemeToggle.vue'
     <MobileMenu items={NavBarLinks} client:load />
   </div>
   <div>
-    <ThemeToggle client:only="vue" />
+    <ThemeToggle client:only="react" />
   </div>
   <div class="auth-action text-[14px] flex items-end gap-2 text-baseline">
     <div>登录</div>

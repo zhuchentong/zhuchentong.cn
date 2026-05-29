@@ -34,7 +34,25 @@ export const COLOR_PALETTE: { name: string, colors: string[] }[] = [
   { name: 'purple', colors: ['#d8b4fe', '#c084fc', '#a855f7', '#9333ea', '#7e22ce', '#581c87'] },
 ]
 
-export const DEFAULT_MARGIN = { top: 36, right: 36, bottom: 36, left: 36 }
+export const DEFAULT_MARGIN = { top: 20, right: 20, bottom: 20, left: 20 }
+
+export const DEFAULT_CONFIG = {
+  text: DEFAULT_TEXT,
+  gridType: 'tian' as const,
+  gridSize: 14,
+  rowGap: 2,
+  margin: { ...DEFAULT_MARGIN },
+  fontFamily: 'tianyingzhang',
+  fontWeight: 'normal',
+  fontSize: 68,
+  fontOffsetY: 0,
+  traceCount: 5,
+  traceColor: '#fca5a5',
+  lineColor: '#cbd5e1',
+  highlightFirst: true,
+  insertEmptyRow: false,
+  insertEmptyCol: false,
+}
 
 export const COPYBOOK_NAV_ITEMS = [
   { label: '← 首页', href: '/' },

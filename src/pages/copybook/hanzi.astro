@@ -1,8 +1,14 @@
 ---
 import CopybookLayout from '@/layouts/CopybookLayout.astro'
-import CopybookEditor from '@/components/copybook/CopybookEditor.vue'
+import CanvasPreview from '@/components/copybook/CanvasPreview.tsx'
+import ControlPanel from '@/components/copybook/ControlPanel.tsx'
 ---
 
 <CopybookLayout title="汉字字帖">
-  <CopybookEditor client:only="vue" />
+  <div class="flex h-full overflow-hidden">
+    <aside class="p-4 border-r border-gray-200 w-[300px] overflow-y-auto">
+      <ControlPanel client:only="react" />
+    </aside>
+    <CanvasPreview client:only="react" />
+  </div>
 </CopybookLayout>

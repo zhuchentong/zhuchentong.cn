@@ -46,5 +46,5 @@ export interface RenderParams {
   insertEmptyCol: boolean
   paperWidth: number
   paperHeight: number
-  pxPerMM: number
+  startCharIndex?: number
 }

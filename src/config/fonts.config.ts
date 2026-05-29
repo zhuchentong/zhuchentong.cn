@@ -18,6 +18,12 @@ export const FONTS: FontConfig[] = [
     sourceFile: 'TianYingZhangKaiShu.ttf',
     fallback: 'KaiTi, STKaiti, serif',
   },
+  {
+    id: 'pangzhonghua',
+    label: '庞中华楷书',
+    sourceFile: 'PangZhongHuaKaiShu.ttf',
+    fallback: 'KaiTi, STKaiti, serif',
+  },
 ]
 
 export const FONT_MAP = new Map(FONTS.map(f => [f.id, f]))
