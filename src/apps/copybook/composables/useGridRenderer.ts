@@ -1,97 +1,137 @@
 import type { GridType, RenderParams } from '@copybook/interfaces'
+import { Line, Rect, Text } from 'leafer-draw'
 
 export function mmToPx(mm: number, dpi: number): number {
   return mm * dpi / 25.4
 }
 
-export function drawGridCell(
-  ctx: CanvasRenderingContext2D,
+export function createGridCell(
   x: number,
   y: number,
   size: number,
   type: GridType,
   lineColor: string,
-) {
-  ctx.strokeStyle = lineColor
-  ctx.lineWidth = 0.3
+): (Rect | Line)[] {
+  const elements: (Rect | Line)[] = []
 
-  ctx.setLineDash([])
-  ctx.strokeRect(x, y, size, size)
+  // 主边框
+  elements.push(new Rect({
+    x,
+    y,
+    width: size,
+    height: size,
+    stroke: lineColor,
+    strokeWidth: 0.3,
+  }))
 
   if (type === 'tian' || type === 'mi') {
-    drawCross(ctx, x, y, size, lineColor)
+    elements.push(...createCross(x, y, size, lineColor))
   }
 
   if (type === 'mi') {
-    drawDiagonals(ctx, x, y, size, lineColor)
+    elements.push(...createDiagonals(x, y, size, lineColor))
   }
 
   if (type === 'huigong' || type === 'huitian' || type === 'huimi') {
-    drawInnerBox(ctx, x, y, size, lineColor)
+    elements.push(...createInnerBox(x, y, size, lineColor))
   }
 
   if (type === 'huitian' || type === 'huimi') {
-    drawCross(ctx, x, y, size, lineColor)
+    elements.push(...createCross(x, y, size, lineColor))
   }
 
   if (type === 'huimi') {
-    drawDiagonals(ctx, x, y, size, lineColor)
+    elements.push(...createDiagonals(x, y, size, lineColor))
   }
 
   if (type === 'jiugong') {
-    drawNineGrid(ctx, x, y, size, lineColor)
+    elements.push(...createNineGrid(x, y, size, lineColor))
   }
+
+  return elements
 }
 
-function drawCross(ctx: CanvasRenderingContext2D, x: number, y: number, size: number, color: string) {
-  ctx.strokeStyle = color
-  ctx.setLineDash([0.3, 1])
-  ctx.beginPath()
-  ctx.moveTo(x + size / 2, y)
-  ctx.lineTo(x + size / 2, y + size)
-  ctx.moveTo(x, y + size / 2)
-  ctx.lineTo(x + size, y + size / 2)
-  ctx.stroke()
-  ctx.setLineDash([])
+function createCross(x: number, y: number, size: number, color: string): Line[] {
+  return [
+    // 垂直中线
+    new Line({
+      points: [x + size / 2, y, x + size / 2, y + size],
+      stroke: color,
+      strokeWidth: 0.3,
+      dashPattern: [0.3, 1],
+    }),
+    // 水平中线
+    new Line({
+      points: [x, y + size / 2, x + size, y + size / 2],
+      stroke: color,
+      strokeWidth: 0.3,
+      dashPattern: [0.3, 1],
+    }),
+  ]
 }
 
-function drawDiagonals(ctx: CanvasRenderingContext2D, x: number, y: number, size: number, color: string) {
-  ctx.strokeStyle = color
-  ctx.setLineDash([0.3, 1])
-  ctx.beginPath()
-  ctx.moveTo(x, y)
-  ctx.lineTo(x + size, y + size)
-  ctx.moveTo(x + size, y)
-  ctx.lineTo(x, y + size)
-  ctx.stroke()
-  ctx.setLineDash([])
+function createDiagonals(x: number, y: number, size: number, color: string): Line[] {
+  return [
+    // 左上到右下
+    new Line({
+      points: [x, y, x + size, y + size],
+      stroke: color,
+      strokeWidth: 0.3,
+      dashPattern: [0.3, 1],
+    }),
+    // 右上到左下
+    new Line({
+      points: [x + size, y, x, y + size],
+      stroke: color,
+      strokeWidth: 0.3,
+      dashPattern: [0.3, 1],
+    }),
+  ]
 }
 
-function drawInnerBox(ctx: CanvasRenderingContext2D, x: number, y: number, size: number, color: string) {
+function createInnerBox(x: number, y: number, size: number, color: string): Rect[] {
   const inset = size / 3
-  ctx.strokeStyle = color
-  ctx.setLineDash([0.3, 1])
-  ctx.strokeRect(x + inset, y + inset, size - 2 * inset, size - 2 * inset)
-  ctx.setLineDash([])
+  return [
+    new Rect({
+      x: x + inset,
+      y: y + inset,
+      width: size - 2 * inset,
+      height: size - 2 * inset,
+      stroke: color,
+      strokeWidth: 0.3,
+      dashPattern: [0.3, 1],
+    }),
+  ]
 }
 
-function drawNineGrid(ctx: CanvasRenderingContext2D, x: number, y: number, size: number, color: string) {
-  ctx.strokeStyle = color
-  ctx.setLineDash([0.3, 1])
+function createNineGrid(x: number, y: number, size: number, color: string): Line[] {
   const step = size / 3
-  ctx.beginPath()
+  const elements: Line[] = []
+
+  // 垂直线
   for (let i = 1; i <= 2; i++) {
-    ctx.moveTo(x + step * i, y)
-    ctx.lineTo(x + step * i, y + size)
-    ctx.moveTo(x, y + step * i)
-    ctx.lineTo(x + size, y + step * i)
+    elements.push(new Line({
+      points: [x + step * i, y, x + step * i, y + size],
+      stroke: color,
+      strokeWidth: 0.3,
+      dashPattern: [0.3, 1],
+    }))
   }
-  ctx.stroke()
-  ctx.setLineDash([])
+
+  // 水平线
+  for (let i = 1; i <= 2; i++) {
+    elements.push(new Line({
+      points: [x, y + step * i, x + size, y + step * i],
+      stroke: color,
+      strokeWidth: 0.3,
+      dashPattern: [0.3, 1],
+    }))
+  }
+
+  return elements
 }
 
-export function drawChar(
-  ctx: CanvasRenderingContext2D,
+export function createChar(
   char: string,
   x: number,
   y: number,
@@ -101,14 +141,21 @@ export function drawChar(
   color: string,
   fontFamily: string,
   fontWeight: string,
-) {
+): Text {
   const fontSize = cellSize * fontSizePercent / 100
-  ctx.fillStyle = color
   const resolvedFamily = resolveFontFamily(fontFamily)
-  ctx.font = `${fontWeight} ${fontSize}px ${resolvedFamily}`
-  ctx.textAlign = 'center'
-  ctx.textBaseline = 'middle'
-  ctx.fillText(char, x + cellSize / 2, y + cellSize / 2 + cellSize * offsetY / 100)
+
+  return new Text({
+    text: char,
+    x: x + cellSize / 2,
+    y: y + cellSize / 2 + cellSize * offsetY / 100,
+    fontFamily: resolvedFamily,
+    fontSize,
+    fontWeight: fontWeight as any,
+    fill: color,
+    textAlign: 'center',
+    verticalAlign: 'middle',
+  })
 }
 
 function resolveFontFamily(fontName: string): string {
@@ -137,7 +184,7 @@ export function calcPageLayout(params: {
   return { rowsPerPage, totalPages }
 }
 
-export function renderGrid(ctx: CanvasRenderingContext2D, params: RenderParams) {
+export function createGridElements(params: RenderParams): (Rect | Line | Text)[] {
   const {
     text,
     gridType,
@@ -162,8 +209,16 @@ export function renderGrid(ctx: CanvasRenderingContext2D, params: RenderParams) 
     startCharIndex = 0,
   } = params
 
-  ctx.fillStyle = '#ffffff'
-  ctx.fillRect(0, 0, paperWidth, paperHeight)
+  const elements: (Rect | Line | Text)[] = []
+
+  // 白色背景
+  elements.push(new Rect({
+    x: 0,
+    y: 0,
+    width: paperWidth,
+    height: paperHeight,
+    fill: '#ffffff',
+  }))
 
   const chars = Array.from(text)
 
@@ -193,18 +248,21 @@ export function renderGrid(ctx: CanvasRenderingContext2D, params: RenderParams) 
       if (x + gridSize > paperWidth - marginRight + gridSize * 0.5)
         break
 
-      drawGridCell(ctx, x, y, gridSize, gridType, lineColor)
+      // 添加方格元素
+      elements.push(...createGridCell(x, y, gridSize, gridType, lineColor))
 
       const isEmpty = (insertEmptyRow && row % 2 === 1)
         || (insertEmptyCol && col % 2 === 1)
-      if (isEmpty || charIdx >= chars.length || chars.length === 0)
-        continue
 
-      if (contentCol < effectiveTraceCount) {
-        const color = (contentCol === 0 && highlightFirst) ? '#000000' : traceColor
-        drawChar(ctx, chars[charIdx], x, y, gridSize, fontSize, fontOffsetY, color, fontFamily, fontWeight)
+      if (!isEmpty && charIdx < chars.length && chars.length > 0) {
+        if (contentCol < effectiveTraceCount) {
+          const color = (contentCol === 0 && highlightFirst) ? '#000000' : traceColor
+          elements.push(createChar(chars[charIdx], x, y, gridSize, fontSize, fontOffsetY, color, fontFamily, fontWeight))
+        }
+        contentCol++
       }
-      contentCol++
     }
   }
+
+  return elements
 }

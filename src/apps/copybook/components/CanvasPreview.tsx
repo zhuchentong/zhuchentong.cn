@@ -1,4 +1,5 @@
-import { calcPageLayout, renderGrid } from '@copybook/composables/useGridRenderer'
+import type { RenderParams } from '@copybook/interfaces'
+import { calcPageLayout, createGridElements } from '@copybook/composables/useGridRenderer'
 import { A4_HEIGHT_MM, A4_WIDTH_MM } from '@copybook/constants'
 import { useFontLoader } from '@copybook/hooks/useFontLoader'
 import {
@@ -18,13 +19,16 @@ import {
   copybookTraceCount,
 } from '@copybook/store'
 import { useStore } from '@nanostores/react'
+import { Leafer } from 'leafer-draw'
 import { useCallback, useEffect, useMemo, useRef } from 'react'
+import '@leafer-in/export'
 
 const A4_CSS_WIDTH = 794
 const A4_CSS_HEIGHT = 1123
 
 export default function CanvasPreview() {
-  const canvasRefs = useRef<Map<number, HTMLCanvasElement>>(new Map())
+  const containerRefsRef = useRef<Map<number, HTMLDivElement>>(new Map())
+  const leaferRefsRef = useRef<Map<number, Leafer>>(new Map())
   const { resolvedFontName } = useFontLoader()
 
   const text = useStore(copybookText)
@@ -59,7 +63,7 @@ export default function CanvasPreview() {
 
   const charsPerPage = insertEmptyRow ? Math.ceil(rowsPerPage / 2) : rowsPerPage
 
-  const getRenderParams = useCallback((page: number) => ({
+  const getRenderParams = useCallback((page: number): RenderParams => ({
     text,
     gridType,
     gridSize,
@@ -83,39 +87,71 @@ export default function CanvasPreview() {
     startCharIndex: page * charsPerPage,
   }), [text, gridType, gridSize, rowGap, margin, resolvedFontName, fontWeight, fontSize, fontOffsetY, traceCount, traceColor, lineColor, highlightFirst, insertEmptyRow, insertEmptyCol, charsPerPage])
 
-  const drawAllPages = useCallback(() => {
+  const renderAllPages = useCallback(() => {
     const dpr = Math.max(window.devicePixelRatio || 1, 2)
+
     for (let page = 0; page < totalPages; page++) {
-      const canvas = canvasRefs.current.get(page)
-      if (!canvas)
+      const container = containerRefsRef.current.get(page)
+      if (!container)
         continue
-      canvas.width = A4_CSS_WIDTH * dpr
-      canvas.height = A4_CSS_HEIGHT * dpr
-      const ctx = canvas.getContext('2d')
-      if (!ctx)
-        continue
-      const pxPerMM = (A4_CSS_WIDTH * dpr) / A4_WIDTH_MM
-      ctx.setTransform(1, 0, 0, 1, 0, 0)
-      ctx.scale(pxPerMM, pxPerMM)
-      renderGrid(ctx, getRenderParams(page))
+
+      // 销毁旧的 Leafer 实例
+      const oldLeafer = leaferRefsRef.current.get(page)
+      if (oldLeafer) {
+        oldLeafer.destroy()
+      }
+
+      // 计算像素比例：A4 纸张 mm 转 px
+      const pxPerMM = A4_CSS_WIDTH / A4_WIDTH_MM
+
+      // 创建新的 Leafer 实例
+      const leafer = new Leafer({
+        view: container,
+        width: A4_CSS_WIDTH,
+        height: A4_CSS_HEIGHT,
+        pixelRatio: dpr,
+      })
+
+      // 创建元素并添加到 Leafer
+      const elements = createGridElements(getRenderParams(page))
+
+      // 添加元素并设置缩放
+      elements.forEach((el) => {
+        el.scale = pxPerMM
+        leafer.add(el)
+      })
+
+      leaferRefsRef.current.set(page, leafer)
     }
   }, [totalPages, getRenderParams])
 
   useEffect(() => {
-    drawAllPages()
-  }, [drawAllPages])
+    renderAllPages()
+  }, [renderAllPages])
 
   useEffect(() => {
-    document.fonts.addEventListener('loadingdone', drawAllPages)
-    return () => document.fonts.removeEventListener('loadingdone', drawAllPages)
-  }, [drawAllPages])
+    const handleFontLoaded = () => renderAllPages()
+    document.fonts.addEventListener('loadingdone', handleFontLoaded)
+    return () => document.fonts.removeEventListener('loadingdone', handleFontLoaded)
+  }, [renderAllPages])
 
-  const setCanvasRef = useCallback((page: number) => (el: HTMLCanvasElement | null) => {
+  // 清理所有 Leafer 实例
+  useEffect(() => {
+    const leaferMap = leaferRefsRef.current
+    return () => {
+      leaferMap.forEach((leafer) => {
+        leafer.destroy()
+      })
+      leaferMap.clear()
+    }
+  }, [])
+
+  const setContainerRef = useCallback((page: number) => (el: HTMLDivElement | null) => {
     if (el) {
-      canvasRefs.current.set(page, el)
+      containerRefsRef.current.set(page, el)
     }
     else {
-      canvasRefs.current.delete(page)
+      containerRefsRef.current.delete(page)
     }
   }, [])
 
@@ -124,8 +160,8 @@ export default function CanvasPreview() {
       <div className="flex flex-col items-center gap-6 print:gap-0">
         {Array.from({ length: totalPages }, (_, page) => (
           <div key={page} className="bg-white shadow-lg print:shadow-none print:my-0" style={{ width: `${A4_CSS_WIDTH}px`, height: `${A4_CSS_HEIGHT}px`, breakAfter: page < totalPages - 1 ? 'page' : 'auto' }}>
-            <canvas
-              ref={setCanvasRef(page)}
+            <div
+              ref={setContainerRef(page)}
               style={{ width: `${A4_CSS_WIDTH}px`, height: `${A4_CSS_HEIGHT}px` }}
             />
           </div>
