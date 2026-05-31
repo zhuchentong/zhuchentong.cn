@@ -1,5 +1,5 @@
+import { COLOR_PALETTE } from '@copybook/config'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { COLOR_PALETTE } from '@/config/copybook.config'
 
 interface Props {
   open: boolean

@@ -26,13 +26,17 @@ Lint: `npx eslint --fix .` (via `@antfu/eslint-config` with astro, react, format
 - shadcn (`radix-nova` style) for UI primitives in `src/components/ui/`; uses Radix UI under the hood
 - `cn()` utility at `src/lib/utils.ts` (clsx + tailwind-merge)
 
-**Layout hierarchy:** `BaseLayout` → `AuthLayout` (login redirect) → `MainLayout` (header/footer/content shell). Also `CopybookLayout` for the copybook feature.
+**Layout hierarchy:** `BaseLayout` → `AuthLayout` (login redirect) → `MainLayout` (header/footer/content shell).
 
 **State management:** Nanostores (`src/stores/`). `app.store.ts` persists theme via `@nanostores/persistent` (cookies on server, localStorage on client). Access stores via `useStore()` from `src/stores/index.ts`.
 
 **Middleware** (`src/middleware/index.ts`) reads a `theme` cookie and sets `Astro.locals.theme`.
 
-**Path alias:** `@/*` maps to `./src/*`
+**Path aliases:**
+- `@/*` maps to `./src/*`
+- `@copybook/*` maps to `./src/apps/copybook/*` (copybook feature)
+
+**Custom routing:** `@inox-tools/custom-routing` registers app routes in `astro.config.ts`, enabling pages outside `src/pages/`.
 
 **Component organization:**
 
@@ -41,14 +45,37 @@ Lint: `npx eslint --fix .` (via `@antfu/eslint-config` with astro, react, format
 - `src/components/pages/` — per-page components, grouped by route
 - `src/components/widgets/` — interactive React widgets (e.g. theme toggle)
 - `src/components/shared/` — reusable Astro components
-- `src/components/copybook/` — copybook feature components
-- `src/config/` — static site config (nav links, layout params, fonts, copybook)
+- `src/config/` — static site config (nav links, layout params)
+
+**Apps (独立功能模块):**
+
+Each app in `src/apps/<name>/` is self-contained with its own pages, components, composables, hooks, store, config, server services, and assets. Routes are registered via `customRouting` in `astro.config.ts`.
+
+- `src/apps/copybook/` — 字帖功能 (route: `/copybook/hanzi`)
+  - `pages/` — Astro pages and API routes
+  - `components/` — React UI components
+  - `composables/` — business logic (rendering, export)
+  - `hooks/` — React hooks (font loading)
+  - `server/` — server-side services (font subsetting)
+  - `store.ts` — Nanostore atoms
+  - `config.ts` — feature configuration
+  - `fonts.config.ts` — font registry
+  - `constants.ts` — physical constants
+  - `interfaces.ts` — TypeScript types
+  - `layout.astro` — dedicated layout
+  - `assets/fonts/` — TTF source fonts
+
+**Adding a new app:**
+
+1. Create `src/apps/<name>/` with the same structure
+2. Add a `@<name>/*` path alias in `tsconfig.json`
+3. Register routes via `customRouting` in `astro.config.ts`
 
 **Icons:** `@iconify/react` with `icon-park` / `icon-park-outline` / `icon-park-solid` collections. Also Lucide via `lucide-react`.
 
 **Theming:** CSS variables defined in `src/styles/globals.css` with `:root` (light) and `.dark` (dark) blocks. Uses oklch color space. Theme applied via class on `<html>` element.
 
-**Fonts:** TTF fonts in `src/assets/fonts/` are copied to `dist/fonts/` by `scripts/copy-fonts.mjs` during build. Font subsetting service at `src/server/font-subset-service.ts`.
+**Fonts:** TTF fonts in `src/apps/copybook/assets/fonts/` are copied to `dist/fonts/` by `scripts/copy-fonts.mjs` during build. Font subsetting service at `src/apps/copybook/server/font-subset-service.ts`.
 
 ## Astro Islands
 

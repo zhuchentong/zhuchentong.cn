@@ -1,7 +1,7 @@
+import { FONT_MAP } from '@copybook/config'
+import { copybookFontFamily, copybookResolvedFont, copybookText } from '@copybook/store'
 import { useStore } from '@nanostores/react'
 import { useEffect, useRef, useState } from 'react'
-import { FONT_MAP } from '@/config/fonts.config'
-import { copybookFontFamily, copybookResolvedFont, copybookText } from '@/stores/copybook.store'
 
 const loadedFonts = new Map<string, string>()
 let fontCounter = 0

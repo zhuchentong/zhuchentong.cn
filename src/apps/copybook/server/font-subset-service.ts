@@ -1,11 +1,11 @@
 import fs from 'node:fs'
 import path from 'node:path'
+import { FONT_MAP } from '@copybook/config'
 import Fontmin from 'fontmin'
-import { FONT_MAP } from '@/config/fonts.config'
 
 const SOURCE_DIR = process.env.NODE_ENV === 'production'
   ? path.resolve(process.cwd(), 'dist/fonts')
-  : path.resolve(process.cwd(), 'src/assets/fonts')
+  : path.resolve(process.cwd(), 'src/apps/copybook/assets/fonts')
 
 const BASE_CHARS = (() => {
   let chars = ''

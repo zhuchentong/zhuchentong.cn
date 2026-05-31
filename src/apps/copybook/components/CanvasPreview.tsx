@@ -1,8 +1,6 @@
-import { useStore } from '@nanostores/react'
-import { useCallback, useEffect, useMemo, useRef } from 'react'
-import { calcPageLayout, renderGrid } from '@/composables/copybook/useGridRenderer'
-import { useFontLoader } from '@/hooks/copybook/useFontLoader'
-import { A4_HEIGHT_MM, A4_WIDTH_MM } from '@/shared/copybook/constants'
+import { calcPageLayout, renderGrid } from '@copybook/composables/useGridRenderer'
+import { A4_HEIGHT_MM, A4_WIDTH_MM } from '@copybook/constants'
+import { useFontLoader } from '@copybook/hooks/useFontLoader'
 import {
   copybookFontOffsetY,
   copybookFontSize,
@@ -18,7 +16,9 @@ import {
   copybookText,
   copybookTraceColor,
   copybookTraceCount,
-} from '@/stores/copybook.store'
+} from '@copybook/store'
+import { useStore } from '@nanostores/react'
+import { useCallback, useEffect, useMemo, useRef } from 'react'
 
 const A4_CSS_WIDTH = 794
 const A4_CSS_HEIGHT = 1123

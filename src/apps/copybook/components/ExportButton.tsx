@@ -1,9 +1,5 @@
-import { useStore } from '@nanostores/react'
-import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
-import { exportPDF, exportPNG } from '@/composables/copybook/useExport'
-import { A4_HEIGHT_MM, A4_WIDTH_MM, EXPORT_DPI, MM_PER_INCH } from '@/shared/copybook/constants'
+import { exportPDF, exportPNG } from '@copybook/composables/useExport'
+import { A4_HEIGHT_MM, A4_WIDTH_MM, EXPORT_DPI, MM_PER_INCH } from '@copybook/constants'
 import {
   copybookFontOffsetY,
   copybookFontSize,
@@ -20,7 +16,11 @@ import {
   copybookText,
   copybookTraceColor,
   copybookTraceCount,
-} from '@/stores/copybook.store'
+} from '@copybook/store'
+import { useStore } from '@nanostores/react'
+import { useState } from 'react'
+import { Button } from '@/components/ui/button'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 
 interface Props {}
 

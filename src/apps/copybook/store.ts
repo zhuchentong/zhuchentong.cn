@@ -1,6 +1,6 @@
-import type { GridType, Margin } from '@/interfaces/copybook'
+import type { GridType, Margin } from '@copybook/interfaces'
+import { DEFAULT_MARGIN, DEFAULT_TEXT } from '@copybook/config'
 import { atom } from 'nanostores'
-import { DEFAULT_MARGIN, DEFAULT_TEXT } from '@/config/copybook.config'
 
 export const copybookText = atom<string>(DEFAULT_TEXT)
 export const copybookGridType = atom<GridType>('tian')

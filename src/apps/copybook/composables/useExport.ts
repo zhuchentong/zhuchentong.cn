@@ -1,5 +1,5 @@
-import type { RenderParams } from '@/interfaces/copybook'
-import { A4_HEIGHT_MM, A4_WIDTH_MM, EXPORT_DPI, MM_PER_INCH } from '@/shared/copybook/constants'
+import type { RenderParams } from '@copybook/interfaces'
+import { A4_HEIGHT_MM, A4_WIDTH_MM, EXPORT_DPI, MM_PER_INCH } from '@copybook/constants'
 import { calcPageLayout, renderGrid } from './useGridRenderer'
 
 function createExportCanvas(params: RenderParams): HTMLCanvasElement {

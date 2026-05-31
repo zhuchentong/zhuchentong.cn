@@ -1,9 +1,9 @@
+import { DEFAULT_MARGIN } from '@copybook/config'
+import { copybookMargin } from '@copybook/store'
 import { useStore } from '@nanostores/react'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Slider } from '@/components/ui/slider'
-import { DEFAULT_MARGIN } from '@/config/copybook.config'
-import { copybookMargin } from '@/stores/copybook.store'
 
 interface Props {
   open: boolean

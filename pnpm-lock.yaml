@@ -23,6 +23,9 @@ importers:
       '@iconify/react':
         specifier: ^6.0.2
         version: 6.0.2(react@19.2.6)
+      '@inox-tools/custom-routing':
+        specifier: ^2.0.0
+        version: 2.0.0(astro@6.3.8(@types/node@25.9.1)(@vercel/functions@3.6.1)(jiti@2.7.0)(lightningcss@1.32.0)(rollup@4.60.4)(sass@1.100.0)(yaml@2.9.0))
       '@nanostores/persistent':
         specifier: ^1.3.4
         version: 1.3.4(nanostores@1.3.0)
@@ -956,6 +959,11 @@ packages:
     engines: {node: ^18.17.0 || ^20.3.0 || >=21.0.0}
     cpu: [x64]
     os: [win32]
+
+  '@inox-tools/custom-routing@2.0.0':
+    resolution: {integrity: sha512-SQpVobL19GiNq//RSe36k83ESAQ5tToTJrfDh9NlOBhjP81KVJHI8sefq9mVuyo4Z19iIhy5hd8dmZyFQWY8AQ==}
+    peerDependencies:
+      astro: '>=3'
 
   '@inquirer/ansi@2.0.6':
     resolution: {integrity: sha512-I/INw4sHGlVZ/afZOckpLiDP9SmbMl1g/GCqeHjLw1Afw/0PlRs2tRFgTGWmdI0hoNuWZn3y2iHNmG1vyECyQQ==}
@@ -7279,6 +7287,10 @@ snapshots:
 
   '@img/sharp-win32-x64@0.34.5':
     optional: true
+
+  '@inox-tools/custom-routing@2.0.0(astro@6.3.8(@types/node@25.9.1)(@vercel/functions@3.6.1)(jiti@2.7.0)(lightningcss@1.32.0)(rollup@4.60.4)(sass@1.100.0)(yaml@2.9.0))':
+    dependencies:
+      astro: 6.3.8(@types/node@25.9.1)(@vercel/functions@3.6.1)(jiti@2.7.0)(lightningcss@1.32.0)(rollup@4.60.4)(sass@1.100.0)(yaml@2.9.0)
 
   '@inquirer/ansi@2.0.6': {}
 

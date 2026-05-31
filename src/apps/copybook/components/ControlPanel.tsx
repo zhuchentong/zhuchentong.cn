@@ -1,14 +1,7 @@
-import type { GridType } from '@/interfaces/copybook'
-import { useStore } from '@nanostores/react'
-import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Field, FieldContent, FieldGroup, FieldLabel, FieldSeparator, FieldSet } from '@/components/ui/field'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Slider } from '@/components/ui/slider'
-import { Switch } from '@/components/ui/switch'
-import { DEFAULT_CONFIG, FONT_WEIGHTS, GRID_TYPES } from '@/config/copybook.config'
-import { FONTS } from '@/config/fonts.config'
-import { A4_WIDTH_MM } from '@/shared/copybook/constants'
+import type { GridType } from '@copybook/interfaces'
+import { DEFAULT_CONFIG, FONT_WEIGHTS, GRID_TYPES } from '@copybook/config'
+import { A4_WIDTH_MM } from '@copybook/constants'
+import { FONTS } from '@copybook/config'
 import {
   copybookFontFamily,
   copybookFontOffsetY,
@@ -25,7 +18,14 @@ import {
   copybookText,
   copybookTraceColor,
   copybookTraceCount,
-} from '@/stores/copybook.store'
+} from '@copybook/store'
+import { useStore } from '@nanostores/react'
+import { useState } from 'react'
+import { Button } from '@/components/ui/button'
+import { Field, FieldContent, FieldGroup, FieldLabel, FieldSeparator, FieldSet } from '@/components/ui/field'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Slider } from '@/components/ui/slider'
+import { Switch } from '@/components/ui/switch'
 import ColorPickerDialog from './ColorPickerDialog'
 import ExportButton from './ExportButton'
 import FontPickerDialog from './FontPickerDialog'

@@ -1,4 +1,4 @@
-import type { GridType, RenderParams } from '@/interfaces/copybook'
+import type { GridType, RenderParams } from '@copybook/interfaces'
 
 export function mmToPx(mm: number, dpi: number): number {
   return mm * dpi / 25.4

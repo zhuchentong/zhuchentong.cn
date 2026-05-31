@@ -4,7 +4,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const srcDir = path.resolve(__dirname, '../src/assets/fonts')
+const srcDir = path.resolve(__dirname, '../src/apps/copybook/assets/fonts')
 const destDir = path.resolve(__dirname, '../dist/fonts')
 
 if (!fs.existsSync(destDir)) {

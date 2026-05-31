@@ -3,8 +3,18 @@ allowBuilds:
   esbuild: true
   sharp: true
   vue-demi: true
+
 managePackageManagerVersions: false
+
 shellEmulator: true
+
 strictTrust: false
 
 trustPolicy: no-downgrade
+onlyBuiltDependencies:
+  - '@parcel/watcher'
+  - core-js
+  - esbuild
+  - msw
+  - sharp
+  - ttf2woff2

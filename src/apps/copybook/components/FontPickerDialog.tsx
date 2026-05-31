@@ -1,9 +1,9 @@
+import { FONT_FAMILIES } from '@copybook/config'
+import { FONTS } from '@copybook/config'
+import { copybookFontFamily } from '@copybook/store'
 import { useStore } from '@nanostores/react'
 import { useEffect, useState } from 'react'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { FONT_FAMILIES } from '@/config/copybook.config'
-import { FONTS } from '@/config/fonts.config'
-import { copybookFontFamily } from '@/stores/copybook.store'
 
 const previewFontCache = new Map<string, string>()
 
