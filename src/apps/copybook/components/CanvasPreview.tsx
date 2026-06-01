@@ -20,16 +20,24 @@ import {
 } from '@copybook/store'
 import { useStore } from '@nanostores/react'
 import { Leafer } from 'leafer-draw'
-import { useCallback, useEffect, useMemo, useRef } from 'react'
+import { Minus, Plus, RotateCcw } from 'lucide-react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { Button } from '@/components/ui/button'
 import '@leafer-in/export'
 
 const A4_CSS_WIDTH = 794
 const A4_CSS_HEIGHT = 1123
 
+const ZOOM_STEP = 25
+const ZOOM_MIN = 25
+const ZOOM_MAX = 200
+const ZOOM_DEFAULT = 100
+
 export default function CanvasPreview() {
   const containerRefsRef = useRef<Map<number, HTMLDivElement>>(new Map())
   const leaferRefsRef = useRef<Map<number, Leafer>>(new Map())
   const { resolvedFontName } = useFontLoader()
+  const [zoom, setZoom] = useState(ZOOM_DEFAULT)
 
   const text = useStore(copybookText)
   const gridType = useStore(copybookGridType)
@@ -151,8 +159,11 @@ export default function CanvasPreview() {
   }, [])
 
   return (
-    <div className="p-6 print:p-0 bg-gray-100 flex flex-1 justify-center overflow-auto">
-      <div className="flex flex-col items-center gap-6 print:gap-0">
+    <div className="relative p-6 print:p-0 bg-gray-100 flex flex-1 justify-center overflow-auto">
+      <div
+        className="flex flex-col items-center gap-6 print:gap-0"
+        style={{ transform: `scale(${zoom / 100})`, transformOrigin: 'top center' }}
+      >
         {Array.from({ length: totalPages }, (_, page) => (
           <div key={page} className="bg-white shadow-lg print:shadow-none print:my-0" style={{ width: `${A4_CSS_WIDTH}px`, height: `${A4_CSS_HEIGHT}px`, breakAfter: page < totalPages - 1 ? 'page' : 'auto' }}>
             <div
@@ -161,6 +172,22 @@ export default function CanvasPreview() {
             />
           </div>
         ))}
+      </div>
+
+      <div className="fixed right-6 bottom-6 z-50 flex flex-col items-center gap-1 bg-background rounded-lg border shadow-md p-1 print:hidden">
+        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setZoom(z => Math.min(ZOOM_MAX, z + ZOOM_STEP))}>
+          <Plus className="h-4 w-4" />
+        </Button>
+        {/* <Button variant="ghost" size="sm" className="h-8 min-w-12 text-xs tabular-nums" onClick={() => setZoom(ZOOM_DEFAULT)}> */}
+        {/*   {zoom} */}
+        {/*   % */}
+        {/* </Button> */}
+        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setZoom(z => Math.max(ZOOM_MIN, z - ZOOM_STEP))}>
+          <Minus className="h-4 w-4" />
+        </Button>
+        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setZoom(ZOOM_DEFAULT)}>
+          <RotateCcw className="h-3.5 w-3.5" />
+        </Button>
       </div>
     </div>
   )
