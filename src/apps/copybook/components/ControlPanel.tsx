@@ -1,7 +1,6 @@
 import type { GridType } from '@copybook/interfaces'
-import { DEFAULT_CONFIG, FONT_WEIGHTS, GRID_TYPES } from '@copybook/config'
+import { DEFAULT_CONFIG, FONT_WEIGHTS, FONTS, GRID_TYPES } from '@copybook/config'
 import { A4_WIDTH_MM } from '@copybook/constants'
-import { FONTS } from '@copybook/config'
 import {
   copybookFontFamily,
   copybookFontOffsetY,
@@ -14,7 +13,9 @@ import {
   copybookInsertEmptyRow,
   copybookLineColor,
   copybookMargin,
+  copybookPinyinMap,
   copybookRowGap,
+  copybookShowPinyin,
   copybookText,
   copybookTraceColor,
   copybookTraceCount,
@@ -51,6 +52,7 @@ export default function ControlPanel() {
   const insertEmptyCol = useStore(copybookInsertEmptyCol)
   const margin = useStore(copybookMargin)
   const fontFamily = useStore(copybookFontFamily)
+  const showPinyin = useStore(copybookShowPinyin)
 
   const colsPerRow = Math.floor((A4_WIDTH_MM - margin.left - margin.right) / gridSize) || 1
   const contentCols = insertEmptyCol ? Math.ceil(colsPerRow / 2) : colsPerRow
@@ -78,6 +80,8 @@ export default function ControlPanel() {
     copybookHighlightFirst.set(DEFAULT_CONFIG.highlightFirst)
     copybookInsertEmptyRow.set(DEFAULT_CONFIG.insertEmptyRow)
     copybookInsertEmptyCol.set(DEFAULT_CONFIG.insertEmptyCol)
+    copybookShowPinyin.set(DEFAULT_CONFIG.showPinyin)
+    copybookPinyinMap.set({})
   }
 
   return (
@@ -111,6 +115,11 @@ export default function ControlPanel() {
           <Field orientation="horizontal" className="h-9 items-center justify-between gap-6">
             <FieldLabel className="text-slate-700 dark:text-slate-200">插入空列</FieldLabel>
             <Switch checked={insertEmptyCol} onCheckedChange={v => copybookInsertEmptyCol.set(v)} />
+          </Field>
+          <FieldSeparator className={sepCls} />
+          <Field orientation="horizontal" className="h-9 items-center justify-between gap-6">
+            <FieldLabel className="text-slate-700 dark:text-slate-200">显示拼音</FieldLabel>
+            <Switch checked={showPinyin} onCheckedChange={v => copybookShowPinyin.set(v)} />
           </Field>
         </FieldGroup>
       </FieldSet>
