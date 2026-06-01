@@ -6,6 +6,6 @@ const stores = {
   user: userStore,
 }
 
-export function useStore() {
+export function getStore() {
   return stores
 }

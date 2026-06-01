@@ -8,6 +8,7 @@
     "start": "node ./dist/server/entry.mjs",
     "build": "astro check && astro build && node scripts/copy-fonts.mjs",
     "preview": "astro preview",
+    "lint": "eslint --fix .",
     "astro": "astro",
     "docker:nginx": "astro check && astro build && docker run -d -p 8080:80 --name astro-nginx -v ./dist:/usr/share/nginx/html"
   },

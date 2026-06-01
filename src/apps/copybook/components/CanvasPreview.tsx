@@ -191,7 +191,7 @@ export default function CanvasPreview() {
         return null
       const pinyinYmm = startYmm + row * rowHeight
       return { charIndex: pc.index, char: pc.char, pinyins: pc.pinyins, left: leftPx, top: pinyinYmm * pxPerMM, height: heightPx }
-    }).filter(Boolean)
+    }).filter((x): x is NonNullable<typeof x> => x != null)
   }, [showPinyin, polyChars, margin, gridSize, rowGap, insertEmptyRow])
 
   return (
