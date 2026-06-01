@@ -5,7 +5,8 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
-      "@copybook/*": ["./src/apps/copybook/*"]
+      "@copybook/*": ["./src/apps/copybook/*"],
+      "@workbook/*": ["./src/apps/workbook/*"]
     }
   }
 }

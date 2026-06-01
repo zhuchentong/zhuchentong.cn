@@ -27,4 +27,8 @@ export const NavBarLinks = [
     text: '字帖',
     link: '/copybook/hanzi',
   },
+  {
+    text: '练习册',
+    link: '/workbook/pinyin',
+  },
 ] as NavBarItem[]
