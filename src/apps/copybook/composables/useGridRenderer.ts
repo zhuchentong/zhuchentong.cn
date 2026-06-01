@@ -5,126 +5,128 @@ export function mmToPx(mm: number, dpi: number): number {
   return mm * dpi / 25.4
 }
 
+function s(value: number, scale: number): number {
+  return value * scale
+}
+
+function sPoints(points: number[], scale: number): number[] {
+  return points.map(v => v * scale)
+}
+
 export function createGridCell(
   x: number,
   y: number,
   size: number,
   type: GridType,
   lineColor: string,
+  scale: number,
 ): (Rect | Line)[] {
   const elements: (Rect | Line)[] = []
 
-  // 主边框
   elements.push(new Rect({
-    x,
-    y,
-    width: size,
-    height: size,
+    x: s(x, scale),
+    y: s(y, scale),
+    width: s(size, scale),
+    height: s(size, scale),
     stroke: lineColor,
-    strokeWidth: 0.3,
+    strokeWidth: s(0.3, scale),
   }))
 
   if (type === 'tian' || type === 'mi') {
-    elements.push(...createCross(x, y, size, lineColor))
+    elements.push(...createCross(x, y, size, lineColor, scale))
   }
 
   if (type === 'mi') {
-    elements.push(...createDiagonals(x, y, size, lineColor))
+    elements.push(...createDiagonals(x, y, size, lineColor, scale))
   }
 
   if (type === 'huigong' || type === 'huitian' || type === 'huimi') {
-    elements.push(...createInnerBox(x, y, size, lineColor))
+    elements.push(...createInnerBox(x, y, size, lineColor, scale))
   }
 
   if (type === 'huitian' || type === 'huimi') {
-    elements.push(...createCross(x, y, size, lineColor))
+    elements.push(...createCross(x, y, size, lineColor, scale))
   }
 
   if (type === 'huimi') {
-    elements.push(...createDiagonals(x, y, size, lineColor))
+    elements.push(...createDiagonals(x, y, size, lineColor, scale))
   }
 
   if (type === 'jiugong') {
-    elements.push(...createNineGrid(x, y, size, lineColor))
+    elements.push(...createNineGrid(x, y, size, lineColor, scale))
   }
 
   return elements
 }
 
-function createCross(x: number, y: number, size: number, color: string): Line[] {
+function createCross(x: number, y: number, size: number, color: string, scale: number): Line[] {
   return [
-    // 垂直中线
     new Line({
-      points: [x + size / 2, y, x + size / 2, y + size],
+      points: sPoints([x + size / 2, y, x + size / 2, y + size], scale),
       stroke: color,
-      strokeWidth: 0.3,
-      dashPattern: [0.3, 1],
+      strokeWidth: s(0.3, scale),
+      dashPattern: [s(0.3, scale), s(1, scale)],
     }),
-    // 水平中线
     new Line({
-      points: [x, y + size / 2, x + size, y + size / 2],
+      points: sPoints([x, y + size / 2, x + size, y + size / 2], scale),
       stroke: color,
-      strokeWidth: 0.3,
-      dashPattern: [0.3, 1],
+      strokeWidth: s(0.3, scale),
+      dashPattern: [s(0.3, scale), s(1, scale)],
     }),
   ]
 }
 
-function createDiagonals(x: number, y: number, size: number, color: string): Line[] {
+function createDiagonals(x: number, y: number, size: number, color: string, scale: number): Line[] {
   return [
-    // 左上到右下
     new Line({
-      points: [x, y, x + size, y + size],
+      points: sPoints([x, y, x + size, y + size], scale),
       stroke: color,
-      strokeWidth: 0.3,
-      dashPattern: [0.3, 1],
+      strokeWidth: s(0.3, scale),
+      dashPattern: [s(0.3, scale), s(1, scale)],
     }),
-    // 右上到左下
     new Line({
-      points: [x + size, y, x, y + size],
+      points: sPoints([x + size, y, x, y + size], scale),
       stroke: color,
-      strokeWidth: 0.3,
-      dashPattern: [0.3, 1],
+      strokeWidth: s(0.3, scale),
+      dashPattern: [s(0.3, scale), s(1, scale)],
     }),
   ]
 }
 
-function createInnerBox(x: number, y: number, size: number, color: string): Rect[] {
+function createInnerBox(x: number, y: number, size: number, color: string, scale: number): Rect[] {
   const inset = size / 3
   return [
     new Rect({
-      x: x + inset,
-      y: y + inset,
-      width: size - 2 * inset,
-      height: size - 2 * inset,
+      x: s(x + inset, scale),
+      y: s(y + inset, scale),
+      width: s(size - 2 * inset, scale),
+      height: s(size - 2 * inset, scale),
       stroke: color,
-      strokeWidth: 0.3,
-      dashPattern: [0.3, 1],
+      strokeWidth: s(0.3, scale),
+      dashPattern: [s(0.3, scale), s(1, scale)],
     }),
   ]
 }
 
-function createNineGrid(x: number, y: number, size: number, color: string): Line[] {
+function createNineGrid(x: number, y: number, size: number, color: string, scale: number): Line[] {
   const step = size / 3
   const elements: Line[] = []
 
-  // 垂直线
   for (let i = 1; i <= 2; i++) {
     elements.push(new Line({
-      points: [x + step * i, y, x + step * i, y + size],
+      points: sPoints([x + step * i, y, x + step * i, y + size], scale),
       stroke: color,
-      strokeWidth: 0.3,
-      dashPattern: [0.3, 1],
+      strokeWidth: s(0.3, scale),
+      dashPattern: [s(0.3, scale), s(1, scale)],
     }))
   }
 
-  // 水平线
   for (let i = 1; i <= 2; i++) {
     elements.push(new Line({
-      points: [x, y + step * i, x + size, y + step * i],
+      points: sPoints([x, y + step * i, x + size, y + step * i], scale),
       stroke: color,
-      strokeWidth: 0.3,
-      dashPattern: [0.3, 1],
+      strokeWidth: s(0.3, scale),
+      dashPattern: [s(0.3, scale), s(1, scale)],
     }))
   }
 
@@ -141,16 +143,17 @@ export function createChar(
   color: string,
   fontFamily: string,
   fontWeight: string,
+  scale: number,
 ): Text {
   const fontSize = cellSize * fontSizePercent / 100
   const resolvedFamily = resolveFontFamily(fontFamily)
 
   return new Text({
     text: char,
-    x: x + cellSize / 2,
-    y: y + cellSize / 2 + cellSize * offsetY / 100,
+    x: s(x + cellSize / 2, scale),
+    y: s(y + cellSize / 2 + cellSize * offsetY / 100, scale),
     fontFamily: resolvedFamily,
-    fontSize,
+    fontSize: s(fontSize, scale),
     fontWeight: fontWeight as any,
     fill: color,
     textAlign: 'center',
@@ -184,7 +187,7 @@ export function calcPageLayout(params: {
   return { rowsPerPage, totalPages }
 }
 
-export function createGridElements(params: RenderParams): (Rect | Line | Text)[] {
+export function createGridElements(params: RenderParams, scale = 1): (Rect | Line | Text)[] {
   const {
     text,
     gridType,
@@ -211,12 +214,11 @@ export function createGridElements(params: RenderParams): (Rect | Line | Text)[]
 
   const elements: (Rect | Line | Text)[] = []
 
-  // 白色背景
   elements.push(new Rect({
     x: 0,
     y: 0,
-    width: paperWidth,
-    height: paperHeight,
+    width: s(paperWidth, scale),
+    height: s(paperHeight, scale),
     fill: '#ffffff',
   }))
 
@@ -248,8 +250,7 @@ export function createGridElements(params: RenderParams): (Rect | Line | Text)[]
       if (x + gridSize > paperWidth - marginRight + gridSize * 0.5)
         break
 
-      // 添加方格元素
-      elements.push(...createGridCell(x, y, gridSize, gridType, lineColor))
+      elements.push(...createGridCell(x, y, gridSize, gridType, lineColor, scale))
 
       const isEmpty = (insertEmptyRow && row % 2 === 1)
         || (insertEmptyCol && col % 2 === 1)
@@ -257,7 +258,7 @@ export function createGridElements(params: RenderParams): (Rect | Line | Text)[]
       if (!isEmpty && charIdx < chars.length && chars.length > 0) {
         if (contentCol < effectiveTraceCount) {
           const color = (contentCol === 0 && highlightFirst) ? '#000000' : traceColor
-          elements.push(createChar(chars[charIdx], x, y, gridSize, fontSize, fontOffsetY, color, fontFamily, fontWeight))
+          elements.push(createChar(chars[charIdx], x, y, gridSize, fontSize, fontOffsetY, color, fontFamily, fontWeight, scale))
         }
         contentCol++
       }

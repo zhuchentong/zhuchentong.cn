@@ -101,10 +101,8 @@ export default function CanvasPreview() {
         oldLeafer.destroy()
       }
 
-      // 计算像素比例：A4 纸张 mm 转 px
       const pxPerMM = A4_CSS_WIDTH / A4_WIDTH_MM
 
-      // 创建新的 Leafer 实例
       const leafer = new Leafer({
         view: container,
         width: A4_CSS_WIDTH,
@@ -112,12 +110,9 @@ export default function CanvasPreview() {
         pixelRatio: dpr,
       })
 
-      // 创建元素并添加到 Leafer
-      const elements = createGridElements(getRenderParams(page))
+      const elements = createGridElements(getRenderParams(page), pxPerMM)
 
-      // 添加元素并设置缩放
       elements.forEach((el) => {
-        el.scale = pxPerMM
         leafer.add(el)
       })
 

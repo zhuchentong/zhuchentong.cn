@@ -26,22 +26,19 @@ function getRenderParamsList(params: RenderParams): RenderParams[] {
 
 /** 创建导出用的 Leafer 实例（离屏，固定 300 DPI） */
 function createExportLeafer(params: RenderParams): Leafer {
-  // A4 尺寸以 mm 为单位，导出需要转换为 px
   const exportWidth = Math.round(A4_WIDTH_MM * EXPORT_DPI / MM_PER_INCH)
   const exportHeight = Math.round(A4_HEIGHT_MM * EXPORT_DPI / MM_PER_INCH)
 
   const leafer = new Leafer({
     width: exportWidth,
     height: exportHeight,
-    pixelRatio: 1, // 已经是 300 DPI 的像素尺寸
+    pixelRatio: 1,
   })
 
-  const elements = createGridElements(params)
-
-  // 计算 mm 到 px 的缩放比例
   const pxPerMM = EXPORT_DPI / MM_PER_INCH
+  const elements = createGridElements(params, pxPerMM)
+
   elements.forEach((el) => {
-    el.scale = pxPerMM
     leafer.add(el)
   })
 
