@@ -33,6 +33,7 @@ Lint: `npx eslint --fix .` (via `@antfu/eslint-config` with astro, react, format
 **Middleware** (`src/middleware/index.ts`) reads a `theme` cookie and sets `Astro.locals.theme`.
 
 **Path aliases:**
+
 - `@/*` maps to `./src/*`
 - `@copybook/*` maps to `./src/apps/copybook/*`
 
@@ -57,6 +58,7 @@ Key gotcha:
 - Always pass the `scale` parameter so all values (x, y, width, height, fontSize, strokeWidth, dashPattern, Line points) are multiplied at creation time.
 
 Adding a new app:
+
 1. Create `src/apps/<name>/` with the same structure
 2. Add a `@<name>/*` path alias in `tsconfig.json`
 3. Register routes via `customRouting` in `astro.config.ts`

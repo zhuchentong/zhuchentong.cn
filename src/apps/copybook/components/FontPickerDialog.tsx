@@ -1,5 +1,4 @@
-import { FONT_FAMILIES } from '@copybook/config'
-import { FONTS } from '@copybook/config'
+import { FONT_FAMILIES, FONTS } from '@copybook/config'
 import { copybookFontFamily } from '@copybook/store'
 import { useStore } from '@nanostores/react'
 import { useEffect, useState } from 'react'

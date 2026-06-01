@@ -23,6 +23,7 @@ export interface CopybookState {
   highlightFirst: boolean
   insertEmptyRow: boolean
   insertEmptyCol: boolean
+  showPinyin: boolean
 }
 
 export interface RenderParams {
@@ -44,6 +45,8 @@ export interface RenderParams {
   highlightFirst: boolean
   insertEmptyRow: boolean
   insertEmptyCol: boolean
+  showPinyin: boolean
+  pinyinMap: Record<number, string>
   paperWidth: number
   paperHeight: number
   startCharIndex?: number
