@@ -14,6 +14,7 @@ function getRenderParamsList(params: RenderParams): RenderParams[] {
     marginBottom: params.marginBottom,
     paperHeight: params.paperHeight,
     insertEmptyRow: params.insertEmptyRow,
+    showPinyin: params.showPinyin,
   })
 
   const charsPerPage = params.insertEmptyRow ? Math.ceil(rowsPerPage / 2) : rowsPerPage

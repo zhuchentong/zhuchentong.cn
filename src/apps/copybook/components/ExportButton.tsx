@@ -11,8 +11,10 @@ import {
   copybookInsertEmptyRow,
   copybookLineColor,
   copybookMargin,
+  copybookPinyinMap,
   copybookResolvedFont,
   copybookRowGap,
+  copybookShowPinyin,
   copybookText,
   copybookTraceColor,
   copybookTraceCount,
@@ -42,6 +44,8 @@ export default function ExportButton(_props: Props) {
   const highlightFirst = useStore(copybookHighlightFirst)
   const insertEmptyRow = useStore(copybookInsertEmptyRow)
   const insertEmptyCol = useStore(copybookInsertEmptyCol)
+  const showPinyin = useStore(copybookShowPinyin)
+  const pinyinMap = useStore(copybookPinyinMap)
 
   function getParams() {
     return {
@@ -63,6 +67,8 @@ export default function ExportButton(_props: Props) {
       highlightFirst,
       insertEmptyRow,
       insertEmptyCol,
+      showPinyin,
+      pinyinMap,
       paperWidth: A4_WIDTH_MM,
       paperHeight: A4_HEIGHT_MM,
       pxPerMM: EXPORT_DPI / MM_PER_INCH,

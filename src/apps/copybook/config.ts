@@ -117,6 +117,7 @@ export const DEFAULT_CONFIG = {
   highlightFirst: true,
   insertEmptyRow: false,
   insertEmptyCol: false,
+  showPinyin: false,
 }
 
 // ─── 导航 ───────────────────────────────────────────
