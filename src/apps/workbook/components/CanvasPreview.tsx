@@ -5,8 +5,8 @@ import { Minus, Plus, RotateCcw } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { calcWorkbookPageLayout, createWorkbookElements } from '../composables/useRenderer'
-import { A4_HEIGHT_MM, A4_WIDTH_MM } from '../constants'
 import { DEFAULT_PINYIN_CONFIG } from '../config'
+import { A4_HEIGHT_MM, A4_WIDTH_MM } from '../constants'
 import {
   pinyinAnswerColor,
   pinyinAnswerMode,
@@ -29,9 +29,13 @@ const ZOOM_MIN = 25
 const ZOOM_MAX = 200
 const ZOOM_DEFAULT = 100
 
+const SCROLL_PADDING = 48
+
 export default function CanvasPreview() {
   const containerRefsRef = useRef<Map<number, HTMLDivElement>>(new Map())
   const leaferRefsRef = useRef<Map<number, Leafer>>(new Map())
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
+  const userZoomRef = useRef(false)
   const [zoom, setZoom] = useState(ZOOM_DEFAULT)
 
   const questions = useStore(pinyinQuestions)
@@ -120,6 +124,27 @@ export default function CanvasPreview() {
   }, [renderAllPages])
 
   useEffect(() => {
+    const container = scrollContainerRef.current
+    if (!container)
+      return
+    const observer = new ResizeObserver((entries) => {
+      if (userZoomRef.current)
+        return
+      const width = entries[0].contentRect.width
+      const available = width - SCROLL_PADDING
+      if (available < A4_CSS_WIDTH) {
+        const autoZoom = Math.floor(available / A4_CSS_WIDTH * 100)
+        setZoom(Math.max(ZOOM_MIN, autoZoom))
+      }
+      else {
+        setZoom(ZOOM_DEFAULT)
+      }
+    })
+    observer.observe(container)
+    return () => observer.disconnect()
+  }, [])
+
+  useEffect(() => {
     const leaferMap = leaferRefsRef.current
     return () => {
       leaferMap.forEach(l => l.destroy())
@@ -142,7 +167,7 @@ export default function CanvasPreview() {
   }
 
   return (
-    <div className="relative p-6 print:p-0 bg-gray-100 flex flex-1 justify-center overflow-auto">
+    <div ref={scrollContainerRef} className="relative p-6 print:p-0 bg-gray-100 flex flex-1 justify-center overflow-auto">
       <div
         className="flex flex-col items-center gap-6 print:gap-0"
         style={{ transform: `scale(${zoom / 100})`, transformOrigin: 'top center' }}
@@ -166,13 +191,37 @@ export default function CanvasPreview() {
       </div>
 
       <div className="fixed right-6 bottom-6 z-50 flex flex-col items-center gap-1 bg-background rounded-lg border shadow-md p-1 print:hidden">
-        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setZoom(z => Math.min(ZOOM_MAX, z + ZOOM_STEP))}>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8"
+          onClick={() => {
+            userZoomRef.current = true
+            setZoom(z => Math.min(ZOOM_MAX, z + ZOOM_STEP))
+          }}
+        >
           <Plus className="h-4 w-4" />
         </Button>
-        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setZoom(z => Math.max(ZOOM_MIN, z - ZOOM_STEP))}>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8"
+          onClick={() => {
+            userZoomRef.current = true
+            setZoom(z => Math.max(ZOOM_MIN, z - ZOOM_STEP))
+          }}
+        >
           <Minus className="h-4 w-4" />
         </Button>
-        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setZoom(ZOOM_DEFAULT)}>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8"
+          onClick={() => {
+            userZoomRef.current = false
+            setZoom(ZOOM_DEFAULT)
+          }}
+        >
           <RotateCcw className="h-3.5 w-3.5" />
         </Button>
       </div>

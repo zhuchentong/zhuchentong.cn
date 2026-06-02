@@ -35,10 +35,13 @@ const ZOOM_STEP = 25
 const ZOOM_MIN = 25
 const ZOOM_MAX = 200
 const ZOOM_DEFAULT = 100
+const SCROLL_PADDING = 48
 
 export default function CanvasPreview() {
   const containerRefsRef = useRef<Map<number, HTMLDivElement>>(new Map())
   const leaferRefsRef = useRef<Map<number, Leafer>>(new Map())
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
+  const userZoomRef = useRef(false)
   const { resolvedFontName } = useFontLoader()
   const [zoom, setZoom] = useState(ZOOM_DEFAULT)
 
@@ -146,6 +149,27 @@ export default function CanvasPreview() {
     return () => document.fonts.removeEventListener('loadingdone', handleFontLoaded)
   }, [renderAllPages])
 
+  useEffect(() => {
+    const container = scrollContainerRef.current
+    if (!container)
+      return
+    const observer = new ResizeObserver((entries) => {
+      if (userZoomRef.current)
+        return
+      const width = entries[0].contentRect.width
+      const available = width - SCROLL_PADDING
+      if (available < A4_CSS_WIDTH) {
+        const autoZoom = Math.floor(available / A4_CSS_WIDTH * 100)
+        setZoom(Math.max(ZOOM_MIN, autoZoom))
+      }
+      else {
+        setZoom(ZOOM_DEFAULT)
+      }
+    })
+    observer.observe(container)
+    return () => observer.disconnect()
+  }, [])
+
   // 清理所有 Leafer 实例
   useEffect(() => {
     const leaferMap = leaferRefsRef.current
@@ -195,7 +219,7 @@ export default function CanvasPreview() {
   }, [showPinyin, polyChars, margin, gridSize, rowGap, insertEmptyRow])
 
   return (
-    <div className="relative p-6 print:p-0 bg-gray-100 flex flex-1 justify-center overflow-auto">
+    <div ref={scrollContainerRef} className="relative p-6 print:p-0 bg-gray-100 flex flex-1 justify-center overflow-auto">
       <div
         className="flex flex-col items-center gap-6 print:gap-0"
         style={{ transform: `scale(${zoom / 100})`, transformOrigin: 'top center' }}
@@ -245,17 +269,41 @@ export default function CanvasPreview() {
       </div>
 
       <div className="fixed right-6 bottom-6 z-50 flex flex-col items-center gap-1 bg-background rounded-lg border shadow-md p-1 print:hidden">
-        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setZoom(z => Math.min(ZOOM_MAX, z + ZOOM_STEP))}>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8"
+          onClick={() => {
+            userZoomRef.current = true
+            setZoom(z => Math.min(ZOOM_MAX, z + ZOOM_STEP))
+          }}
+        >
           <Plus className="h-4 w-4" />
         </Button>
         {/* <Button variant="ghost" size="sm" className="h-8 min-w-12 text-xs tabular-nums" onClick={() => setZoom(ZOOM_DEFAULT)}> */}
         {/*   {zoom} */}
         {/*   % */}
         {/* </Button> */}
-        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setZoom(z => Math.max(ZOOM_MIN, z - ZOOM_STEP))}>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8"
+          onClick={() => {
+            userZoomRef.current = true
+            setZoom(z => Math.max(ZOOM_MIN, z - ZOOM_STEP))
+          }}
+        >
           <Minus className="h-4 w-4" />
         </Button>
-        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setZoom(ZOOM_DEFAULT)}>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8"
+          onClick={() => {
+            userZoomRef.current = false
+            setZoom(ZOOM_DEFAULT)
+          }}
+        >
           <RotateCcw className="h-3.5 w-3.5" />
         </Button>
       </div>
