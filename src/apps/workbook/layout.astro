@@ -1,7 +1,7 @@
 ---
 import Favicons from '@/components/layouts/Favicons.astro'
 import Theme from '@/components/layouts/Theme.astro'
-import { useStore } from '@/stores'
+import { getStore } from '@/stores'
 import '@/styles/globals.css'
 import { WORKBOOK_NAV_ITEMS } from '@workbook/config'
 
@@ -11,7 +11,7 @@ export interface Props {
 }
 
 const { title, description } = Astro.props
-const store = useStore()
+const store = getStore()
 const theme = store.app.theme
 ---
 
