@@ -24,7 +24,7 @@ export default function FontPickerDialog({ open, onOpenChange }: Props) {
           return
         try {
           const params = new URLSearchParams({ text: font.label, font: font.id })
-          const res = await fetch(`/api/font-subset?${params}`)
+          const res = await fetch(`/api/copybook/font-subset?${params}`)
           if (!res.ok)
             return
           const { data } = await res.json()

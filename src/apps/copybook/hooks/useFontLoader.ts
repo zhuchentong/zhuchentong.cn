@@ -49,7 +49,7 @@ export function useFontLoader() {
 
       try {
         const params = new URLSearchParams({ text: inputText, font: fontId })
-        const res = await fetch(`/api/font-subset?${params}`)
+        const res = await fetch(`/api/copybook/font-subset?${params}`)
         if (!res.ok)
           throw new Error(`API error: ${res.status}`)
         const { data } = await res.json()

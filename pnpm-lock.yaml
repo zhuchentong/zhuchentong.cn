@@ -120,6 +120,9 @@ importers:
       astro-eslint-parser:
         specifier: ^1.4.0
         version: 1.4.0
+      cnchar-words:
+        specifier: ^3.2.6
+        version: 3.2.6
       eslint:
         specifier: 10.4.0
         version: 10.4.0(jiti@2.7.0)
@@ -3060,6 +3063,9 @@ packages:
 
   cnchar-types@3.2.6:
     resolution: {integrity: sha512-LGU2ss7KcsI1Psme73+jffUX0ZDuChr6P9Rj2j8lynJHStklNpoC/+kheKSSUcXQ1u2KNvZt1Shs/5efcihHkg==}
+
+  cnchar-words@3.2.6:
+    resolution: {integrity: sha512-g0FPLbaUaWxvUH/L2dHsQiWqvghwtfRWP+yCGDLWijza2MT6ET8GP8+dNbqYVmnSU02yUTlR7X1sUY5pckzL0Q==}
 
   cnchar@3.2.6:
     resolution: {integrity: sha512-7Up5ALAkoOTAHlRMN0B7VgrrRsp6+trgFV0M7xSsZ0TwnnBfW68gXClcE9Oz8sTOEu+zqGOZjBhlHNzPIBckDA==}
@@ -9736,6 +9742,10 @@ snapshots:
       cnchar-types: 3.2.6
 
   cnchar-types@3.2.6: {}
+
+  cnchar-words@3.2.6:
+    dependencies:
+      cnchar-types: 3.2.6
 
   cnchar@3.2.6:
     dependencies:

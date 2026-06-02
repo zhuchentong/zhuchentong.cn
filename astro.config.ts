@@ -14,7 +14,8 @@ export default defineConfig({
     react(),
     customRouting({
       '/copybook/hanzi': './src/apps/copybook/pages/hanzi.astro',
-      '/api/font-subset': './src/apps/copybook/pages/api/font-subset.ts',
+      '/api/copybook/font-subset': './src/apps/copybook/pages/api/font-subset.ts',
+      '/workbook/pinyin': './src/apps/workbook/pages/pinyin.astro',
     }),
   ],
   vite: {
