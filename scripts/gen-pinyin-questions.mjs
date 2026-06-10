@@ -10,7 +10,7 @@ const { pinyin } = require('pinyin-pro')
 const PER_CHAPTER = 300
 
 function removeTone(s) {
-  return s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/ü/g, 'v')
+  return s.normalize('NFD').replace(/[\u0300-\u036F]/g, '').replace(/ü/g, 'v')
 }
 
 const INIT_LIST = ['zh', 'ch', 'sh', 'b', 'p', 'm', 'f', 'd', 't', 'n', 'l', 'g', 'k', 'h', 'j', 'q', 'x', 'r', 'z', 'c', 's', 'y', 'w']
@@ -18,7 +18,8 @@ const INIT_LIST = ['zh', 'ch', 'sh', 'b', 'p', 'm', 'f', 'd', 't', 'n', 'l', 'g'
 function getInitial(py) {
   const nt = removeTone(py)
   for (const init of INIT_LIST) {
-    if (nt.startsWith(init)) return init
+    if (nt.startsWith(init))
+      return init
   }
   return ''
 }
@@ -26,7 +27,8 @@ function getInitial(py) {
 function getFinal(py) {
   const nt = removeTone(py)
   for (const init of INIT_LIST) {
-    if (nt.startsWith(init)) return nt.slice(init.length)
+    if (nt.startsWith(init))
+      return nt.slice(init.length)
   }
   return nt
 }
@@ -35,9 +37,12 @@ function matchesRule(py, rule) {
   const init = getInitial(py)
   const final = getFinal(py)
   const nt = removeTone(py)
-  if (rule.initials.length && rule.initials.includes(init)) return true
-  if (rule.finals.length && rule.finals.includes(final)) return true
-  if (rule.specialSpells.length && rule.specialSpells.includes(nt)) return true
+  if (rule.initials.length && rule.initials.includes(init))
+    return true
+  if (rule.finals.length && rule.finals.includes(final))
+    return true
+  if (rule.specialSpells.length && rule.specialSpells.includes(nt))
+    return true
   return false
 }
 
@@ -91,7 +96,8 @@ for (let ch = 1; ch <= 12; ch++) {
   for (const char of pool) {
     const wordList = cnchar.words(char) || []
     for (const word of wordList) {
-      if (word.length !== 2 || seen.has(word)) continue
+      if (word.length !== 2 || seen.has(word))
+        continue
       const pinyins = pinyin(word, { toneType: 'symbol', type: 'array' })
       if (pinyins.some(py => matchesRule(py, rule))) {
         seen.add(word)
@@ -110,5 +116,5 @@ for (let ch = 1; ch <= 12; ch++) {
 }
 
 const outPath = new URL('../src/apps/workbook/assets/data/pinyin-questions.json', import.meta.url)
-writeFileSync(outPath, JSON.stringify(allQuestions, null, 2) + '\n')
+writeFileSync(outPath, `${JSON.stringify(allQuestions, null, 2)}\n`)
 console.log(`\nTotal: ${allQuestions.length} questions written to ${outPath.pathname}`)

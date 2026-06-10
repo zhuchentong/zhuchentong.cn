@@ -2,7 +2,6 @@ import { useStore } from '@nanostores/react'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
-import { DEFAULT_PINYIN_CONFIG } from '../config'
 import { exportPDF, exportPNG } from '../composables/useExport'
 import { A4_HEIGHT_MM, A4_WIDTH_MM } from '../constants'
 import {
@@ -10,6 +9,7 @@ import {
   pinyinAnswerMode,
   pinyinFontColor,
   pinyinFontSize,
+  pinyinFontWeight,
   pinyinGridSize,
   pinyinHighlightColor,
   pinyinHighlightEnabled,
@@ -17,6 +17,7 @@ import {
   pinyinMargin,
   pinyinQuestionGap,
   pinyinQuestions,
+  pinyinResolvedFont,
 } from '../store'
 
 export default function ExportButton() {
@@ -32,6 +33,8 @@ export default function ExportButton() {
   const answerColor = useStore(pinyinAnswerColor)
   const fontSize = useStore(pinyinFontSize)
   const fontColor = useStore(pinyinFontColor)
+  const fontWeight = useStore(pinyinFontWeight)
+  const resolvedFont = useStore(pinyinResolvedFont)
 
   function getParams() {
     return {
@@ -47,8 +50,8 @@ export default function ExportButton() {
       marginLeft: margin.left,
       lineColor,
       answerColor,
-      fontFamily: DEFAULT_PINYIN_CONFIG.fontFamily,
-      fontWeight: 'normal',
+      fontFamily: resolvedFont,
+      fontWeight,
       fontSize,
       fontColor,
       paperWidth: A4_WIDTH_MM,

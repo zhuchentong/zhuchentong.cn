@@ -127,7 +127,8 @@ export function createWorkbookElements(
       // 填拼音答案
       if (answerMode !== 'hidden') {
         for (let i = 0; i < question.pinyin.length; i++) {
-          if (answerMode === 'hide-keyword' && question.highlight?.[i]) continue
+          if (answerMode === 'hide-keyword' && question.highlight?.[i])
+            continue
           elements.push(createPinyinText(
             question.pinyin[i],
             cursorX + i * gridSize,

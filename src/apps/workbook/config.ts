@@ -1,24 +1,43 @@
-import type { Chapter, Margin } from './interfaces'
+import type { Margin } from './interfaces'
 
 export const WORKBOOK_NAV_ITEMS = [
   { label: '← 首页', href: '/' },
   { label: '拼音练习', href: '/workbook/pinyin' },
 ]
 
-export const CHAPTERS: Chapter[] = [
-  { id: 1, title: 'a o e i u ü' },
-  { id: 2, title: 'b p m f' },
-  { id: 3, title: 'd t n l' },
-  { id: 4, title: 'g k h' },
-  { id: 5, title: 'j q x' },
-  { id: 6, title: 'zh ch sh r' },
-  { id: 7, title: 'z c s' },
-  { id: 8, title: 'ai ei ao ou' },
-  { id: 9, title: 'ia ie ua uo üe' },
-  { id: 10, title: 'iao iu uai ui' },
-  { id: 11, title: 'an en in un ün' },
-  { id: 12, title: 'ang eng ing ong' },
+export interface InitialGroup {
+  id: string
+  title: string
+  initials: string[]
+}
+
+export interface FinalGroup {
+  id: string
+  title: string
+  finals: string[]
+}
+
+export const INITIAL_GROUPS: InitialGroup[] = [
+  { id: 's1', title: 'b p m f', initials: ['b', 'p', 'm', 'f'] },
+  { id: 's2', title: 'd t n l', initials: ['d', 't', 'n', 'l'] },
+  { id: 's3', title: 'g k h', initials: ['g', 'k', 'h'] },
+  { id: 's4', title: 'j q x', initials: ['j', 'q', 'x'] },
+  { id: 's5', title: 'zh ch sh r', initials: ['zh', 'ch', 'sh', 'r'] },
+  { id: 's6', title: 'z c s', initials: ['z', 'c', 's'] },
 ]
+
+export const FINAL_GROUPS: FinalGroup[] = [
+  { id: 'y1', title: 'a o e', finals: ['a', 'o', 'e'] },
+  { id: 'y2', title: 'i u ü', finals: ['i', 'u', 'ü'] },
+  { id: 'y3', title: 'ai ei ui', finals: ['ai', 'ei', 'ui'] },
+  { id: 'y4', title: 'ao ou iu', finals: ['ao', 'ou', 'iu'] },
+  { id: 'y5', title: 'ie üe er', finals: ['ie', 'üe', 'er'] },
+  { id: 'y6', title: 'an en in un ün üan', finals: ['an', 'en', 'in', 'un', 'ün', 'üan'] },
+  { id: 'y7', title: 'ang eng ing ong', finals: ['ang', 'eng', 'ing', 'ong'] },
+]
+
+export const DEFAULT_INITIALS: string[] = []
+export const DEFAULT_FINALS = ['a', 'o', 'e']
 
 export const COLOR_PALETTE = [
   { name: 'gray', colors: ['#e2e8f0', '#cbd5e1', '#94a3b8', '#64748b', '#475569', 'black'] },
@@ -32,7 +51,8 @@ export const COLOR_PALETTE = [
 export const DEFAULT_MARGIN: Margin = { top: 20, right: 20, bottom: 20, left: 20 }
 
 export const DEFAULT_PINYIN_CONFIG = {
-  chapter: 1,
+  initials: [] as string[],
+  finals: ['a', 'o', 'e'] as string[],
   questionCount: 24,
   answerMode: 'hide-keyword' as const,
   highlightEnabled: true,
@@ -42,7 +62,7 @@ export const DEFAULT_PINYIN_CONFIG = {
   margin: { ...DEFAULT_MARGIN },
   lineColor: '#cbd5e1',
   answerColor: '#ef4444',
-  fontFamily: 'serif',
+  fontFamily: 'tianyingzhang',
   fontWeight: 'normal',
   fontSize: 68,
   fontColor: '#000000',

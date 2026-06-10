@@ -1,13 +1,7 @@
 export interface Question {
   words: string
   pinyin: string[]
-  chapter: number
   highlight?: boolean[]
-}
-
-export interface Chapter {
-  id: number
-  title: string
 }
 
 export interface Margin {

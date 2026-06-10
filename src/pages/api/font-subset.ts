@@ -1,6 +1,6 @@
 import type { APIRoute } from 'astro'
-import { ALLOWED_FONT_IDS } from '@copybook/config'
-import { getFontSubsetBase64 } from '@copybook/server/font-subset-service'
+import { ALLOWED_FONT_IDS } from '@/config/font.config'
+import { getFontSubsetBase64 } from '@/services/font-subset-service'
 
 const MAX_TEXT_LENGTH = 2000
 

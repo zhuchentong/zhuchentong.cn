@@ -1,20 +1,23 @@
 import type { Margin } from '../interfaces'
 import { useStore } from '@nanostores/react'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import FontPickerDialog from '@/components/FontPickerDialog'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Field, FieldContent, FieldGroup, FieldLabel, FieldSeparator, FieldSet } from '@/components/ui/field'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Slider } from '@/components/ui/slider'
 import { Switch } from '@/components/ui/switch'
-import { generateQuiz } from '../composables/useQuizGenerator'
-import { CHAPTERS, COLOR_PALETTE, DEFAULT_MARGIN, DEFAULT_PINYIN_CONFIG } from '../config'
+import { FONT_FAMILIES } from '@/config/font.config'
+import { countMatches, generateQuiz } from '../composables/useQuizGenerator'
+import { COLOR_PALETTE, DEFAULT_MARGIN, DEFAULT_PINYIN_CONFIG, FINAL_GROUPS, INITIAL_GROUPS } from '../config'
 import {
   pinyinAnswerColor,
   pinyinAnswerMode,
-  pinyinChapter,
   pinyinFontColor,
+  pinyinFontFamily,
   pinyinFontSize,
+  pinyinFontWeight,
   pinyinGridSize,
   pinyinHighlightColor,
   pinyinHighlightEnabled,
@@ -24,6 +27,8 @@ import {
   pinyinQuestionGap,
   pinyinQuestions,
   pinyinSeed,
+  pinyinSelectedFinals,
+  pinyinSelectedInitials,
 } from '../store'
 import ExportButton from './ExportButton'
 
@@ -117,8 +122,161 @@ function MarginDialog({ open, onOpenChange, margin, onChange }: {
   )
 }
 
+function PinyinSelector({ selectedInitials, selectedFinals, onInitialsChange, onFinalsChange }: {
+  selectedInitials: string[]
+  selectedFinals: string[]
+  onInitialsChange: (initials: string[]) => void
+  onFinalsChange: (finals: string[]) => void
+}) {
+  const [open, setOpen] = useState(false)
+  const [localInitials, setLocalInitials] = useState(selectedInitials)
+  const [localFinals, setLocalFinals] = useState(selectedFinals)
+
+  function handleOpenChange(nextOpen: boolean) {
+    setOpen(nextOpen)
+    if (nextOpen) {
+      setLocalInitials([...selectedInitials])
+      setLocalFinals([...selectedFinals])
+    }
+  }
+
+  const resolvedCount = useMemo(() =>
+    countMatches(localInitials, localFinals), [localInitials, localFinals])
+
+  function toggleItem(list: string[], item: string): string[] {
+    return list.includes(item) ? list.filter(x => x !== item) : [...list, item]
+  }
+
+  function toggleGroup(list: string[], items: string[]): string[] {
+    const allSelected = items.every(i => list.includes(i))
+    return allSelected ? list.filter(x => !items.includes(x)) : [...new Set([...list, ...items])]
+  }
+
+  return (
+    <>
+      <button className="flex h-9 w-full items-center justify-between hover:bg-accent" onClick={() => handleOpenChange(true)}>
+        <FieldLabel className="text-slate-700 dark:text-slate-200">已选拼音</FieldLabel>
+        <span className="text-xs text-muted-foreground">
+          {selectedInitials.length}
+          声
+          {selectedFinals.length}
+          韵 →
+          {countMatches(selectedInitials, selectedFinals)}
+          音节
+        </span>
+      </button>
+      <Dialog open={open} onOpenChange={handleOpenChange}>
+        <DialogContent className="sm:max-w-[480px] max-h-[80vh]">
+          <DialogHeader>
+            <DialogTitle>选择拼音</DialogTitle>
+            <DialogDescription className="sr-only">选择要练习的声母和韵母</DialogDescription>
+          </DialogHeader>
+          <div className="overflow-y-auto max-h-[60vh] space-y-4">
+            <div className="text-xs font-medium text-muted-foreground">韵母</div>
+            {FINAL_GROUPS.map(group => (
+              <div key={group.id}>
+                <div className="flex items-center justify-between text-xs text-muted-foreground mb-1.5">
+                  <span className="font-medium">{group.title}</span>
+                  <button
+                    className="text-primary hover:underline"
+                    onClick={() => setLocalFinals(toggleGroup(localFinals, group.finals))}
+                  >
+                    {group.finals.every(f => localFinals.includes(f)) ? '取消全选' : '全选'}
+                  </button>
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {group.finals.map(final => (
+                    <button
+                      key={final}
+                      className={[
+                        'px-3 py-1.5 text-sm rounded-md border transition-colors',
+                        localFinals.includes(final)
+                          ? 'bg-primary text-primary-foreground border-primary'
+                          : 'bg-background text-foreground border-border hover:bg-accent',
+                      ].join(' ')}
+                      onClick={() => setLocalFinals(toggleItem(localFinals, final))}
+                    >
+                      {final}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ))}
+
+            <div className="h-px bg-border my-2" />
+
+            <div className="text-xs font-medium text-muted-foreground">声母</div>
+            {INITIAL_GROUPS.map(group => (
+              <div key={group.id}>
+                <div className="flex items-center justify-between text-xs text-muted-foreground mb-1.5">
+                  <span className="font-medium">{group.title}</span>
+                  <button
+                    className="text-primary hover:underline"
+                    onClick={() => setLocalInitials(toggleGroup(localInitials, group.initials))}
+                  >
+                    {group.initials.every(i => localInitials.includes(i)) ? '取消全选' : '全选'}
+                  </button>
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {group.initials.map(initial => (
+                    <button
+                      key={initial}
+                      className={[
+                        'px-3 py-1.5 text-sm rounded-md border transition-colors',
+                        localInitials.includes(initial)
+                          ? 'bg-primary text-primary-foreground border-primary'
+                          : 'bg-background text-foreground border-border hover:bg-accent',
+                      ].join(' ')}
+                      onClick={() => setLocalInitials(toggleItem(localInitials, initial))}
+                    >
+                      {initial}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+          <DialogFooter>
+            <span className="text-xs text-muted-foreground flex-1">
+              已选
+              {localInitials.length}
+              个声母、
+              {localFinals.length}
+              个韵母，共
+              {resolvedCount}
+              个音节
+            </span>
+            <Button
+              variant="outline"
+              onClick={() => {
+                const allInitials = INITIAL_GROUPS.flatMap(g => g.initials)
+                const allFinals = FINAL_GROUPS.flatMap(g => g.finals)
+                const shuffledI = [...allInitials].sort(() => Math.random() - 0.5)
+                const shuffledF = [...allFinals].sort(() => Math.random() - 0.5)
+                setLocalInitials(shuffledI.slice(0, 3))
+                setLocalFinals(shuffledF.slice(0, 3))
+              }}
+            >
+              随机
+            </Button>
+            <Button onClick={() => {
+              onInitialsChange(localInitials)
+              onFinalsChange(localFinals)
+              setOpen(false)
+            }}
+            >
+              确定
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
+  )
+}
+
 export default function ControlPanel() {
-  const chapter = useStore(pinyinChapter)
+  const selectedInitials = useStore(pinyinSelectedInitials)
+  const selectedFinals = useStore(pinyinSelectedFinals)
   const questionCount = useStore(pinyinQuestionCount)
   const answerMode = useStore(pinyinAnswerMode)
   const highlightEnabled = useStore(pinyinHighlightEnabled)
@@ -129,8 +287,11 @@ export default function ControlPanel() {
   const answerColor = useStore(pinyinAnswerColor)
   const fontSize = useStore(pinyinFontSize)
   const fontColor = useStore(pinyinFontColor)
+  const fontFamily = useStore(pinyinFontFamily)
+  const fontWeight = useStore(pinyinFontWeight)
   const highlightColor = useStore(pinyinHighlightColor)
 
+  const [showFontDialog, setShowFontDialog] = useState(false)
   const [showMarginDialog, setShowMarginDialog] = useState(false)
   const [showLineColorPicker, setShowLineColorPicker] = useState(false)
   const [showAnswerColorPicker, setShowAnswerColorPicker] = useState(false)
@@ -140,17 +301,18 @@ export default function ControlPanel() {
   useEffect(() => {
     const seed = pinyinSeed.get()
     pinyinSeed.set(seed)
-    pinyinQuestions.set(generateQuiz(chapter, seed, questionCount))
-  }, [chapter, questionCount])
+    pinyinQuestions.set(generateQuiz(selectedInitials, selectedFinals, seed, questionCount))
+  }, [selectedInitials, selectedFinals, questionCount])
 
   function regenerate() {
     const newSeed = Date.now()
     pinyinSeed.set(newSeed)
-    pinyinQuestions.set(generateQuiz(chapter, newSeed, questionCount))
+    pinyinQuestions.set(generateQuiz(selectedInitials, selectedFinals, newSeed, questionCount))
   }
 
   function resetAll() {
-    pinyinChapter.set(DEFAULT_PINYIN_CONFIG.chapter)
+    pinyinSelectedInitials.set([...DEFAULT_PINYIN_CONFIG.initials])
+    pinyinSelectedFinals.set([...DEFAULT_PINYIN_CONFIG.finals])
     pinyinQuestionCount.set(DEFAULT_PINYIN_CONFIG.questionCount)
     pinyinAnswerMode.set(DEFAULT_PINYIN_CONFIG.answerMode)
     pinyinHighlightEnabled.set(DEFAULT_PINYIN_CONFIG.highlightEnabled)
@@ -162,9 +324,11 @@ export default function ControlPanel() {
     pinyinAnswerColor.set(DEFAULT_PINYIN_CONFIG.answerColor)
     pinyinFontSize.set(DEFAULT_PINYIN_CONFIG.fontSize)
     pinyinFontColor.set(DEFAULT_PINYIN_CONFIG.fontColor)
+    pinyinFontFamily.set(DEFAULT_PINYIN_CONFIG.fontFamily)
+    pinyinFontWeight.set(DEFAULT_PINYIN_CONFIG.fontWeight)
     const newSeed = Date.now()
     pinyinSeed.set(newSeed)
-    pinyinQuestions.set(generateQuiz(DEFAULT_PINYIN_CONFIG.chapter, newSeed, DEFAULT_PINYIN_CONFIG.questionCount))
+    pinyinQuestions.set(generateQuiz(DEFAULT_PINYIN_CONFIG.initials, DEFAULT_PINYIN_CONFIG.finals, newSeed, DEFAULT_PINYIN_CONFIG.questionCount))
   }
 
   return (
@@ -178,23 +342,12 @@ export default function ControlPanel() {
 
       <FieldSet className={groupCls}>
         <FieldGroup className="gap-0">
-          <Field orientation="horizontal" className="h-9 !items-center gap-6">
-            <FieldLabel className="!flex-none w-14 shrink-0 text-slate-700 dark:text-slate-200">练习章节</FieldLabel>
-            <FieldContent className="flex-1">
-              <Select value={String(chapter)} onValueChange={v => pinyinChapter.set(Number(v))}>
-                <SelectTrigger className="w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {CHAPTERS.map(ch => (
-                    <SelectItem key={ch.id} value={String(ch.id)}>
-                      {ch.title}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </FieldContent>
-          </Field>
+          <PinyinSelector
+            selectedInitials={selectedInitials}
+            selectedFinals={selectedFinals}
+            onInitialsChange={v => pinyinSelectedInitials.set(v)}
+            onFinalsChange={v => pinyinSelectedFinals.set(v)}
+          />
           <FieldSeparator className={sepCls} />
           <Field orientation="horizontal" className="h-9 !items-center gap-6">
             <FieldLabel className="!flex-none w-14 shrink-0 text-slate-700 dark:text-slate-200">题目数量</FieldLabel>
@@ -306,6 +459,22 @@ export default function ControlPanel() {
 
       <FieldSet className={groupCls}>
         <FieldGroup className="gap-0">
+          <button className="flex h-9 w-full items-center justify-between hover:bg-accent" onClick={() => setShowFontDialog(true)}>
+            <FieldLabel className="text-slate-700 dark:text-slate-200">字体</FieldLabel>
+            <span className="text-muted-foreground">
+              {FONT_FAMILIES.find(f => f.id === fontFamily)?.label ?? fontFamily}
+            </span>
+          </button>
+          <FieldSeparator className={sepCls} />
+          <Field orientation="horizontal" className="h-9 items-center justify-between gap-6">
+            <FieldLabel className="text-slate-700 dark:text-slate-200">字体加粗</FieldLabel>
+            <Switch checked={fontWeight === 'bold'} onCheckedChange={v => pinyinFontWeight.set(v ? 'bold' : 'normal')} />
+          </Field>
+        </FieldGroup>
+      </FieldSet>
+
+      <FieldSet className={groupCls}>
+        <FieldGroup className="gap-0">
           <Field orientation="horizontal" className="h-9 !items-center gap-6">
             <FieldLabel className="!flex-none w-14 shrink-0 text-slate-700 dark:text-slate-200">字号大小</FieldLabel>
             <FieldContent className="!flex-row items-center gap-2">
@@ -357,6 +526,12 @@ export default function ControlPanel() {
         onOpenChange={setShowHighlightColorPicker}
         color={highlightColor}
         onSelect={v => pinyinHighlightColor.set(v)}
+      />
+      <FontPickerDialog
+        open={showFontDialog}
+        onOpenChange={setShowFontDialog}
+        value={fontFamily}
+        onSelect={v => pinyinFontFamily.set(v)}
       />
     </div>
   )

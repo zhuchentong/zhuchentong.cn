@@ -16,7 +16,7 @@ export default function PanelDrawer() {
 
       <aside
         className={`fixed md:relative z-40 md:z-auto inset-y-0 left-0 w-[300px] p-4 border-r border-gray-200 overflow-y-auto bg-background transition-transform duration-200 ease-in-out ${open ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
-          }`}
+        }`}
       >
         <button
           className="md:hidden absolute top-3 right-3 text-gray-400 hover:text-gray-600"

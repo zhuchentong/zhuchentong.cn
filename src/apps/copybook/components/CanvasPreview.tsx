@@ -26,6 +26,7 @@ import { Leafer } from 'leafer-draw'
 import { Minus, Plus, RotateCcw } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
+import { Spinner } from '@/components/ui/spinner'
 import '@leafer-in/export'
 
 const A4_CSS_WIDTH = 794
@@ -36,14 +37,20 @@ const ZOOM_MIN = 25
 const ZOOM_MAX = 200
 const ZOOM_DEFAULT = 100
 const SCROLL_PADDING = 48
+const MOBILE_BREAKPOINT = 768
+const ZOOM_MOBILE = 50
+
+function isMobile() {
+  return window.innerWidth < MOBILE_BREAKPOINT
+}
 
 export default function CanvasPreview() {
   const containerRefsRef = useRef<Map<number, HTMLDivElement>>(new Map())
   const leaferRefsRef = useRef<Map<number, Leafer>>(new Map())
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const userZoomRef = useRef(false)
-  const { resolvedFontName } = useFontLoader()
-  const [zoom, setZoom] = useState(ZOOM_DEFAULT)
+  const { resolvedFontName, fontLoaded } = useFontLoader()
+  const [zoom, setZoom] = useState(() => isMobile() ? ZOOM_MOBILE : ZOOM_DEFAULT)
 
   const text = useStore(copybookText)
   const gridType = useStore(copybookGridType)
@@ -144,12 +151,6 @@ export default function CanvasPreview() {
   }, [renderAllPages])
 
   useEffect(() => {
-    const handleFontLoaded = () => renderAllPages()
-    document.fonts.addEventListener('loadingdone', handleFontLoaded)
-    return () => document.fonts.removeEventListener('loadingdone', handleFontLoaded)
-  }, [renderAllPages])
-
-  useEffect(() => {
     const container = scrollContainerRef.current
     if (!container)
       return
@@ -163,7 +164,7 @@ export default function CanvasPreview() {
         setZoom(Math.max(ZOOM_MIN, autoZoom))
       }
       else {
-        setZoom(ZOOM_DEFAULT)
+        setZoom(isMobile() ? ZOOM_MOBILE : ZOOM_DEFAULT)
       }
     })
     observer.observe(container)
@@ -217,6 +218,15 @@ export default function CanvasPreview() {
       return { charIndex: pc.index, char: pc.char, pinyins: pc.pinyins, left: leftPx, top: pinyinYmm * pxPerMM, height: heightPx }
     }).filter((x): x is NonNullable<typeof x> => x != null)
   }, [showPinyin, polyChars, margin, gridSize, rowGap, insertEmptyRow])
+
+  if (!text.trim() || !fontLoaded) {
+    return (
+      <div className="flex flex-1 items-center justify-center text-gray-400 gap-2">
+        <Spinner className="size-5" />
+        {!text.trim() ? '请输入文字...' : '字体加载中...'}
+      </div>
+    )
+  }
 
   return (
     <div ref={scrollContainerRef} className="relative p-6 print:p-0 bg-gray-100 flex flex-1 justify-center overflow-auto">
@@ -301,7 +311,7 @@ export default function CanvasPreview() {
           className="h-8 w-8"
           onClick={() => {
             userZoomRef.current = false
-            setZoom(ZOOM_DEFAULT)
+            setZoom(isMobile() ? ZOOM_MOBILE : ZOOM_DEFAULT)
           }}
         >
           <RotateCcw className="h-3.5 w-3.5" />

@@ -1,5 +1,26 @@
 import type { Question } from '../interfaces'
-import allQuestions from '../assets/data/pinyin-questions.json'
+import pinyinDict from '../assets/data/pinyin-dict.json'
+
+interface Syllable {
+  pinyin: string
+  initial: string | null
+  final: string
+}
+
+type WordDict = Record<string, Syllable[]>
+const dict = pinyinDict as WordDict
+
+const indexByInitial: Record<string, Set<string>> = {}
+const indexByFinal: Record<string, Set<string>> = {}
+
+for (const [word, syllables] of Object.entries(dict)) {
+  for (const s of syllables) {
+    if (s.initial) {
+      ;(indexByInitial[s.initial] ??= new Set()).add(word)
+    }
+    ;(indexByFinal[s.final] ??= new Set()).add(word)
+  }
+}
 
 function seededRandom(seed: number): () => number {
   let s = seed
@@ -18,8 +39,39 @@ function shuffle<T>(arr: T[], rng: () => number): T[] {
   return result
 }
 
-export function generateQuiz(chapter: number, seed: number, count: number): Question[] {
-  const pool = (allQuestions as Question[]).filter(q => q.chapter === chapter)
+export function countMatches(initials: string[], finals: string[]): number {
+  const matchWords = new Set<string>()
+  for (const i of initials) {
+    indexByInitial[i]?.forEach(w => matchWords.add(w))
+  }
+  for (const f of finals) {
+    indexByFinal[f]?.forEach(w => matchWords.add(w))
+  }
+  return matchWords.size
+}
+
+export function generateQuiz(initials: string[], finals: string[], seed: number, count: number): Question[] {
+  const matchWords = new Set<string>()
+  for (const i of initials) {
+    indexByInitial[i]?.forEach(w => matchWords.add(w))
+  }
+  for (const f of finals) {
+    indexByFinal[f]?.forEach(w => matchWords.add(w))
+  }
+
+  const pool: Question[] = []
+  for (const word of matchWords) {
+    const syllables = dict[word]
+    pool.push({
+      words: word,
+      pinyin: syllables.map(s => s.pinyin),
+      highlight: syllables.map(s =>
+        (s.initial !== null && initials.includes(s.initial))
+        || finals.includes(s.final),
+      ),
+    })
+  }
+
   const rng = seededRandom(seed)
   return shuffle(pool, rng).slice(0, count)
 }

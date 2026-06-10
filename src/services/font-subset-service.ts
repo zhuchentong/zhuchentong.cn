@@ -2,12 +2,12 @@ import type { Buffer } from 'node:buffer'
 import fs from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
-import { FONT_MAP } from '@copybook/config'
 import Fontmin from 'fontmin'
+import { FONT_MAP } from '@/config/font.config'
 
 const SOURCE_DIR = process.env.NODE_ENV === 'production'
   ? path.resolve(process.cwd(), 'dist/fonts')
-  : path.resolve(process.cwd(), 'src/apps/copybook/assets/fonts')
+  : path.resolve(process.cwd(), 'src/assets/fonts')
 
 const BASE_CHARS = (() => {
   let chars = ''

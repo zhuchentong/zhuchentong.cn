@@ -1,5 +1,5 @@
 import type { GridType } from '@copybook/interfaces'
-import { DEFAULT_CONFIG, FONT_WEIGHTS, FONTS, GRID_TYPES } from '@copybook/config'
+import { DEFAULT_CONFIG, FONTS, GRID_TYPES } from '@copybook/config'
 import { A4_WIDTH_MM } from '@copybook/constants'
 import {
   copybookFontFamily,
@@ -186,20 +186,9 @@ export default function ControlPanel() {
             <span className="text-muted-foreground">{FONTS.find(f => f.id === fontFamily)?.label ?? '选择...'}</span>
           </button>
           <FieldSeparator className={sepCls} />
-          <Field orientation="horizontal" className="h-9 !items-center gap-6">
-            <FieldLabel className="!flex-none w-14 shrink-0 text-slate-700 dark:text-slate-200">字体粗细</FieldLabel>
-            <FieldContent className="flex-1">
-              <Select value={fontWeight} onValueChange={v => copybookFontWeight.set(v)}>
-                <SelectTrigger className="w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {FONT_WEIGHTS.map(fw => (
-                    <SelectItem key={fw.value} value={fw.value}>{fw.label}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </FieldContent>
+          <Field orientation="horizontal" className="h-9 items-center justify-between gap-6">
+            <FieldLabel className="text-slate-700 dark:text-slate-200">字体加粗</FieldLabel>
+            <Switch checked={fontWeight === 'bold'} onCheckedChange={v => copybookFontWeight.set(v ? 'bold' : 'normal')} />
           </Field>
           <FieldSeparator className={sepCls} />
           <Field orientation="horizontal" className="h-9 !items-center gap-6">

@@ -1,46 +1,13 @@
 import type { GridType } from '@copybook/interfaces'
 
-/**
- * 字体配置
- *
- * 定义字帖功能可用的字体列表。
- * sourceFile 对应 src/apps/copybook/assets/fonts/ 下的 TTF 文件名。
- * fallback 为字体加载失败时的降级方案。
- */
-export interface FontConfig {
-  id: string
-  label: string
-  sourceFile: string
-  fallback: string
-}
-
-/** 可用字体列表，构建时由 copy-fonts.mjs 复制到 dist/fonts/ */
-export const FONTS: FontConfig[] = [
-  {
-    id: 'mashanzheng',
-    label: '马善政毛笔楷书',
-    sourceFile: 'MaShanZhengMaoBiKaiShu.ttf',
-    fallback: 'KaiTi, STKaiti, serif',
-  },
-  {
-    id: 'tianyingzhang',
-    label: '田英章楷书',
-    sourceFile: 'TianYingZhangKaiShu.ttf',
-    fallback: 'KaiTi, STKaiti, serif',
-  },
-  {
-    id: 'pangzhonghua',
-    label: '庞中华楷书',
-    sourceFile: 'PangZhongHuaKaiShu.ttf',
-    fallback: 'KaiTi, STKaiti, serif',
-  },
-]
-
-/** 字体 ID → 字体配置的映射表，用于服务端字体子集化 */
-export const FONT_MAP = new Map(FONTS.map(f => [f.id, f]))
-
-/** API 端点允许的字体 ID 集合，用于请求校验 */
-export const ALLOWED_FONT_IDS = new Set(FONTS.map(f => f.id))
+export {
+  ALLOWED_FONT_IDS,
+  FONT_FAMILIES,
+  FONT_MAP,
+  FONT_WEIGHTS,
+  type FontConfig,
+  FONTS,
+} from '@/config/font.config'
 
 // ─── 练字内容 ───────────────────────────────────────
 
@@ -61,20 +28,6 @@ export const GRID_TYPES: { label: string, value: GridType }[] = [
 ]
 
 // ─── 字体选项 ───────────────────────────────────────
-
-/** 字体选择器用到的简化列表（不含 sourceFile） */
-export const FONT_FAMILIES = FONTS.map(f => ({
-  label: f.label,
-  id: f.id,
-  fallback: f.fallback,
-}))
-
-/** 可选字体粗细 */
-export const FONT_WEIGHTS = [
-  { label: '常规', value: 'normal' },
-  { label: '中等', value: '500' },
-  { label: '粗体', value: 'bold' },
-]
 
 // ─── 颜色 ───────────────────────────────────────────
 
