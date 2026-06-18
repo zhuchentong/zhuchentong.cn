@@ -1,6 +1,4 @@
 FROM node:24-alpine AS base
-ENV HOST=0.0.0.0
-ENV PORT=4000
 WORKDIR /app
 COPY . .
 RUN corepack enable \
@@ -19,6 +17,8 @@ WORKDIR /app
 COPY --from=prod-deps /app/node_modules /app/node_modules
 COPY --from=build /app/dist /app/dist
 ENV NODE_ENV=production
+ENV HOST=0.0.0.0
+ENV PORT=4000
 EXPOSE 4000
 CMD ["node", "./dist/server/entry.mjs"]
 
