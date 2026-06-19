@@ -299,7 +299,7 @@ async function main() {
   console.log(`目标服务：${BASE}`)
   console.log(`待导入：${items.length} 个单词的例句\n`)
 
-  const res = await fetch(`${BASE}/wordbook/api/sentences-batch`, {
+  const res = await fetch(`${BASE}/wordbook/api/batch/sentences`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ items }),

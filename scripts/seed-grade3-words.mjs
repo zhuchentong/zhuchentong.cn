@@ -192,7 +192,7 @@ async function createTextbook() {
 }
 
 async function batchAdd(textbookId) {
-  const res = await fetch(`${BASE}/wordbook/api/words-batch`, {
+  const res = await fetch(`${BASE}/wordbook/api/batch/words`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ textbookId, words: wordItems }),
