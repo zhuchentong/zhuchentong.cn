@@ -2,7 +2,9 @@ import { drizzle } from 'drizzle-orm/postgres-js'
 import postgres from 'postgres'
 import * as schema from './schema'
 
-const connectionString = `postgres://${process.env.DATABASE_USER}:${process.env.DATABASE_PASSWORD}@${process.env.DATABASE_HOST}:${process.env.DATABASE_PORT}/${process.env.DATABASE_DB}`
+const getEnv = (key: string) => process.env[key] ?? import.meta.env[key]
+
+const connectionString = `postgres://${getEnv('DATABASE_USER')}:${getEnv('DATABASE_PASSWORD')}@${getEnv('DATABASE_HOST')}:${getEnv('DATABASE_PORT')}/${getEnv('DATABASE_DB')}`
 
 const client = postgres(connectionString)
 
