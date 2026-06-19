@@ -31,4 +31,8 @@ export const NavBarLinks = [
     text: '练习册',
     link: '/workbook/pinyin',
   },
+  {
+    text: '单词',
+    link: '/wordbook',
+  },
 ] as NavBarItem[]

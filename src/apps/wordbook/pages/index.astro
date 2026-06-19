@@ -5,11 +5,19 @@ import WordbookLayout from '@wordbook/layout.astro'
 <WordbookLayout title="单词本">
   <div class="flex h-full flex-col items-center justify-center gap-4 bg-gray-100">
     <p class="text-lg text-gray-600">单词本</p>
-    <a
-      href="/wordbook/admin"
-      class="rounded-lg bg-primary px-4 py-2 text-sm text-primary-foreground hover:bg-primary/90"
-    >
-      进入单词管理
-    </a>
+    <div class="flex gap-4">
+      <a
+        href="/wordbook/admin"
+        class="rounded-lg bg-gray-800 px-4 py-2 text-sm text-white hover:bg-gray-700"
+      >
+        进入单词管理
+      </a>
+      <a
+        href="/wordbook/learner"
+        class="rounded-lg bg-gray-800 px-4 py-2 text-sm text-white hover:bg-gray-700"
+      >
+        单词学习
+      </a>
+    </div>
   </div>
 </WordbookLayout>

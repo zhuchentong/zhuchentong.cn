@@ -17,6 +17,7 @@ export default defineConfig({
       '/workbook/pinyin': './src/apps/workbook/pages/pinyin.astro',
       '/wordbook': './src/apps/wordbook/pages/index.astro',
       '/wordbook/admin': './src/apps/wordbook/pages/admin.astro',
+      '/wordbook/learner': './src/apps/wordbook/pages/learner.astro',
       '/wordbook/api/textbooks': './src/apps/wordbook/pages/api/textbooks.ts',
       '/wordbook/api/units': './src/apps/wordbook/pages/api/units.ts',
       '/wordbook/api/words': './src/apps/wordbook/pages/api/words.ts',
