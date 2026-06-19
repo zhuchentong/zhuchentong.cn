@@ -1,5 +1,5 @@
 FROM node:24-alpine AS base
-RUN apk add --no-cache python3 make g++
+RUN apk add --no-cache python3 py3-setuptools make g++
 WORKDIR /app
 RUN corepack enable
 COPY package.json pnpm-lock.yaml .npmrc ./
