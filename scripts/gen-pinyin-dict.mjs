@@ -13,12 +13,31 @@ const CHAR_MAX = 0x9FFF
 
 function getBase(p) {
   const map = {
-    'ā': 'a', 'á': 'a', 'ǎ': 'a', 'à': 'a',
-    'ē': 'e', 'é': 'e', 'ě': 'e', 'è': 'e',
-    'ī': 'i', 'í': 'i', 'ǐ': 'i', 'ì': 'i',
-    'ō': 'o', 'ó': 'o', 'ǒ': 'o', 'ò': 'o',
-    'ū': 'u', 'ú': 'u', 'ǔ': 'u', 'ù': 'u',
-    'ǖ': 'v', 'ǘ': 'v', 'ǚ': 'v', 'ǜ': 'v', 'ü': 'v',
+    ā: 'a',
+    á: 'a',
+    ǎ: 'a',
+    à: 'a',
+    ē: 'e',
+    é: 'e',
+    ě: 'e',
+    è: 'e',
+    ī: 'i',
+    í: 'i',
+    ǐ: 'i',
+    ì: 'i',
+    ō: 'o',
+    ó: 'o',
+    ǒ: 'o',
+    ò: 'o',
+    ū: 'u',
+    ú: 'u',
+    ǔ: 'u',
+    ù: 'u',
+    ǖ: 'v',
+    ǘ: 'v',
+    ǚ: 'v',
+    ǜ: 'v',
+    ü: 'v',
   }
   let r = p
   for (const [k, v] of Object.entries(map)) r = r.replaceAll(k, v)
@@ -91,7 +110,7 @@ function generateForPinyin(basePinyin) {
         continue
 
       const bases = pyList.map(getBase)
-      const hasMatch = bases.some(b => b === basePinyin)
+      const hasMatch = bases.includes(basePinyin)
       if (!hasMatch)
         continue
 
@@ -127,7 +146,7 @@ function validateEntry(entry, basePinyin) {
   }
 
   const bases = pyList.map(getBase)
-  const hasMatch = bases.some(b => b === basePinyin)
+  const hasMatch = bases.includes(basePinyin)
   if (!hasMatch) {
     errors.push(`${words}: no character has base pinyin "${basePinyin}", got [${bases.join(',')}]`)
   }

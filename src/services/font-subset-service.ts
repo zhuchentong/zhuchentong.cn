@@ -5,7 +5,7 @@ import process from 'node:process'
 import Fontmin from 'fontmin'
 import { FONT_MAP } from '@/config/font.config'
 
-const SOURCE_DIR = process.env.NODE_ENV === 'production'
+const SOURCE_DIR = import.meta.env.MODE === 'production'
   ? path.resolve(process.cwd(), 'dist/fonts')
   : path.resolve(process.cwd(), 'src/assets/fonts')
 

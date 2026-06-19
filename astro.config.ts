@@ -15,6 +15,14 @@ export default defineConfig({
     customRouting({
       '/copybook/hanzi': './src/apps/copybook/pages/hanzi.astro',
       '/workbook/pinyin': './src/apps/workbook/pages/pinyin.astro',
+      '/wordbook': './src/apps/wordbook/pages/index.astro',
+      '/wordbook/admin': './src/apps/wordbook/pages/admin.astro',
+      '/wordbook/api/textbooks': './src/apps/wordbook/pages/api/textbooks.ts',
+      '/wordbook/api/units': './src/apps/wordbook/pages/api/units.ts',
+      '/wordbook/api/words': './src/apps/wordbook/pages/api/words.ts',
+      '/wordbook/api/words-batch': './src/apps/wordbook/pages/api/words-batch.ts',
+      '/wordbook/api/sentences-batch': './src/apps/wordbook/pages/api/sentences-batch.ts',
+      '/wordbook/api/words-search': './src/apps/wordbook/pages/api/words-search.ts',
     }),
   ],
   vite: {

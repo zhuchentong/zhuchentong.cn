@@ -1,6 +1,6 @@
-import { useFontLoader as useSharedFontLoader } from '@/hooks/useFontLoader'
 import { useStore } from '@nanostores/react'
 import { useEffect, useMemo } from 'react'
+import { useFontLoader as useSharedFontLoader } from '@/hooks/useFontLoader'
 import { pinyinFontFamily, pinyinQuestions, pinyinResolvedFont } from '../store'
 
 export function useFontLoader() {

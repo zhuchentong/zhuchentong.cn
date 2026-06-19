@@ -10,4 +10,8 @@ export default antfu({
     'docs/**/*',
     'src/components/ui/**/*',
   ],
+  rules: {
+    'no-alert': 'off',
+    'no-console': 'off',
+  },
 })

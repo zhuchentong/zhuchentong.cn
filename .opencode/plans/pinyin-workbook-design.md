@@ -19,10 +19,10 @@
 
 ```ts
 interface Question {
-  words: string              // 词组，如 "阿姨"
-  pinyin: string[]           // 每个字的拼音，如 ["ā", "yí"]
-  chapter: number            // 所属章节 1-12
-  knowledgePoints: string[]  // 涉及的知识点，如 ["a", "yi", "四声"]
+  words: string // 词组，如 "阿姨"
+  pinyin: string[] // 每个字的拼音，如 ["ā", "yí"]
+  chapter: number // 所属章节 1-12
+  knowledgePoints: string[] // 涉及的知识点，如 ["a", "yi", "四声"]
 }
 ```
 
@@ -31,8 +31,8 @@ interface Question {
 ```ts
 interface Chapter {
   id: number
-  title: string              // 如 "单韵母 + 四声 + y/w规则"
-  pinyinRange: string        // 已学拼音范围描述
+  title: string // 如 "单韵母 + 四声 + y/w规则"
+  pinyinRange: string // 已学拼音范围描述
 }
 ```
 
@@ -46,20 +46,20 @@ interface Chapter {
 
 ### 章节规划（12 章）
 
-| 章节 | 已学拼音范围 | 示例词组 |
-|------|-------------|---------|
-| 1 | 单韵母 + 四声 + y/w规则 | 阿姨、雨衣、乌鸦、鳄鱼 |
-| 2 | + b p m f | 爸爸、妈妈、泼水、发卡、木马 |
-| 3 | + d t n l | 大地、土地、那里、拉力、泥巴 |
-| 4 | + g k h | 哥哥、哭喊、荷花、老虎、苦瓜 |
-| 5 | + j q x + ü 去点 | 学习、请客、西瓜、句子、有趣 |
-| 6 | + zh ch sh r | 知道、吃饭、老师、日出、热水 |
-| 7 | + z c s | 写字、词语、思考、紫色、擦车 |
-| 8 | + ai ei ao ou | 买菜、妹妹、高兴、头发、口袋 |
-| 9 | + ia ie ua uo üe | 下雨、爷爷、西瓜、过河、月亮 |
-| 10 | + iao iou uai uei 及缩写 | 学校、六岁、快跑、回家、对错 |
-| 11 | + 前鼻韵母 an en in un ün | 看见、认真、关心、春天、云彩 |
-| 12 | + 后鼻韵母 ang eng ing ong | 上课、灯光、听写、红色、风筝 |
+| 章节 | 已学拼音范围               | 示例词组                     |
+| ---- | -------------------------- | ---------------------------- |
+| 1    | 单韵母 + 四声 + y/w规则    | 阿姨、雨衣、乌鸦、鳄鱼       |
+| 2    | + b p m f                  | 爸爸、妈妈、泼水、发卡、木马 |
+| 3    | + d t n l                  | 大地、土地、那里、拉力、泥巴 |
+| 4    | + g k h                    | 哥哥、哭喊、荷花、老虎、苦瓜 |
+| 5    | + j q x + ü 去点           | 学习、请客、西瓜、句子、有趣 |
+| 6    | + zh ch sh r               | 知道、吃饭、老师、日出、热水 |
+| 7    | + z c s                    | 写字、词语、思考、紫色、擦车 |
+| 8    | + ai ei ao ou              | 买菜、妹妹、高兴、头发、口袋 |
+| 9    | + ia ie ua uo üe           | 下雨、爷爷、西瓜、过河、月亮 |
+| 10   | + iao iou uai uei 及缩写   | 学校、六岁、快跑、回家、对错 |
+| 11   | + 前鼻韵母 an en in un ün  | 看见、认真、关心、春天、云彩 |
+| 12   | + 后鼻韵母 ang eng ing ong | 上课、灯光、听写、红色、风筝 |
 
 ## 文件结构
 
@@ -93,16 +93,16 @@ src/apps/workbook/
 
 使用 Nanostores，与 copybook 一致：
 
-| Atom | 类型 | 默认值 | 说明 |
-|------|------|--------|------|
-| `pinyinChapter` | `number` | `1` | 当前章节 (1-12) |
-| `pinyinShowAnswer` | `boolean` | `false` | 是否显示答案 |
-| `pinyinLineColor` | `string` | `"#cbd5e1"` | 线条颜色 |
-| `pinyinAnswerColor` | `string` | `"#ef4444"` | 答案颜色（红色） |
-| `pinyinGridSize` | `number` | `14` | 田字格大小 (mm) |
-| `pinyinMargin` | `Margin` | `{top:20,right:20,bottom:20,left:20}` | 页面边距 |
-| `pinyinQuestions` | `Question[]` | `[]` | 当前试题列表 |
-| `pinyinSeed` | `number` | `Date.now()` | 随机种子 |
+| Atom                | 类型         | 默认值                                | 说明             |
+| ------------------- | ------------ | ------------------------------------- | ---------------- |
+| `pinyinChapter`     | `number`     | `1`                                   | 当前章节 (1-12)  |
+| `pinyinShowAnswer`  | `boolean`    | `false`                               | 是否显示答案     |
+| `pinyinLineColor`   | `string`     | `"#cbd5e1"`                           | 线条颜色         |
+| `pinyinAnswerColor` | `string`     | `"#ef4444"`                           | 答案颜色（红色） |
+| `pinyinGridSize`    | `number`     | `14`                                  | 田字格大小 (mm)  |
+| `pinyinMargin`      | `Margin`     | `{top:20,right:20,bottom:20,left:20}` | 页面边距         |
+| `pinyinQuestions`   | `Question[]` | `[]`                                  | 当前试题列表     |
+| `pinyinSeed`        | `number`     | `Date.now()`                          | 随机种子         |
 
 ## 页面布局
 
@@ -224,15 +224,15 @@ function generateQuiz(chapter, allQuestions, seed): Question[] {
 
 ## 复用 copybook 的代码
 
-| 来源 | 复用内容 |
-|------|---------|
-| `copybook/constants.ts` | A4 尺寸、DPI、MM_PER_INCH |
-| `copybook/composables/useGridRenderer.ts` | `mmToPx`, `s`, `sPoints`, `createGridCell`, `createChar`, `createCross` |
-| `copybook/composables/useExport.ts` | PDF/PNG 导出框架 |
-| `copybook/components/ColorPickerDialog.tsx` | 颜色选择器 |
-| `copybook/components/MarginDialog.tsx` | 边距设置 |
-| `copybook/hooks/useFontLoader.ts` | 字体加载 |
-| `copybook/server/font-subset-service.ts` | 字体子集化 API |
+| 来源                                        | 复用内容                                                                |
+| ------------------------------------------- | ----------------------------------------------------------------------- |
+| `copybook/constants.ts`                     | A4 尺寸、DPI、MM_PER_INCH                                               |
+| `copybook/composables/useGridRenderer.ts`   | `mmToPx`, `s`, `sPoints`, `createGridCell`, `createChar`, `createCross` |
+| `copybook/composables/useExport.ts`         | PDF/PNG 导出框架                                                        |
+| `copybook/components/ColorPickerDialog.tsx` | 颜色选择器                                                              |
+| `copybook/components/MarginDialog.tsx`      | 边距设置                                                                |
+| `copybook/hooks/useFontLoader.ts`           | 字体加载                                                                |
+| `copybook/server/font-subset-service.ts`    | 字体子集化 API                                                          |
 
 ## 技术方案
 

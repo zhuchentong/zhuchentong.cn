@@ -2,11 +2,22 @@
   "extends": "astro/tsconfigs/strict",
   "compilerOptions": {
     "jsx": "preserve",
-    "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"],
-      "@copybook/*": ["./src/apps/copybook/*"],
-      "@workbook/*": ["./src/apps/workbook/*"]
+      "@/*": [
+        "./src/*"
+      ],
+      "@copybook/*": [
+        "./src/apps/copybook/*"
+      ],
+      "@workbook/*": [
+        "./src/apps/workbook/*"
+      ],
+      "@wordbook/*": [
+        "./src/apps/wordbook/*"
+      ],
+      "@database/*": [
+        "./src/database/*"
+      ]
     }
   }
 }

@@ -14,14 +14,14 @@
 
 从 `@copybook/composables/useGridRenderer` 导入：
 
-| 函数 | 用途 |
-|------|------|
-| `mmToPx(mm, dpi)` | mm 转 px |
-| `createPinyinRow(x, y, width, height, lineColor, scale)` | 四线三格（外框 Rect + 2 条内部虚线 = 4 线 3 格） |
-| `createPinyinText(pinyin, x, y, cellSize, pinyinHeight, scale, color?)` | 拼音格内文字 |
-| `getPinyinHeight(gridSize)` | 拼音格高度 = `gridSize * 0.5` |
-| `createGridCell(x, y, size, type, lineColor, scale)` | 田字格（type='tian'） |
-| `createChar(char, x, y, cellSize, fontSize%, offsetY, color, fontFamily, fontWeight, scale)` | 汉字文字 |
+| 函数                                                                                         | 用途                                             |
+| -------------------------------------------------------------------------------------------- | ------------------------------------------------ |
+| `mmToPx(mm, dpi)`                                                                            | mm 转 px                                         |
+| `createPinyinRow(x, y, width, height, lineColor, scale)`                                     | 四线三格（外框 Rect + 2 条内部虚线 = 4 线 3 格） |
+| `createPinyinText(pinyin, x, y, cellSize, pinyinHeight, scale, color?)`                      | 拼音格内文字                                     |
+| `getPinyinHeight(gridSize)`                                                                  | 拼音格高度 = `gridSize * 0.5`                    |
+| `createGridCell(x, y, size, type, lineColor, scale)`                                         | 田字格（type='tian'）                            |
+| `createChar(char, x, y, cellSize, fontSize%, offsetY, color, fontFamily, fontWeight, scale)` | 汉字文字                                         |
 
 ---
 
@@ -54,6 +54,7 @@ src/apps/workbook/
 ### Task 1: 类型定义 + 常量
 
 **Files:**
+
 - Create: `src/apps/workbook/interfaces.ts`
 - Create: `src/apps/workbook/constants.ts`
 
@@ -117,6 +118,7 @@ export const MM_PER_INCH = 25.4
 ### Task 2: 题库 JSON
 
 **Files:**
+
 - Create: `src/apps/workbook/assets/data/pinyin-questions.json`
 
 - [ ] **创建完整 12 章题库**
@@ -172,6 +174,7 @@ export const MM_PER_INCH = 25.4
 ### Task 3: 配置扩展 + 状态管理
 
 **Files:**
+
 - Modify: `src/apps/workbook/config.ts`
 - Create: `src/apps/workbook/store.ts`
 
@@ -228,8 +231,8 @@ export const DEFAULT_PINYIN_CONFIG = {
 
 ```ts
 import type { Margin, Question } from './interfaces'
-import { DEFAULT_PINYIN_CONFIG } from './config'
 import { atom } from 'nanostores'
+import { DEFAULT_PINYIN_CONFIG } from './config'
 
 export const pinyinChapter = atom<number>(DEFAULT_PINYIN_CONFIG.chapter)
 export const pinyinShowAnswer = atom<boolean>(DEFAULT_PINYIN_CONFIG.showAnswer)
@@ -246,6 +249,7 @@ export const pinyinQuestions = atom<Question[]>([])
 ### Task 4: 试题生成逻辑
 
 **Files:**
+
 - Create: `src/apps/workbook/composables/useQuizGenerator.ts`
 
 - [ ] **实现 `useQuizGenerator.ts`**
@@ -309,6 +313,7 @@ export function generateQuiz(chapter: number, seed: number): Question[] {
 ### Task 5: 核心渲染逻辑（复用 copybook）
 
 **Files:**
+
 - Create: `src/apps/workbook/composables/useRenderer.ts`
 
 **核心思路：** 导入 copybook 的 `createPinyinRow`（四线三格）、`createPinyinText`（拼音文字）、`createGridCell`（田字格）、`createChar`（汉字）来组合每道题。
@@ -316,7 +321,7 @@ export function generateQuiz(chapter: number, seed: number): Question[] {
 - [ ] **实现 `useRenderer.ts`**
 
 ```ts
-import type { Question, WorkbookRenderParams, WorkbookPageLayout } from '../interfaces'
+import type { Question, WorkbookPageLayout, WorkbookRenderParams } from '../interfaces'
 import {
   createChar,
   createGridCell,
@@ -327,7 +332,7 @@ import {
 } from '@copybook/composables/useGridRenderer'
 import { Line, Rect } from 'leafer-draw'
 
-export { mmToPx, getPinyinHeight }
+export { getPinyinHeight, mmToPx }
 
 export function calcWorkbookPageLayout(params: {
   questionCount: number
@@ -388,10 +393,15 @@ function createQuestionBlock(
     const cellX = x + i * gridSize
     elements.push(...createGridCell(cellX, gridY, gridSize, 'tian', lineColor, scale))
     elements.push(createChar(
-      chars[i], cellX, gridY, gridSize,
-      68, 0,        // fontSize%, offsetY — 与 copybook 默认值一致
+      chars[i],
+      cellX,
+      gridY,
+      gridSize,
+      68,
+      0, // fontSize%, offsetY — 与 copybook 默认值一致
       '#000000',
-      fontFamily, fontWeight,
+      fontFamily,
+      fontWeight,
       scale,
     ))
   }
@@ -424,7 +434,8 @@ export function createWorkbookElements(
 
   // 白色背景
   elements.push(new Rect({
-    x: 0, y: 0,
+    x: 0,
+    y: 0,
     width: paperWidth * scale,
     height: paperHeight * scale,
     fill: '#ffffff',
@@ -439,10 +450,12 @@ export function createWorkbookElements(
 
   for (let row = 0; row < maxRows; row++) {
     const qi = startQuestionIndex + row
-    if (qi >= questions.length) break
+    if (qi >= questions.length)
+      break
 
     const qy = marginTop + row * questionHeight
-    if (qy + questionHeight - questionGap > paperHeight - marginBottom) break
+    if (qy + questionHeight - questionGap > paperHeight - marginBottom)
+      break
 
     elements.push(...createQuestionBlock(
       questions[qi],
@@ -470,14 +483,15 @@ export function createWorkbookElements(
 ### Task 6: 导出逻辑
 
 **Files:**
+
 - Create: `src/apps/workbook/composables/useExport.ts`
 
 - [ ] **实现 `useExport.ts`**
 
 ```ts
 import type { WorkbookRenderParams } from '../interfaces'
-import { A4_HEIGHT_MM, A4_WIDTH_MM, EXPORT_DPI, MM_PER_INCH } from '../constants'
 import { Leafer } from 'leafer-draw'
+import { A4_HEIGHT_MM, A4_WIDTH_MM, EXPORT_DPI, MM_PER_INCH } from '../constants'
 import { calcWorkbookPageLayout, createWorkbookElements } from './useRenderer'
 import '@leafer-in/export'
 
@@ -523,7 +537,8 @@ export async function exportPDF(params: WorkbookRenderParams) {
   const pages = getRenderParamsList(params)
   const pdf = new jsPDF('p', 'mm', 'a4')
   for (let i = 0; i < pages.length; i++) {
-    if (i > 0) pdf.addPage()
+    if (i > 0)
+      pdf.addPage()
     const leafer = createExportLeafer(pages[i])
     const result = await leafer.export('png', { pixelRatio: 1 })
     pdf.addImage(result.data as string, 'PNG', 0, 0, A4_WIDTH_MM, A4_HEIGHT_MM)
@@ -538,11 +553,13 @@ export async function exportPDF(params: WorkbookRenderParams) {
 ### Task 7: 控制面板组件
 
 **Files:**
+
 - Create: `src/apps/workbook/components/ControlPanel.tsx`
 
 - [ ] **实现 ControlPanel.tsx**
 
 组件结构：
+
 - 顶部：重置 + 导出按钮（一行两列）
 - 重新出题按钮
 - FieldSet 1：章节选择（Select）、显示答案（Switch）
@@ -551,6 +568,7 @@ export async function exportPDF(params: WorkbookRenderParams) {
 - 内嵌 `ColorPickerDialog` 和 `MarginDialog`（props 受控模式，不依赖 copybook store）
 
 关键逻辑：
+
 - `useEffect` 监听 `chapter` 变化，自动调用 `generateQuiz` 更新 `pinyinQuestions`
 - 重新出题按钮更新 `pinyinSeed` 并重新生成
 - `MarginDialog` 接收 `margin` + `onChange` props（受控模式）
@@ -559,13 +577,14 @@ export async function exportPDF(params: WorkbookRenderParams) {
 从 `@workbook/store` 读取：`pinyinChapter`, `pinyinShowAnswer`, `pinyinGridSize`, `pinyinMargin`, `pinyinLineColor`, `pinyinAnswerColor`, `pinyinSeed`
 写入 `@workbook/store`：对应 set 方法
 
-UI 组件来自 `@/components/ui/`：Button, Select, Slider, Switch, Dialog, Field*
+UI 组件来自 `@/components/ui/`：Button, Select, Slider, Switch, Dialog, Field\*
 
 ---
 
 ### Task 8: 导出按钮组件
 
 **Files:**
+
 - Create: `src/apps/workbook/components/ExportButton.tsx`
 
 - [ ] **实现 ExportButton.tsx**
@@ -579,11 +598,13 @@ UI 组件来自 `@/components/ui/`：Button, Select, Slider, Switch, Dialog, Fie
 ### Task 9: Canvas 预览组件
 
 **Files:**
+
 - Create: `src/apps/workbook/components/CanvasPreview.tsx`
 
 - [ ] **实现 CanvasPreview.tsx**
 
 核心逻辑（参考 copybook CanvasPreview 简化版）：
+
 1. 从 store 读取所有状态
 2. `useMemo` 计算 `calcWorkbookPageLayout` 得到 `questionsPerPage` + `totalPages`
 3. `getRenderParams(page)` 组装 `WorkbookRenderParams`
@@ -598,6 +619,7 @@ UI 组件来自 `@/components/ui/`：Button, Select, Slider, Switch, Dialog, Fie
 ### Task 10: 页面与布局更新
 
 **Files:**
+
 - Modify: `src/apps/workbook/pages/pinyin.astro`
 - Modify: `src/apps/workbook/layout.astro`
 
@@ -609,6 +631,7 @@ import WorkbookLayout from '@workbook/layout.astro'
 import CanvasPreview from '@workbook/components/CanvasPreview.tsx'
 import ControlPanel from '@workbook/components/ControlPanel.tsx'
 ---
+
 <WorkbookLayout title="拼音练习">
   <div class="flex h-full overflow-hidden">
     <aside class="p-4 border-r border-gray-200 w-[300px] overflow-y-auto">
@@ -624,11 +647,25 @@ import ControlPanel from '@workbook/components/ControlPanel.tsx'
 ```html
 <style is:global>
   @media print {
-    @page { size: A4; margin: 0; }
-    nav, aside, [data-radix-popper-content-wrapper] { display: none !important; }
-    .flex-1 { overflow: visible !important; }
-    .bg-gray-100 { background: white !important; padding: 0 !important; }
-    .shadow-lg { box-shadow: none !important; }
+    @page {
+      size: A4;
+      margin: 0;
+    }
+    nav,
+    aside,
+    [data-radix-popper-content-wrapper] {
+      display: none !important;
+    }
+    .flex-1 {
+      overflow: visible !important;
+    }
+    .bg-gray-100 {
+      background: white !important;
+      padding: 0 !important;
+    }
+    .shadow-lg {
+      box-shadow: none !important;
+    }
   }
 </style>
 ```
