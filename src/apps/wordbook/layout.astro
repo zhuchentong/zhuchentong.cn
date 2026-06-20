@@ -27,10 +27,10 @@ const theme = store.app.theme
     <Theme />
   </head>
   <body class="flex flex-col h-screen overflow-hidden">
-    <nav class="h-[48px] flex items-center border-b border-gray-200 px-4 gap-6 bg-white shrink-0">
+    <nav class="h-[48px] flex items-center border-b border-border px-4 gap-6 bg-background shrink-0">
       {
         WORDBOOK_NAV_ITEMS.map((item) => (
-          <a href={item.href} class="text-sm text-gray-500 hover:text-gray-800">
+          <a href={item.href} class="text-sm text-muted-foreground hover:text-foreground">
             {item.label}
           </a>
         ))

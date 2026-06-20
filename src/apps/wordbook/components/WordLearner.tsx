@@ -5,6 +5,9 @@ import correctAudio from '@wordbook/assets/audio/correct.wav'
 import incorrectAudio from '@wordbook/assets/audio/incorrect.wav'
 import keydownAudio from '@wordbook/assets/audio/keydown.wav'
 import { apiRequest } from '@wordbook/lib/request'
+import { cancelSpeech, speakWord } from '@wordbook/lib/tts'
+import { Icon } from '@iconify/react'
+import { useStore } from '@nanostores/react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -16,6 +19,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { Switch } from '@/components/ui/switch'
+import * as AppStore from '@/stores/app.store'
 
 type Phase = 'selecting' | 'learning' | 'finished'
 
@@ -49,6 +54,9 @@ function formatTime(seconds: number) {
 }
 
 export function WordLearner() {
+  // === 主题 ===
+  const theme = useStore(AppStore.theme)
+
   // === 选择阶段状态 ===
   const [textbooks, setTextbooks] = useState<WordbookTextbook[]>([])
   const [unitNumbers, setUnitNumbers] = useState<number[]>([])
@@ -62,7 +70,15 @@ export function WordLearner() {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [charIndex, setCharIndex] = useState(0)
   const [inputStatus, setInputStatus] = useState<('idle' | 'correct' | 'wrong')[]>([])
+  const [typedChars, setTypedChars] = useState<string[]>([])
   const [wrongFlash, setWrongFlash] = useState(false)
+
+  // === 功能条状态 ===
+  const [accent, setAccent] = useState<'en-US' | 'en-GB'>('en-US')
+  const [dictationMode, setDictationMode] = useState(false)
+  const [hideMeaning, setHideMeaning] = useState(false)
+  const [autoSpeak, setAutoSpeak] = useState(true)
+  const [soundEnabled, setSoundEnabled] = useState(true)
 
   // === 统计 ===
   const [elapsed, setElapsed] = useState(0)
@@ -88,6 +104,7 @@ export function WordLearner() {
       clearTimeout(wordCompleteTimeoutRef.current)
       wordCompleteTimeoutRef.current = null
     }
+    cancelSpeech()
     setPhase('selecting')
     setWords([])
     setCurrentIndex(0)
@@ -104,11 +121,13 @@ export function WordLearner() {
           clearInterval(timerRef.current)
           timerRef.current = null
         }
+        cancelSpeech()
         setPhase('finished')
         return prevIndex
       }
       setCharIndex(0)
       setInputStatus(Array.from({ length: words[nextIndex].word.length }).fill('idle') as ('idle' | 'correct' | 'wrong')[])
+      setTypedChars(Array.from({ length: words[nextIndex].word.length }).fill('') as string[])
       currentWordTypedRef.current = ''
       return nextIndex
     })
@@ -138,6 +157,17 @@ export function WordLearner() {
       }
     }
   }, [phase])
+
+  // === 自动发音 ===
+  useEffect(() => {
+    if (phase === 'learning' && autoSpeak && words[currentIndex]) {
+      const timer = setTimeout(() => {
+        speakWord(words[currentIndex].word, accent)
+      }, 100)
+      return () => clearTimeout(timer)
+    }
+    return () => cancelSpeech()
+  }, [currentIndex, phase, words, autoSpeak, accent])
 
   // === 全局键盘监听 ===
   useEffect(() => {
@@ -170,6 +200,11 @@ export function WordLearner() {
             next[newIdx] = 'idle'
             return next
           })
+          setTypedChars((prev) => {
+            const next = [...prev]
+            next[newIdx] = ''
+            return next
+          })
           currentWordTypedRef.current = currentWordTypedRef.current.slice(0, -1)
         }
         return
@@ -179,7 +214,8 @@ export function WordLearner() {
       const expected = word.word[charIndex]
       if (expected === undefined)
         return
-      playSound(keydownSoundRef.current)
+      if (soundEnabled)
+        playSound(keydownSoundRef.current)
       setTotalInputs(c => c + 1)
 
       if (e.key.toLowerCase() === expected.toLowerCase()) {
@@ -191,13 +227,19 @@ export function WordLearner() {
           next[charIndex] = 'correct'
           return next
         })
+        setTypedChars((prev) => {
+          const next = [...prev]
+          next[charIndex] = e.key
+          return next
+        })
         currentWordTypedRef.current += e.key
 
         const nextCharIndex = charIndex + 1
         if (nextCharIndex >= word.word.length) {
           // 单词完成
           setCorrectWords(c => c + 1)
-          playSound(correctSoundRef.current)
+          if (soundEnabled)
+            playSound(correctSoundRef.current)
           if (wordCompleteTimeoutRef.current)
             clearTimeout(wordCompleteTimeoutRef.current)
           wordCompleteTimeoutRef.current = setTimeout(goToNextWord, 500)
@@ -206,13 +248,19 @@ export function WordLearner() {
       }
       else {
         // 错误
-        playSound(incorrectSoundRef.current)
+        if (soundEnabled)
+          playSound(incorrectSoundRef.current)
         setWrongFlash(true)
         const flashTimeoutId = setTimeout(setWrongFlash, 300, false)
         pendingTimeouts.add(flashTimeoutId)
         setInputStatus((prev) => {
           const next = [...prev]
           next[charIndex] = 'wrong'
+          return next
+        })
+        setTypedChars((prev) => {
+          const next = [...prev]
+          next[charIndex] = e.key
           return next
         })
         currentWordTypedRef.current += e.key
@@ -236,7 +284,7 @@ export function WordLearner() {
       }
       pendingTimeouts.clear()
     }
-  }, [phase, currentIndex, charIndex, words, errors, resetToSelecting, goToNextWord])
+  }, [phase, currentIndex, charIndex, words, errors, soundEnabled, resetToSelecting, goToNextWord])
 
   const handleTextbookChange = async (value: string) => {
     const id = Number(value)
@@ -264,6 +312,7 @@ export function WordLearner() {
       setCurrentIndex(0)
       setCharIndex(0)
       setInputStatus(Array.from({ length: shuffled[0].word.length }).fill('idle') as ('idle' | 'correct' | 'wrong')[])
+      setTypedChars(Array.from({ length: shuffled[0].word.length }).fill('') as string[])
       setElapsed(0)
       setTotalInputs(0)
       setCorrectInputs(0)
@@ -283,6 +332,7 @@ export function WordLearner() {
     setCurrentIndex(0)
     setCharIndex(0)
     setInputStatus(Array.from({ length: shuffled[0].word.length }).fill('idle') as ('idle' | 'correct' | 'wrong')[])
+    setTypedChars(Array.from({ length: shuffled[0].word.length }).fill('') as string[])
     setElapsed(0)
     setTotalInputs(0)
     setCorrectInputs(0)
@@ -299,7 +349,7 @@ export function WordLearner() {
   // === 选择阶段 ===
   if (phase === 'selecting') {
     return (
-      <div className="flex h-full items-center justify-center bg-gray-50 p-6">
+      <div className="flex h-full items-center justify-center bg-background p-6">
         <Card className="w-full max-w-md">
           <CardHeader>
             <CardTitle>选择学习内容</CardTitle>
@@ -367,18 +417,91 @@ export function WordLearner() {
 
     return (
       <div
-        className={`flex h-full flex-col bg-gray-50 transition-colors ${wrongFlash ? 'bg-red-50' : ''}`}
+        className={`flex h-full flex-col bg-background transition-colors ${wrongFlash ? 'bg-red-50 dark:bg-red-950/30' : ''}`}
       >
-        {/* 顶部信息栏 */}
-        <div className="flex items-center justify-between px-6 py-3">
-          <span className="text-sm text-muted-foreground">
-            {selectedTextbook && `${selectedTextbook.stage} · ${selectedTextbook.publisher} · ${selectedTextbook.name}`}
-            {' '}
-            {unitNumber !== null && `Unit ${unitNumber}`}
-          </span>
-          <Button variant="ghost" size="sm" onClick={resetToSelecting}>
-            Esc 返回
-          </Button>
+        {/* 功能条 */}
+        <div className="flex items-center justify-between border-b border-border px-4 py-2">
+          <div className="flex items-center gap-4">
+            {/* 课本信息 */}
+            <span className="text-sm text-muted-foreground">
+              {selectedTextbook && `${selectedTextbook.stage} · ${selectedTextbook.publisher} · ${selectedTextbook.name}`}
+              {' '}
+              {unitNumber !== null && `Unit ${unitNumber}`}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-3">
+            {/* 发音切换 */}
+            <button
+              className="flex items-center gap-1 rounded-md px-2 py-1 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+              onClick={() => setAccent(accent === 'en-US' ? 'en-GB' : 'en-US')}
+            >
+              <Icon icon="icon-park-outline:voice-one" className="size-4" />
+              <span>{accent === 'en-US' ? '美式' : '英式'}</span>
+            </button>
+
+            {/* 分隔线 */}
+            <div className="h-4 w-px bg-border" />
+
+            {/* 默写模式 */}
+            <label className="flex cursor-pointer items-center gap-1.5 text-sm text-muted-foreground">
+              <Switch
+                size="sm"
+                checked={dictationMode}
+                onCheckedChange={setDictationMode}
+              />
+              <span>默写</span>
+            </label>
+
+            {/* 隐藏释义 */}
+            <label className="flex cursor-pointer items-center gap-1.5 text-sm text-muted-foreground">
+              <Switch
+                size="sm"
+                checked={hideMeaning}
+                onCheckedChange={setHideMeaning}
+              />
+              <span>释义</span>
+            </label>
+
+            {/* 分隔线 */}
+            <div className="h-4 w-px bg-border" />
+
+            {/* 主题切换 */}
+            <button
+              className="flex items-center rounded-md p-1.5 text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+              onClick={() => AppStore.updateTheme(theme === 'dark' ? 'light' : 'dark')}
+            >
+              <Icon icon={theme === 'dark' ? 'icon-park-outline:moon' : 'icon-park-outline:sun-one'} className="size-4" />
+            </button>
+
+            {/* 分隔线 */}
+            <div className="h-4 w-px bg-border" />
+
+            {/* 自动发音 */}
+            <label className="flex cursor-pointer items-center gap-1.5 text-sm text-muted-foreground">
+              <Switch
+                size="sm"
+                checked={autoSpeak}
+                onCheckedChange={setAutoSpeak}
+              />
+              <Icon icon="icon-park-outline:volume-small" className="size-4" />
+            </label>
+
+            {/* 打字音效 */}
+            <label className="flex cursor-pointer items-center gap-1.5 text-sm text-muted-foreground">
+              <Switch
+                size="sm"
+                checked={soundEnabled}
+                onCheckedChange={setSoundEnabled}
+              />
+              <Icon icon="icon-park-outline:keyboard-one" className="size-4" />
+            </label>
+
+            {/* 返回按钮 */}
+            <Button variant="ghost" size="sm" onClick={resetToSelecting}>
+              Esc 返回
+            </Button>
+          </div>
         </div>
 
         {/* 主内容区 - 居中显示 */}
@@ -387,7 +510,18 @@ export function WordLearner() {
           <div className="mb-8 text-center">
             <div className="mb-4 font-mono text-7xl font-bold tracking-widest">
               {currentWord.word.split('').map((ch, i) => {
-                let color = 'text-gray-300'
+                if (dictationMode) {
+                  const typed = typedChars[i]
+                  if (!typed)
+                    return <span key={`${ch}-${i}`} className="inline-block text-muted-foreground">_</span>
+                  const isCorrect = typed.toLowerCase() === ch.toLowerCase()
+                  return (
+                    <span key={`${ch}-${i}`} className={`inline-block transition-colors ${isCorrect ? 'text-green-500' : 'text-red-500'}`}>
+                      {typed}
+                    </span>
+                  )
+                }
+                let color = 'text-muted-foreground/40'
                 if (inputStatus[i] === 'correct')
                   color = 'text-green-500'
                 else if (inputStatus[i] === 'wrong')
@@ -399,7 +533,9 @@ export function WordLearner() {
                 )
               })}
             </div>
-            <p className="text-2xl text-gray-500">{currentWord.meaning}</p>
+            {!hideMeaning && (
+              <p className="text-2xl text-muted-foreground">{currentWord.meaning}</p>
+            )}
           </div>
 
           {/* 进度条 */}
@@ -414,7 +550,7 @@ export function WordLearner() {
         </div>
 
         {/* 底部统计栏 */}
-        <div className="border-t bg-white px-6 py-4">
+        <div className="border-t border-border bg-card px-6 py-4">
           <div className="mx-auto flex max-w-lg items-center justify-between">
             <div className="text-center">
               <p className="text-xs text-muted-foreground">用时</p>
@@ -449,7 +585,7 @@ export function WordLearner() {
   const errorList = Array.from(errors.values())
 
   return (
-    <div className="flex h-full items-center justify-center bg-gray-50 p-6">
+    <div className="flex h-full items-center justify-center bg-background p-6">
       <Card className="w-full max-w-lg">
         <CardHeader>
           <CardTitle className="text-center text-2xl">学习完成！</CardTitle>
@@ -457,15 +593,15 @@ export function WordLearner() {
         <CardContent className="space-y-6">
           {/* 统计 */}
           <div className="grid grid-cols-2 gap-4">
-            <div className="rounded-lg border p-4 text-center">
+            <div className="rounded-lg border border-border p-4 text-center">
               <p className="text-sm text-muted-foreground">用时</p>
               <p className="font-mono text-2xl font-bold">{formatTime(elapsed)}</p>
             </div>
-            <div className="rounded-lg border p-4 text-center">
+            <div className="rounded-lg border border-border p-4 text-center">
               <p className="text-sm text-muted-foreground">单词数</p>
               <p className="font-mono text-2xl font-bold">{words.length}</p>
             </div>
-            <div className="rounded-lg border p-4 text-center">
+            <div className="rounded-lg border border-border p-4 text-center">
               <p className="text-sm text-muted-foreground">速度</p>
               <p className="font-mono text-2xl font-bold">
                 {wpm}
@@ -473,7 +609,7 @@ export function WordLearner() {
                 WPM
               </p>
             </div>
-            <div className="rounded-lg border p-4 text-center">
+            <div className="rounded-lg border border-border p-4 text-center">
               <p className="text-sm text-muted-foreground">正确率</p>
               <p className="font-mono text-2xl font-bold">
                 {accuracy}
@@ -492,7 +628,7 @@ export function WordLearner() {
               </h3>
               <div className="space-y-2">
                 {errorList.map(err => (
-                  <div key={err.word} className="flex items-center justify-between rounded border p-2 text-sm">
+                  <div key={err.word} className="flex items-center justify-between rounded border border-border p-2 text-sm">
                     <span className="font-medium">{err.word}</span>
                     <span className="text-red-500">
                       → 你输入:
