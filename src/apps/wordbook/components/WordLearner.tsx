@@ -39,6 +39,15 @@ function shuffle<T>(arr: T[]): T[] {
   return a
 }
 
+/** 跳过空格，返回下一个非空格位置 */
+function skipSpaces(word: string, startIndex: number): number {
+  let idx = startIndex
+  while (idx < word.length && word[idx] === ' ') {
+    idx++
+  }
+  return idx
+}
+
 /** 播放音效，自动重置到开头避免重叠 */
 function playSound(el: HTMLAudioElement | null) {
   if (!el)
@@ -125,9 +134,11 @@ export function WordLearner() {
         setPhase('finished')
         return prevIndex
       }
-      setCharIndex(0)
-      setInputStatus(Array.from({ length: words[nextIndex].word.length }).fill('idle') as ('idle' | 'correct' | 'wrong')[])
-      setTypedChars(Array.from({ length: words[nextIndex].word.length }).fill('') as string[])
+      const nextWord = words[nextIndex]
+      const firstCharIdx = skipSpaces(nextWord.word, 0)
+      setCharIndex(firstCharIdx)
+      setInputStatus(nextWord.word.split('').map(ch => ch === ' ' ? 'correct' : 'idle') as ('idle' | 'correct' | 'wrong')[])
+      setTypedChars(nextWord.word.split('').map(ch => ch === ' ' ? ' ' : ''))
       currentWordTypedRef.current = ''
       return nextIndex
     })
@@ -193,7 +204,14 @@ export function WordLearner() {
 
       if (e.key === 'Backspace') {
         if (charIndex > 0) {
-          const newIdx = charIndex - 1
+          let newIdx = charIndex - 1
+          // 跳过空格位置
+          while (newIdx > 0 && word.word[newIdx] === ' ') {
+            newIdx--
+          }
+          // 如果当前位置是空格，不处理
+          if (word.word[newIdx] === ' ')
+            return
           setCharIndex(newIdx)
           setInputStatus((prev) => {
             const next = [...prev]
@@ -214,6 +232,18 @@ export function WordLearner() {
       const expected = word.word[charIndex]
       if (expected === undefined)
         return
+
+      // 如果当前位置是空格，自动跳过（理论上不会发生，因为初始化时已跳过）
+      if (expected === ' ') {
+        setCharIndex(skipSpaces(word.word, charIndex))
+        return
+      }
+
+      // 如果按的是空格键，忽略（不算出错）
+      if (e.key === ' ') {
+        return
+      }
+
       if (soundEnabled)
         playSound(keydownSoundRef.current)
       setTotalInputs(c => c + 1)
@@ -234,7 +264,7 @@ export function WordLearner() {
         })
         currentWordTypedRef.current += e.key
 
-        const nextCharIndex = charIndex + 1
+        const nextCharIndex = skipSpaces(word.word, charIndex + 1)
         if (nextCharIndex >= word.word.length) {
           // 单词完成
           setCorrectWords(c => c + 1)
@@ -308,11 +338,13 @@ export function WordLearner() {
         return
       }
       const shuffled = shuffle(data)
+      const firstWord = shuffled[0]
+      const firstCharIdx = skipSpaces(firstWord.word, 0)
       setWords(shuffled)
       setCurrentIndex(0)
-      setCharIndex(0)
-      setInputStatus(Array.from({ length: shuffled[0].word.length }).fill('idle') as ('idle' | 'correct' | 'wrong')[])
-      setTypedChars(Array.from({ length: shuffled[0].word.length }).fill('') as string[])
+      setCharIndex(firstCharIdx)
+      setInputStatus(firstWord.word.split('').map(ch => ch === ' ' ? 'correct' : 'idle') as ('idle' | 'correct' | 'wrong')[])
+      setTypedChars(firstWord.word.split('').map(ch => ch === ' ' ? ' ' : ''))
       setElapsed(0)
       setTotalInputs(0)
       setCorrectInputs(0)
@@ -328,11 +360,13 @@ export function WordLearner() {
 
   const restartWithSameWords = () => {
     const shuffled = shuffle(words)
+    const firstWord = shuffled[0]
+    const firstCharIdx = skipSpaces(firstWord.word, 0)
     setWords(shuffled)
     setCurrentIndex(0)
-    setCharIndex(0)
-    setInputStatus(Array.from({ length: shuffled[0].word.length }).fill('idle') as ('idle' | 'correct' | 'wrong')[])
-    setTypedChars(Array.from({ length: shuffled[0].word.length }).fill('') as string[])
+    setCharIndex(firstCharIdx)
+    setInputStatus(firstWord.word.split('').map(ch => ch === ' ' ? 'correct' : 'idle') as ('idle' | 'correct' | 'wrong')[])
+    setTypedChars(firstWord.word.split('').map(ch => ch === ' ' ? ' ' : ''))
     setElapsed(0)
     setTotalInputs(0)
     setCorrectInputs(0)
@@ -341,6 +375,67 @@ export function WordLearner() {
     currentWordTypedRef.current = ''
     setPhase('learning')
   }
+
+  const goToNextUnit = useCallback(async () => {
+    if (!textbookId || unitNumber === null)
+      return
+
+    const currentIdx = unitNumbers.indexOf(unitNumber)
+    if (currentIdx === -1 || currentIdx >= unitNumbers.length - 1) {
+      alert('已经是最后一个单元')
+      return
+    }
+
+    const nextUnit = unitNumbers[currentIdx + 1]
+    setUnitNumber(nextUnit)
+    setLoading(true)
+    try {
+      const data = await apiRequest<WordWithSentences[]>(
+        `/wordbook/api/words?textbookId=${textbookId}&unitNumber=${nextUnit}`,
+      )
+      if (data.length === 0) {
+        alert('该单元暂无单词')
+        return
+      }
+      const shuffled = shuffle(data)
+      const firstWord = shuffled[0]
+      const firstCharIdx = skipSpaces(firstWord.word, 0)
+      setWords(shuffled)
+      setCurrentIndex(0)
+      setCharIndex(firstCharIdx)
+      setInputStatus(firstWord.word.split('').map(ch => ch === ' ' ? 'correct' : 'idle') as ('idle' | 'correct' | 'wrong')[])
+      setTypedChars(firstWord.word.split('').map(ch => ch === ' ' ? ' ' : ''))
+      setElapsed(0)
+      setTotalInputs(0)
+      setCorrectInputs(0)
+      setCorrectWords(0)
+      setErrors(new Map())
+      currentWordTypedRef.current = ''
+      setPhase('learning')
+    }
+    finally {
+      setLoading(false)
+    }
+  }, [textbookId, unitNumber, unitNumbers])
+
+  const startDictation = useCallback(() => {
+    setDictationMode(true)
+    const shuffled = shuffle(words)
+    const firstWord = shuffled[0]
+    const firstCharIdx = skipSpaces(firstWord.word, 0)
+    setWords(shuffled)
+    setCurrentIndex(0)
+    setCharIndex(firstCharIdx)
+    setInputStatus(firstWord.word.split('').map(ch => ch === ' ' ? 'correct' : 'idle') as ('idle' | 'correct' | 'wrong')[])
+    setTypedChars(firstWord.word.split('').map(ch => ch === ' ' ? ' ' : ''))
+    setElapsed(0)
+    setTotalInputs(0)
+    setCorrectInputs(0)
+    setCorrectWords(0)
+    setErrors(new Map())
+    currentWordTypedRef.current = ''
+    setPhase('learning')
+  }, [words])
 
   const wpm = elapsed > 0 ? (correctWords / (elapsed / 60)).toFixed(1) : '0.0'
   const accuracy = totalInputs > 0 ? ((correctInputs / totalInputs) * 100).toFixed(1) : '100.0'
@@ -510,6 +605,10 @@ export function WordLearner() {
           <div className="mb-8 text-center">
             <div className="mb-4 font-mono text-7xl font-bold tracking-widest">
               {currentWord.word.split('').map((ch, i) => {
+                // 空格显示为 ␣
+                if (ch === ' ') {
+                  return <span key={`${ch}-${i}`} className="inline-block text-muted-foreground/40">␣</span>
+                }
                 if (dictationMode) {
                   const typed = typedChars[i]
                   if (!typed)
@@ -641,13 +740,23 @@ export function WordLearner() {
           )}
 
           {/* 操作按钮 */}
-          <div className="flex gap-3">
-            <Button className="flex-1" onClick={restartWithSameWords}>
-              重新学习
-            </Button>
-            <Button className="flex-1" variant="outline" onClick={resetToSelecting}>
-              返回选择
-            </Button>
+          <div className="space-y-3">
+            <div className="flex gap-3">
+              <Button className="flex-1" onClick={goToNextUnit} disabled={loading}>
+                {loading ? '加载中...' : '下一章节'}
+              </Button>
+              <Button className="flex-1" variant="outline" onClick={startDictation}>
+                开始默写
+              </Button>
+            </div>
+            <div className="flex gap-3">
+              <Button className="flex-1" variant="outline" onClick={restartWithSameWords}>
+                重新学习
+              </Button>
+              <Button className="flex-1" variant="outline" onClick={resetToSelecting}>
+                返回选择
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>
