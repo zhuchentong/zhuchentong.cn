@@ -22,6 +22,13 @@
       "when": 1781858633997,
       "tag": "0002_wordbook_rename",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1781900000000,
+      "tag": "0003_wordbook_to_english",
+      "breakpoints": true
     }
   ]
 }

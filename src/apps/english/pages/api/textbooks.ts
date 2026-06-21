@@ -1,8 +1,8 @@
-import type { CreateTextbookPayload } from '@wordbook/interfaces'
+import type { CreateTextbookPayload } from '@english/interfaces'
 
 import type { APIRoute } from 'astro'
-import { fail, ok } from '@wordbook/services/response'
-import { createTextbook, listTextbooks } from '@wordbook/services/textbook.service'
+import { fail, ok } from '@english/services/response'
+import { createTextbook, listTextbooks } from '@english/services/textbook.service'
 
 /** 查询课本列表，可选 ?stage=小学 筛选 */
 export const GET: APIRoute = async ({ url }) => {

@@ -1,7 +1,7 @@
 import type { APIRoute } from 'astro'
 
-import { fail, ok } from '@wordbook/services/response'
-import { searchWord } from '@wordbook/services/word.service'
+import { fail, ok } from '@english/services/response'
+import { searchWord } from '@english/services/word.service'
 
 /** 按单词反查出处，?q=apple */
 export const GET: APIRoute = async ({ url }) => {

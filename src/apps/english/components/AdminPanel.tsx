@@ -1,5 +1,5 @@
 import { useStore } from '@nanostores/react'
-import { selectedTextbookId, selectedUnitNumber } from '@wordbook/store'
+import { selectedTextbookId, selectedUnitNumber } from '@english/store'
 
 import { useState } from 'react'
 import { AddWordForm } from './AddWordForm'

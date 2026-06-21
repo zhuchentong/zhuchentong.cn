@@ -1,8 +1,8 @@
-import type { BatchAddSentencesItem } from '@wordbook/interfaces'
+import type { BatchAddSentencesItem } from '@english/interfaces'
 
 import type { APIRoute } from 'astro'
-import { fail, ok } from '@wordbook/services/response'
-import { batchAddSentences } from '@wordbook/services/word.service'
+import { fail, ok } from '@english/services/response'
+import { batchAddSentences } from '@english/services/word.service'
 
 /**
  * 批量为已有单词添加例句（不修改释义/音标）

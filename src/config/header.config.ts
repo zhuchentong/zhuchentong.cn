@@ -33,6 +33,6 @@ export const NavBarLinks = [
   },
   {
     text: '单词',
-    link: '/wordbook',
+    link: '/english',
   },
 ] as NavBarItem[]

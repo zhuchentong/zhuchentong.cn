@@ -3,7 +3,7 @@ import Favicons from '@/components/layouts/Favicons.astro'
 import Theme from '@/components/layouts/Theme.astro'
 import { getStore } from '@/stores'
 import '@/styles/globals.css'
-import { WORDBOOK_NAV_ITEMS } from '@wordbook/config'
+import { ENGLISH_NAV_ITEMS } from '@english/config'
 
 export interface Props {
   title: string
@@ -29,7 +29,7 @@ const theme = store.app.theme
   <body class="flex flex-col h-screen overflow-hidden">
     <nav class="h-[48px] flex items-center border-b border-border px-4 gap-6 bg-background shrink-0">
       {
-        WORDBOOK_NAV_ITEMS.map((item) => (
+        ENGLISH_NAV_ITEMS.map((item) => (
           <a href={item.href} class="text-sm text-muted-foreground hover:text-foreground">
             {item.label}
           </a>

@@ -176,7 +176,7 @@ const wordItems = units.flatMap(unit =>
 )
 
 async function createTextbook() {
-  const res = await fetch(`${BASE}/wordbook/api/textbooks`, {
+  const res = await fetch(`${BASE}/english/api/textbooks`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(textbook),
@@ -189,7 +189,7 @@ async function createTextbook() {
 }
 
 async function batchAdd(textbookId) {
-  const res = await fetch(`${BASE}/wordbook/api/batch/words`, {
+  const res = await fetch(`${BASE}/english/api/batch/words`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ textbookId, words: wordItems }),

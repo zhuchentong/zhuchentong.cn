@@ -12,8 +12,8 @@
       "@workbook/*": [
         "./src/apps/workbook/*"
       ],
-      "@wordbook/*": [
-        "./src/apps/wordbook/*"
+      "@english/*": [
+        "./src/apps/english/*"
       ],
       "@database/*": [
         "./src/database/*"

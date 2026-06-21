@@ -1,8 +1,8 @@
-import type { AddWordResult } from '@wordbook/interfaces'
+import type { AddWordResult } from '@english/interfaces'
 import { useStore } from '@nanostores/react'
 
-import { apiRequest } from '@wordbook/lib/request'
-import { selectedTextbookId, selectedUnitNumber } from '@wordbook/store'
+import { apiRequest } from '@english/lib/request'
+import { selectedTextbookId, selectedUnitNumber } from '@english/store'
 import { useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -44,7 +44,7 @@ export function AddWordForm({ onAdded }: { onAdded: () => void }) {
     }
     setSubmitting(true)
     try {
-      const result = await apiRequest<AddWordResult>('/wordbook/api/words', {
+      const result = await apiRequest<AddWordResult>('/english/api/words', {
         method: 'POST',
         body: JSON.stringify({
           textbookId,

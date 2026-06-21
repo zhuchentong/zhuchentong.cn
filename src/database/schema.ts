@@ -10,10 +10,10 @@ export const users = pgTable('users', {
 export type User = typeof users.$inferSelect
 export type NewUser = typeof users.$inferInsert
 
-// ===== 单词数据库表 =====
+// ===== 英语单词数据库表 =====
 
 // 1. 课本表
-export const wordbookTextbook = pgTable('wordbook_textbook', {
+export const englishTextbook = pgTable('english_textbook', {
   id: serial('id').primaryKey(),
   stage: text('stage').notNull(),
   name: text('name').notNull(),
@@ -24,7 +24,7 @@ export const wordbookTextbook = pgTable('wordbook_textbook', {
 })
 
 // 2. 单词表（去重）
-export const wordbookWord = pgTable('wordbook_word', {
+export const englishWord = pgTable('english_word', {
   id: serial('id').primaryKey(),
   word: text('word').unique().notNull(),
   phonetic: text('phonetic'),
@@ -33,39 +33,39 @@ export const wordbookWord = pgTable('wordbook_word', {
 })
 
 // 3. 课本-单词关联表（含单元号，合并原 unit 表）
-export const wordbookTextbookWord = pgTable('wordbook_textbook_word', {
-  textbookId: integer('textbook_id').references(() => wordbookTextbook.id).notNull(),
-  wordId: integer('word_id').references(() => wordbookWord.id).notNull(),
+export const englishTextbookWord = pgTable('english_textbook_word', {
+  textbookId: integer('textbook_id').references(() => englishTextbook.id).notNull(),
+  wordId: integer('word_id').references(() => englishWord.id).notNull(),
   unitNumber: integer('unit_number').notNull(),
 }, table => [
   primaryKey({ columns: [table.textbookId, table.wordId, table.unitNumber] }),
 ])
 
 // 4. 例句表
-export const wordbookSentence = pgTable('wordbook_sentence', {
+export const englishSentence = pgTable('english_sentence', {
   id: serial('id').primaryKey(),
-  wordId: integer('word_id').references(() => wordbookWord.id).notNull(),
+  wordId: integer('word_id').references(() => englishWord.id).notNull(),
   sentence: text('sentence').notNull(),
   translation: text('translation'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 }, table => [
-  unique('wordbook_sentence_word_id_sentence_unique').on(table.wordId, table.sentence),
+  unique('english_sentence_word_id_sentence_unique').on(table.wordId, table.sentence),
 ])
 
 // ===== 类型导出 =====
 
 // 课本表
-export type WordbookTextbook = typeof wordbookTextbook.$inferSelect
-export type NewWordbookTextbook = typeof wordbookTextbook.$inferInsert
+export type EnglishTextbook = typeof englishTextbook.$inferSelect
+export type NewEnglishTextbook = typeof englishTextbook.$inferInsert
 
 // 单词表
-export type WordbookWord = typeof wordbookWord.$inferSelect
-export type NewWordbookWord = typeof wordbookWord.$inferInsert
+export type EnglishWord = typeof englishWord.$inferSelect
+export type NewEnglishWord = typeof englishWord.$inferInsert
 
 // 课本-单词关联表
-export type WordbookTextbookWord = typeof wordbookTextbookWord.$inferSelect
-export type NewWordbookTextbookWord = typeof wordbookTextbookWord.$inferInsert
+export type EnglishTextbookWord = typeof englishTextbookWord.$inferSelect
+export type NewEnglishTextbookWord = typeof englishTextbookWord.$inferInsert
 
 // 例句表
-export type WordbookSentence = typeof wordbookSentence.$inferSelect
-export type NewWordbookSentence = typeof wordbookSentence.$inferInsert
+export type EnglishSentence = typeof englishSentence.$inferSelect
+export type NewEnglishSentence = typeof englishSentence.$inferInsert

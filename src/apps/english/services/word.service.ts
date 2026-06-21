@@ -7,15 +7,15 @@ import type {
   BatchAddWordResult,
   WordLocation,
   WordWithSentences,
-} from '@wordbook/interfaces'
+} from '@english/interfaces'
 
 import { and, asc, eq, inArray } from 'drizzle-orm'
 import { db } from '@/database'
 import {
-  wordbookSentence,
-  wordbookTextbook,
-  wordbookTextbookWord,
-  wordbookWord,
+  englishSentence,
+  englishTextbook,
+  englishTextbookWord,
+  englishWord,
 } from '@/database/schema'
 
 /**
@@ -29,9 +29,9 @@ export async function addWord(payload: AddWordPayload): Promise<AddWordResult> {
   return db.transaction(async (tx) => {
     // 先查是否存在，用于判断是否为本次新建
     const [existing] = await tx
-      .select({ id: wordbookWord.id })
-      .from(wordbookWord)
-      .where(eq(wordbookWord.word, payload.word))
+      .select({ id: englishWord.id })
+      .from(englishWord)
+      .where(eq(englishWord.word, payload.word))
 
     // 条件构造 set：仅在提供 phonetic 时更新，避免误清空已有音标
     const set: { phonetic?: string, meaning: string } = { meaning: payload.meaning }
@@ -41,17 +41,17 @@ export async function addWord(payload: AddWordPayload): Promise<AddWordResult> {
 
     // 1. 单词去重 upsert
     const returned = await tx
-      .insert(wordbookWord)
+      .insert(englishWord)
       .values({
         word: payload.word,
         phonetic: payload.phonetic,
         meaning: payload.meaning,
       })
       .onConflictDoUpdate({
-        target: wordbookWord.word,
+        target: englishWord.word,
         set,
       })
-      .returning({ id: wordbookWord.id })
+      .returning({ id: englishWord.id })
 
     const wordId = returned[0]?.id
     if (wordId === undefined) {
@@ -60,7 +60,7 @@ export async function addWord(payload: AddWordPayload): Promise<AddWordResult> {
 
     // 2. 关联课本单元（联合主键去重）
     await tx
-      .insert(wordbookTextbookWord)
+      .insert(englishTextbookWord)
       .values({
         textbookId: payload.textbookId,
         wordId,
@@ -71,7 +71,7 @@ export async function addWord(payload: AddWordPayload): Promise<AddWordResult> {
     // 3. 插入例句（唯一约束去重）
     if (payload.sentences?.length) {
       await tx
-        .insert(wordbookSentence)
+        .insert(englishSentence)
         .values(
           payload.sentences.map(s => ({
             wordId,
@@ -100,9 +100,9 @@ export async function batchAddWords(payload: BatchAddWordPayload): Promise<Batch
     for (const item of payload.words) {
       // 先查是否存在，用于判断是否为本次新建
       const [existing] = await tx
-        .select({ id: wordbookWord.id })
-        .from(wordbookWord)
-        .where(eq(wordbookWord.word, item.word))
+        .select({ id: englishWord.id })
+        .from(englishWord)
+        .where(eq(englishWord.word, item.word))
 
       if (existing) {
         updated++
@@ -119,17 +119,17 @@ export async function batchAddWords(payload: BatchAddWordPayload): Promise<Batch
 
       // 1. 单词去重 upsert
       const returned = await tx
-        .insert(wordbookWord)
+        .insert(englishWord)
         .values({
           word: item.word,
           phonetic: item.phonetic,
           meaning: item.meaning,
         })
         .onConflictDoUpdate({
-          target: wordbookWord.word,
+          target: englishWord.word,
           set,
         })
-        .returning({ id: wordbookWord.id })
+        .returning({ id: englishWord.id })
 
       const wordId = returned[0]?.id
       if (wordId === undefined) {
@@ -138,7 +138,7 @@ export async function batchAddWords(payload: BatchAddWordPayload): Promise<Batch
 
       // 2. 关联课本单元（联合主键去重）
       await tx
-        .insert(wordbookTextbookWord)
+        .insert(englishTextbookWord)
         .values({
           textbookId: payload.textbookId,
           wordId,
@@ -149,7 +149,7 @@ export async function batchAddWords(payload: BatchAddWordPayload): Promise<Batch
       // 3. 插入例句（唯一约束去重）
       if (item.sentences?.length) {
         await tx
-          .insert(wordbookSentence)
+          .insert(englishSentence)
           .values(
             item.sentences.map(s => ({
               wordId,
@@ -171,16 +171,16 @@ export async function batchAddWords(payload: BatchAddWordPayload): Promise<Batch
 export async function listWords(textbookId: number, unitNumber: number): Promise<WordWithSentences[]> {
   const words = await db
     .select({
-      id: wordbookWord.id,
-      word: wordbookWord.word,
-      phonetic: wordbookWord.phonetic,
-      meaning: wordbookWord.meaning,
+      id: englishWord.id,
+      word: englishWord.word,
+      phonetic: englishWord.phonetic,
+      meaning: englishWord.meaning,
     })
-    .from(wordbookTextbookWord)
-    .innerJoin(wordbookWord, eq(wordbookTextbookWord.wordId, wordbookWord.id))
+    .from(englishTextbookWord)
+    .innerJoin(englishWord, eq(englishTextbookWord.wordId, englishWord.id))
     .where(and(
-      eq(wordbookTextbookWord.textbookId, textbookId),
-      eq(wordbookTextbookWord.unitNumber, unitNumber),
+      eq(englishTextbookWord.textbookId, textbookId),
+      eq(englishTextbookWord.unitNumber, unitNumber),
     ))
 
   if (words.length === 0) {
@@ -191,13 +191,13 @@ export async function listWords(textbookId: number, unitNumber: number): Promise
   const wordIds = words.map(w => w.id)
   const sentences = await db
     .select({
-      id: wordbookSentence.id,
-      wordId: wordbookSentence.wordId,
-      sentence: wordbookSentence.sentence,
-      translation: wordbookSentence.translation,
+      id: englishSentence.id,
+      wordId: englishSentence.wordId,
+      sentence: englishSentence.sentence,
+      translation: englishSentence.translation,
     })
-    .from(wordbookSentence)
-    .where(inArray(wordbookSentence.wordId, wordIds))
+    .from(englishSentence)
+    .where(inArray(englishSentence.wordId, wordIds))
 
   // 按单词分组例句
   const sentenceMap = new Map<number, WordWithSentences['sentences']>()
@@ -221,10 +221,10 @@ export async function listWords(textbookId: number, unitNumber: number): Promise
  */
 export async function listUnitNumbers(textbookId: number): Promise<number[]> {
   const rows = await db
-    .selectDistinct({ n: wordbookTextbookWord.unitNumber })
-    .from(wordbookTextbookWord)
-    .where(eq(wordbookTextbookWord.textbookId, textbookId))
-    .orderBy(asc(wordbookTextbookWord.unitNumber))
+    .selectDistinct({ n: englishTextbookWord.unitNumber })
+    .from(englishTextbookWord)
+    .where(eq(englishTextbookWord.textbookId, textbookId))
+    .orderBy(asc(englishTextbookWord.unitNumber))
   return rows.map(r => r.n)
 }
 
@@ -233,9 +233,9 @@ export async function listUnitNumbers(textbookId: number): Promise<number[]> {
  */
 export async function searchWord(word: string): Promise<{ found: boolean, locations: WordLocation[] }> {
   const [wordRow] = await db
-    .select({ id: wordbookWord.id })
-    .from(wordbookWord)
-    .where(eq(wordbookWord.word, word))
+    .select({ id: englishWord.id })
+    .from(englishWord)
+    .where(eq(englishWord.word, word))
 
   if (!wordRow) {
     return { found: false, locations: [] }
@@ -243,16 +243,16 @@ export async function searchWord(word: string): Promise<{ found: boolean, locati
 
   const locations = await db
     .select({
-      stage: wordbookTextbook.stage,
-      textbookName: wordbookTextbook.name,
-      publisher: wordbookTextbook.publisher,
-      grade: wordbookTextbook.grade,
-      semester: wordbookTextbook.semester,
-      unitNumber: wordbookTextbookWord.unitNumber,
+      stage: englishTextbook.stage,
+      textbookName: englishTextbook.name,
+      publisher: englishTextbook.publisher,
+      grade: englishTextbook.grade,
+      semester: englishTextbook.semester,
+      unitNumber: englishTextbookWord.unitNumber,
     })
-    .from(wordbookTextbookWord)
-    .innerJoin(wordbookTextbook, eq(wordbookTextbookWord.textbookId, wordbookTextbook.id))
-    .where(eq(wordbookTextbookWord.wordId, wordRow.id))
+    .from(englishTextbookWord)
+    .innerJoin(englishTextbook, eq(englishTextbookWord.textbookId, englishTextbook.id))
+    .where(eq(englishTextbookWord.wordId, wordRow.id))
 
   return {
     found: true,
@@ -280,9 +280,9 @@ export async function batchAddSentences(payload: BatchAddSentencesPayload): Prom
   await db.transaction(async (tx) => {
     for (const item of payload.items) {
       const [wordRow] = await tx
-        .select({ id: wordbookWord.id })
-        .from(wordbookWord)
-        .where(eq(wordbookWord.word, item.word))
+        .select({ id: englishWord.id })
+        .from(englishWord)
+        .where(eq(englishWord.word, item.word))
 
       if (!wordRow) {
         missing++
@@ -291,7 +291,7 @@ export async function batchAddSentences(payload: BatchAddSentencesPayload): Prom
 
       if (item.sentences.length > 0) {
         await tx
-          .insert(wordbookSentence)
+          .insert(englishSentence)
           .values(
             item.sentences.map(s => ({
               wordId: wordRow.id,

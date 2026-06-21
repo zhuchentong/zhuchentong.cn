@@ -1,7 +1,7 @@
 import type { APIRoute } from 'astro'
 
-import { fail, ok } from '@wordbook/services/response'
-import { listUnitNumbers } from '@wordbook/services/word.service'
+import { fail, ok } from '@english/services/response'
+import { listUnitNumbers } from '@english/services/word.service'
 
 /** 查询某课本下已有的单元号（去重升序），?textbookId=1 */
 export const GET: APIRoute = async ({ url }) => {

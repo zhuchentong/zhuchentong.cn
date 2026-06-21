@@ -1,8 +1,8 @@
-import type { AddWordPayload } from '@wordbook/interfaces'
+import type { AddWordPayload } from '@english/interfaces'
 
 import type { APIRoute } from 'astro'
-import { fail, ok } from '@wordbook/services/response'
-import { addWord, listWords } from '@wordbook/services/word.service'
+import { fail, ok } from '@english/services/response'
+import { addWord, listWords } from '@english/services/word.service'
 
 /** 查询某课本某单元下的单词（含例句），?textbookId=1&unitNumber=1 */
 export const GET: APIRoute = async ({ url }) => {

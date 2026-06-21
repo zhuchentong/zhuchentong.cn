@@ -1,0 +1,47 @@
+---
+import EnglishLayout from '@english/layout.astro'
+import Icon from '@/components/widgets/Icon.tsx'
+---
+
+<EnglishLayout title="英语单词学习">
+  <div class="flex h-full flex-col items-center justify-center bg-background p-6">
+    <div class="mb-10 text-center">
+      <h1 class="text-2xl font-bold tracking-tight">英语单词学习</h1>
+      <p class="mt-2 text-muted-foreground">选择功能开始使用</p>
+    </div>
+
+    <div class="grid w-full max-w-2xl gap-6 sm:grid-cols-2">
+      <a
+        href="/english/admin"
+        class="group flex flex-col items-center gap-4 rounded-xl border border-border bg-card p-8 text-center transition-all hover:border-foreground/20 hover:shadow-lg"
+      >
+        <div class="flex size-16 items-center justify-center rounded-full bg-muted transition-colors group-hover:bg-primary/10">
+          <Icon icon="icon-park-outline:book-one" class="size-8 text-muted-foreground transition-colors group-hover:text-primary" client:load />
+        </div>
+        <div>
+          <h2 class="text-lg font-semibold">单词管理</h2>
+          <p class="mt-1 text-sm text-muted-foreground">管理课本、添加和编辑单词</p>
+        </div>
+        <span class="mt-auto text-sm font-medium text-primary opacity-0 transition-opacity group-hover:opacity-100">
+          进入 →
+        </span>
+      </a>
+
+      <a
+        href="/english/gallery"
+        class="group flex flex-col items-center gap-4 rounded-xl border border-border bg-card p-8 text-center transition-all hover:border-foreground/20 hover:shadow-lg"
+      >
+        <div class="flex size-16 items-center justify-center rounded-full bg-muted transition-colors group-hover:bg-primary/10">
+          <Icon icon="icon-park-outline:education" class="size-8 text-muted-foreground transition-colors group-hover:text-primary" client:load />
+        </div>
+        <div>
+          <h2 class="text-lg font-semibold">单词学习</h2>
+          <p class="mt-1 text-sm text-muted-foreground">选择课程和单元开始学习</p>
+        </div>
+        <span class="mt-auto text-sm font-medium text-primary opacity-0 transition-opacity group-hover:opacity-100">
+          开始 →
+        </span>
+      </a>
+    </div>
+  </div>
+</EnglishLayout>

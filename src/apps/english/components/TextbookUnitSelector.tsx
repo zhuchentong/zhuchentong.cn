@@ -1,9 +1,9 @@
-import type { WordbookTextbook } from '@/database/schema'
+import type { EnglishTextbook } from '@/database/schema'
 import { useStore } from '@nanostores/react'
 
-import { PUBLISHERS, SEMESTERS, STAGES } from '@wordbook/constants'
-import { apiRequest } from '@wordbook/lib/request'
-import { selectedTextbookId, selectedUnitNumber } from '@wordbook/store'
+import { PUBLISHERS, SEMESTERS, STAGES } from '@english/constants'
+import { apiRequest } from '@english/lib/request'
+import { selectedTextbookId, selectedUnitNumber } from '@english/store'
 import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -28,15 +28,15 @@ import {
 export function TextbookUnitSelector() {
   const textbookId = useStore(selectedTextbookId)
   const unitNumber = useStore(selectedUnitNumber)
-  const [textbooks, setTextbooks] = useState<WordbookTextbook[]>([])
+  const [textbooks, setTextbooks] = useState<EnglishTextbook[]>([])
   const [unitNumbers, setUnitNumbers] = useState<number[]>([])
 
   const fetchTextbooks = async () => {
-    setTextbooks(await apiRequest<WordbookTextbook[]>('/wordbook/api/textbooks'))
+    setTextbooks(await apiRequest<EnglishTextbook[]>('/english/api/textbooks'))
   }
 
   const fetchUnitNumbers = async (tbId: number) => {
-    setUnitNumbers(await apiRequest<number[]>(`/wordbook/api/units?textbookId=${tbId}`))
+    setUnitNumbers(await apiRequest<number[]>(`/english/api/units?textbookId=${tbId}`))
   }
 
   useEffect(() => {
@@ -127,7 +127,7 @@ function CreateTextbookDialog({ onCreated }: { onCreated: () => void }) {
     }
     setSubmitting(true)
     try {
-      await apiRequest('/wordbook/api/textbooks', {
+      await apiRequest('/english/api/textbooks', {
         method: 'POST',
         body: JSON.stringify({
           stage: form.stage,

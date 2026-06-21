@@ -1,32 +1,30 @@
-import type { WordWithSentences } from '@wordbook/interfaces'
-import type { WordbookTextbook } from '@/database/schema'
+import type { WordWithSentences } from '@english/interfaces'
+import type { EnglishTextbook } from '@/database/schema'
 
-import correctAudio from '@wordbook/assets/audio/correct.wav'
-import incorrectAudio from '@wordbook/assets/audio/incorrect.wav'
-import keydownAudio from '@wordbook/assets/audio/keydown.wav'
-import { apiRequest } from '@wordbook/lib/request'
-import { cancelSpeech, speakWord } from '@wordbook/lib/tts'
+import correctAudio from '@english/assets/audio/correct.wav'
+import incorrectAudio from '@english/assets/audio/incorrect.wav'
+import keydownAudio from '@english/assets/audio/keydown.wav'
+import { apiRequest } from '@english/lib/request'
+import { cancelSpeech, speakWord } from '@english/lib/tts'
 import { Icon } from '@iconify/react'
 import { useStore } from '@nanostores/react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
 import * as AppStore from '@/stores/app.store'
 
-type Phase = 'selecting' | 'learning' | 'finished'
+type Phase = 'learning' | 'finished'
 
 interface ErrorRecord {
   word: string
   typed: string
+}
+
+interface WordLearnerProps {
+  initialTextbookId: number
+  initialUnitNumber: number
 }
 
 /** Fisher-Yates 洗牌 */
@@ -62,19 +60,19 @@ function formatTime(seconds: number) {
   return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
 }
 
-export function WordLearner() {
+export function WordLearner({ initialTextbookId, initialUnitNumber }: WordLearnerProps) {
   // === 主题 ===
   const theme = useStore(AppStore.theme)
 
-  // === 选择阶段状态 ===
-  const [textbooks, setTextbooks] = useState<WordbookTextbook[]>([])
+  // === 课本信息 ===
+  const [textbookId] = useState<number>(initialTextbookId)
+  const [unitNumber] = useState<number>(initialUnitNumber)
+  const [textbookInfo, setTextbookInfo] = useState<EnglishTextbook | null>(null)
   const [unitNumbers, setUnitNumbers] = useState<number[]>([])
-  const [textbookId, setTextbookId] = useState<number | null>(null)
-  const [unitNumber, setUnitNumber] = useState<number | null>(null)
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
 
   // === 学习阶段状态 ===
-  const [phase, setPhase] = useState<Phase>('selecting')
+  const [phase, setPhase] = useState<Phase>('learning')
   const [words, setWords] = useState<WordWithSentences[]>([])
   const [currentIndex, setCurrentIndex] = useState(0)
   const [charIndex, setCharIndex] = useState(0)
@@ -100,11 +98,13 @@ export function WordLearner() {
   const wordCompleteTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const pendingTimeoutsRef = useRef<Set<ReturnType<typeof setTimeout>>>(new Set())
   const currentWordTypedRef = useRef('')
+  const isResettingRef = useRef(false)
+  const resetTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const correctSoundRef = useRef<HTMLAudioElement | null>(null)
   const incorrectSoundRef = useRef<HTMLAudioElement | null>(null)
   const keydownSoundRef = useRef<HTMLAudioElement | null>(null)
 
-  const resetToSelecting = useCallback(() => {
+  const resetToGallery = useCallback(() => {
     if (timerRef.current) {
       clearInterval(timerRef.current)
       timerRef.current = null
@@ -113,12 +113,13 @@ export function WordLearner() {
       clearTimeout(wordCompleteTimeoutRef.current)
       wordCompleteTimeoutRef.current = null
     }
+    if (resetTimeoutRef.current) {
+      clearTimeout(resetTimeoutRef.current)
+      resetTimeoutRef.current = null
+    }
+    isResettingRef.current = false
     cancelSpeech()
-    setPhase('selecting')
-    setWords([])
-    setCurrentIndex(0)
-    setCharIndex(0)
-    setElapsed(0)
+    window.location.href = '/english/gallery'
   }, [])
 
   const goToNextWord = useCallback(() => {
@@ -144,10 +145,50 @@ export function WordLearner() {
     })
   }, [words])
 
-  // === 加载课本列表 ===
+  // === 加载课本信息和单元列表，并自动开始学习 ===
   useEffect(() => {
-    apiRequest<WordbookTextbook[]>('/wordbook/api/textbooks').then(setTextbooks)
-  }, [])
+    const loadData = async () => {
+      try {
+        // 加载课本信息
+        const textbooks = await apiRequest<EnglishTextbook[]>(`/english/api/textbooks`)
+        const textbook = textbooks.find(tb => tb.id === textbookId)
+        if (textbook) {
+          setTextbookInfo(textbook)
+        }
+
+        // 加载单元列表
+        const units = await apiRequest<number[]>(`/english/api/units?textbookId=${textbookId}`)
+        setUnitNumbers(units)
+
+        // 加载单词并开始学习
+        const data = await apiRequest<WordWithSentences[]>(
+          `/english/api/words?textbookId=${textbookId}&unitNumber=${unitNumber}`,
+        )
+        if (data.length === 0) {
+          alert('该单元暂无单词')
+          window.location.href = '/english/gallery'
+          return
+        }
+        const shuffled = shuffle(data)
+        const firstWord = shuffled[0]
+        const firstCharIdx = skipSpaces(firstWord.word, 0)
+        setWords(shuffled)
+        setCurrentIndex(0)
+        setCharIndex(firstCharIdx)
+        setInputStatus(firstWord.word.split('').map(ch => ch === ' ' ? 'correct' : 'idle') as ('idle' | 'correct' | 'wrong')[])
+        setTypedChars(firstWord.word.split('').map(ch => ch === ' ' ? ' ' : ''))
+      }
+      catch (err) {
+        console.error('加载数据失败:', err)
+        alert('加载数据失败，请重试')
+        window.location.href = '/english/gallery'
+      }
+      finally {
+        setLoading(false)
+      }
+    }
+    loadData()
+  }, [textbookId, unitNumber])
 
   // === 预加载音效 ===
   useEffect(() => {
@@ -188,9 +229,13 @@ export function WordLearner() {
     const pendingTimeouts = pendingTimeoutsRef.current
 
     const handleKeyDown = (e: KeyboardEvent) => {
+      // 重置过程中忽略所有输入
+      if (isResettingRef.current)
+        return
+
       // Esc 返回选择
       if (e.key === 'Escape') {
-        resetToSelecting()
+        resetToGallery()
         return
       }
 
@@ -281,6 +326,7 @@ export function WordLearner() {
         if (soundEnabled)
           playSound(incorrectSoundRef.current)
         setWrongFlash(true)
+        isResettingRef.current = true
         const flashTimeoutId = setTimeout(setWrongFlash, 300, false)
         pendingTimeouts.add(flashTimeoutId)
         setInputStatus((prev) => {
@@ -295,14 +341,41 @@ export function WordLearner() {
         })
         currentWordTypedRef.current += e.key
 
-        // 记录错误
-        if (!errors.has(word.word)) {
-          setErrors((prev) => {
-            const next = new Map(prev)
-            next.set(word.word, { word: word.word, typed: currentWordTypedRef.current })
-            return next
-          })
+        // 记录错误（无条件更新，记录最后一次错误）
+        setErrors((prev) => {
+          const next = new Map(prev)
+          next.set(word.word, { word: word.word, typed: currentWordTypedRef.current })
+          return next
+        })
+
+        // 300ms后重置整个单词输入
+        if (resetTimeoutRef.current) {
+          clearTimeout(resetTimeoutRef.current)
         }
+        resetTimeoutRef.current = setTimeout(() => {
+          resetTimeoutRef.current = null
+          const currentWord = words[currentIndex]
+          if (!currentWord) {
+            isResettingRef.current = false
+            return
+          }
+
+          const firstCharIdx = skipSpaces(currentWord.word, 0)
+          setCharIndex(firstCharIdx)
+          setInputStatus(currentWord.word.split('').map(ch => ch === ' ' ? 'correct' : 'idle') as ('idle' | 'correct' | 'wrong')[])
+          setTypedChars(currentWord.word.split('').map(ch => ch === ' ' ? ' ' : ''))
+          currentWordTypedRef.current = ''
+          isResettingRef.current = false
+
+          if (wordCompleteTimeoutRef.current) {
+            clearTimeout(wordCompleteTimeoutRef.current)
+            wordCompleteTimeoutRef.current = null
+          }
+
+          if (autoSpeak) {
+            speakWord(currentWord.word, accent)
+          }
+        }, 300)
       }
     }
 
@@ -314,51 +387,14 @@ export function WordLearner() {
       }
       pendingTimeouts.clear()
     }
-  }, [phase, currentIndex, charIndex, words, errors, soundEnabled, resetToSelecting, goToNextWord])
-
-  const handleTextbookChange = async (value: string) => {
-    const id = Number(value)
-    setTextbookId(id)
-    setUnitNumber(null)
-    setUnitNumbers([])
-    const units = await apiRequest<number[]>(`/wordbook/api/units?textbookId=${id}`)
-    setUnitNumbers(units)
-  }
-
-  const startLearning = async () => {
-    if (!textbookId || unitNumber === null)
-      return
-    setLoading(true)
-    try {
-      const data = await apiRequest<WordWithSentences[]>(
-        `/wordbook/api/words?textbookId=${textbookId}&unitNumber=${unitNumber}`,
-      )
-      if (data.length === 0) {
-        alert('该单元暂无单词')
-        return
-      }
-      const shuffled = shuffle(data)
-      const firstWord = shuffled[0]
-      const firstCharIdx = skipSpaces(firstWord.word, 0)
-      setWords(shuffled)
-      setCurrentIndex(0)
-      setCharIndex(firstCharIdx)
-      setInputStatus(firstWord.word.split('').map(ch => ch === ' ' ? 'correct' : 'idle') as ('idle' | 'correct' | 'wrong')[])
-      setTypedChars(firstWord.word.split('').map(ch => ch === ' ' ? ' ' : ''))
-      setElapsed(0)
-      setTotalInputs(0)
-      setCorrectInputs(0)
-      setCorrectWords(0)
-      setErrors(new Map())
-      currentWordTypedRef.current = ''
-      setPhase('learning')
-    }
-    finally {
-      setLoading(false)
-    }
-  }
+  }, [phase, currentIndex, charIndex, words, errors, soundEnabled, resetToGallery, goToNextWord])
 
   const restartWithSameWords = () => {
+    if (resetTimeoutRef.current) {
+      clearTimeout(resetTimeoutRef.current)
+      resetTimeoutRef.current = null
+    }
+    isResettingRef.current = false
     const shuffled = shuffle(words)
     const firstWord = shuffled[0]
     const firstCharIdx = skipSpaces(firstWord.word, 0)
@@ -387,38 +423,15 @@ export function WordLearner() {
     }
 
     const nextUnit = unitNumbers[currentIdx + 1]
-    setUnitNumber(nextUnit)
-    setLoading(true)
-    try {
-      const data = await apiRequest<WordWithSentences[]>(
-        `/wordbook/api/words?textbookId=${textbookId}&unitNumber=${nextUnit}`,
-      )
-      if (data.length === 0) {
-        alert('该单元暂无单词')
-        return
-      }
-      const shuffled = shuffle(data)
-      const firstWord = shuffled[0]
-      const firstCharIdx = skipSpaces(firstWord.word, 0)
-      setWords(shuffled)
-      setCurrentIndex(0)
-      setCharIndex(firstCharIdx)
-      setInputStatus(firstWord.word.split('').map(ch => ch === ' ' ? 'correct' : 'idle') as ('idle' | 'correct' | 'wrong')[])
-      setTypedChars(firstWord.word.split('').map(ch => ch === ' ' ? ' ' : ''))
-      setElapsed(0)
-      setTotalInputs(0)
-      setCorrectInputs(0)
-      setCorrectWords(0)
-      setErrors(new Map())
-      currentWordTypedRef.current = ''
-      setPhase('learning')
-    }
-    finally {
-      setLoading(false)
-    }
+    window.location.href = `/english/learner?textbookId=${textbookId}&unitNumber=${nextUnit}`
   }, [textbookId, unitNumber, unitNumbers])
 
   const startDictation = useCallback(() => {
+    if (resetTimeoutRef.current) {
+      clearTimeout(resetTimeoutRef.current)
+      resetTimeoutRef.current = null
+    }
+    isResettingRef.current = false
     setDictationMode(true)
     const shuffled = shuffle(words)
     const firstWord = shuffled[0]
@@ -439,68 +452,12 @@ export function WordLearner() {
 
   const wpm = elapsed > 0 ? (correctWords / (elapsed / 60)).toFixed(1) : '0.0'
   const accuracy = totalInputs > 0 ? ((correctInputs / totalInputs) * 100).toFixed(1) : '100.0'
-  const selectedTextbook = textbooks.find(tb => tb.id === textbookId)
 
-  // === 选择阶段 ===
-  if (phase === 'selecting') {
+  // 加载中状态
+  if (loading) {
     return (
-      <div className="flex h-full items-center justify-center bg-background p-6">
-        <Card className="w-full max-w-md">
-          <CardHeader>
-            <CardTitle>选择学习内容</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">课本</label>
-              <Select value={textbookId ? String(textbookId) : ''} onValueChange={handleTextbookChange}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="选择课本" />
-                </SelectTrigger>
-                <SelectContent>
-                  {textbooks.map(tb => (
-                    <SelectItem key={tb.id} value={String(tb.id)}>
-                      {`${tb.stage} · ${tb.publisher} · ${tb.name}`}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium">单元</label>
-              <Select
-                value={unitNumber !== null ? String(unitNumber) : ''}
-                onValueChange={v => setUnitNumber(Number(v))}
-                disabled={!textbookId}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder={textbookId ? '选择单元' : '请先选择课本'} />
-                </SelectTrigger>
-                <SelectContent>
-                  {unitNumbers.map(n => (
-                    <SelectItem key={n} value={String(n)}>
-                      {n === 0 ? '无单元' : `Unit ${n}`}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {unitNumbers.length > 0 && (
-                <p className="text-xs text-muted-foreground">
-                  已有单元：
-                  {unitNumbers.join('、')}
-                </p>
-              )}
-            </div>
-
-            <Button
-              className="w-full"
-              onClick={startLearning}
-              disabled={!textbookId || unitNumber === null || loading}
-            >
-              {loading ? '加载中...' : '开始学习'}
-            </Button>
-          </CardContent>
-        </Card>
+      <div className="flex h-full items-center justify-center bg-background">
+        <p className="text-muted-foreground">加载中...</p>
       </div>
     )
   }
@@ -519,9 +476,9 @@ export function WordLearner() {
           <div className="flex items-center gap-4">
             {/* 课本信息 */}
             <span className="text-sm text-muted-foreground">
-              {selectedTextbook && `${selectedTextbook.stage} · ${selectedTextbook.publisher} · ${selectedTextbook.name}`}
+              {textbookInfo && `${textbookInfo.stage} · ${textbookInfo.publisher} · ${textbookInfo.name}`}
               {' '}
-              {unitNumber !== null && `Unit ${unitNumber}`}
+              {`Unit ${unitNumber}`}
             </span>
           </div>
 
@@ -593,7 +550,7 @@ export function WordLearner() {
             </label>
 
             {/* 返回按钮 */}
-            <Button variant="ghost" size="sm" onClick={resetToSelecting}>
+            <Button variant="ghost" size="sm" onClick={resetToGallery}>
               Esc 返回
             </Button>
           </div>
@@ -753,7 +710,7 @@ export function WordLearner() {
               <Button className="flex-1" variant="outline" onClick={restartWithSameWords}>
                 重新学习
               </Button>
-              <Button className="flex-1" variant="outline" onClick={resetToSelecting}>
+              <Button className="flex-1" variant="outline" onClick={resetToGallery}>
                 返回选择
               </Button>
             </div>

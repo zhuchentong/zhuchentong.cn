@@ -1,8 +1,8 @@
-import type { BatchWordItem } from '@wordbook/interfaces'
+import type { BatchWordItem } from '@english/interfaces'
 
 import type { APIRoute } from 'astro'
-import { fail, ok } from '@wordbook/services/response'
-import { batchAddWords } from '@wordbook/services/word.service'
+import { fail, ok } from '@english/services/response'
+import { batchAddWords } from '@english/services/word.service'
 
 /**
  * 批量添加单词到某课本（各条目内指定单元号）

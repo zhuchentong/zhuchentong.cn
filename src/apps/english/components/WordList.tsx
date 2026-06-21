@@ -1,8 +1,8 @@
-import type { WordLocation, WordWithSentences } from '@wordbook/interfaces'
+import type { WordLocation, WordWithSentences } from '@english/interfaces'
 import { useStore } from '@nanostores/react'
 
-import { apiRequest } from '@wordbook/lib/request'
-import { selectedTextbookId, selectedUnitNumber } from '@wordbook/store'
+import { apiRequest } from '@english/lib/request'
+import { selectedTextbookId, selectedUnitNumber } from '@english/store'
 import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -19,7 +19,7 @@ export function WordList() {
       return
     }
     let active = true
-    apiRequest<WordWithSentences[]>(`/wordbook/api/words?textbookId=${textbookId}&unitNumber=${unitNumber}`)
+    apiRequest<WordWithSentences[]>(`/english/api/words?textbookId=${textbookId}&unitNumber=${unitNumber}`)
       .then((data) => {
         if (active) {
           setWords(data)
@@ -92,7 +92,7 @@ export function WordSearchPanel() {
     }
     setSearching(true)
     try {
-      setResult(await apiRequest(`/wordbook/api/words-search?q=${encodeURIComponent(query.trim())}`))
+      setResult(await apiRequest(`/english/api/words-search?q=${encodeURIComponent(query.trim())}`))
     }
     finally {
       setSearching(false)
