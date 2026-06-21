@@ -41,15 +41,27 @@ export const englishTextbookWord = pgTable('english_textbook_word', {
   primaryKey({ columns: [table.textbookId, table.wordId, table.unitNumber] }),
 ])
 
-// 4. 例句表
-export const englishSentence = pgTable('english_sentence', {
+// 4. 单词例句表
+export const englishWordSentence = pgTable('english_word_sentence', {
   id: serial('id').primaryKey(),
   wordId: integer('word_id').references(() => englishWord.id).notNull(),
   sentence: text('sentence').notNull(),
   translation: text('translation'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 }, table => [
-  unique('english_sentence_word_id_sentence_unique').on(table.wordId, table.sentence),
+  unique('english_word_sentence_word_id_sentence_unique').on(table.wordId, table.sentence),
+])
+
+// 5. 课文句子表（与课本单元直接关联）
+export const englishSentence = pgTable('english_sentence', {
+  id: serial('id').primaryKey(),
+  textbookId: integer('textbook_id').references(() => englishTextbook.id).notNull(),
+  unitNumber: integer('unit_number').notNull(),
+  sentence: text('sentence').notNull(),
+  translation: text('translation'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+}, table => [
+  unique('english_sentence_textbook_unit_sentence_unique').on(table.textbookId, table.unitNumber, table.sentence),
 ])
 
 // ===== 类型导出 =====
@@ -66,6 +78,10 @@ export type NewEnglishWord = typeof englishWord.$inferInsert
 export type EnglishTextbookWord = typeof englishTextbookWord.$inferSelect
 export type NewEnglishTextbookWord = typeof englishTextbookWord.$inferInsert
 
-// 例句表
+// 单词例句表
+export type EnglishWordSentence = typeof englishWordSentence.$inferSelect
+export type NewEnglishWordSentence = typeof englishWordSentence.$inferInsert
+
+// 课文句子表
 export type EnglishSentence = typeof englishSentence.$inferSelect
 export type NewEnglishSentence = typeof englishSentence.$inferInsert

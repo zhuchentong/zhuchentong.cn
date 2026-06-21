@@ -1,7 +1,9 @@
 ---
+import { SentenceLearner } from '@english/components/SentenceLearner'
 import { WordLearner } from '@english/components/WordLearner'
 import EnglishLayout from '@english/layout.astro'
 
+const type = Astro.url.searchParams.get('type') || 'word'
 const textbookId = Astro.url.searchParams.get('textbookId')
 const unitNumber = Astro.url.searchParams.get('unitNumber')
 
@@ -11,10 +13,12 @@ if (!textbookId || !unitNumber) {
 }
 ---
 
-<EnglishLayout title="单词学习">
-  <WordLearner
-    client:load
-    initialTextbookId={Number(textbookId)}
-    initialUnitNumber={Number(unitNumber)}
-  />
+<EnglishLayout title={type === 'sentence' ? '句子学习' : '单词学习'}>
+  {
+    type === 'sentence' ? (
+      <SentenceLearner client:load initialTextbookId={Number(textbookId)} initialUnitNumber={Number(unitNumber)} />
+    ) : (
+      <WordLearner client:load initialTextbookId={Number(textbookId)} initialUnitNumber={Number(unitNumber)} />
+    )
+  }
 </EnglishLayout>

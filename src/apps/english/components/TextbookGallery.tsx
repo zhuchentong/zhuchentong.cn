@@ -1,7 +1,7 @@
 import type { EnglishTextbook } from '@/database/schema'
 
-import { apiRequest } from '@english/lib/request'
 import { STAGES } from '@english/constants'
+import { apiRequest } from '@english/lib/request'
 import { Icon } from '@iconify/react'
 import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
@@ -17,6 +17,12 @@ export function TextbookGallery() {
   const [stage, setStage] = useState<string>(STAGES[0])
   const [textbooks, setTextbooks] = useState<EnglishTextbook[]>([])
   const [loading, setLoading] = useState(true)
+
+  // 从 URL 读取学习类型（惰性初始化，避免 useEffect 中同步 setState）
+  const [learnType] = useState<'word' | 'sentence'>(() => {
+    const params = new URLSearchParams(window.location.search)
+    return params.get('type') === 'sentence' ? 'sentence' : 'word'
+  })
 
   // Dialog 状态
   const [selectedTextbook, setSelectedTextbook] = useState<EnglishTextbook | null>(null)
@@ -48,7 +54,7 @@ export function TextbookGallery() {
   const handleUnitClick = (unitNumber: number) => {
     if (!selectedTextbook)
       return
-    window.location.href = `/english/learner?textbookId=${selectedTextbook.id}&unitNumber=${unitNumber}`
+    window.location.href = `/english/learner?type=${learnType}&textbookId=${selectedTextbook.id}&unitNumber=${unitNumber}`
   }
 
   return (
@@ -58,7 +64,11 @@ export function TextbookGallery() {
         <a href="/english" className="text-muted-foreground hover:text-foreground">
           <Icon icon="icon-park-outline:left" className="size-5" />
         </a>
-        <h1 className="text-lg font-semibold">选择学习内容</h1>
+        <h1 className="text-lg font-semibold">
+          选择学习内容（
+          {learnType === 'sentence' ? '句子' : '单词'}
+          ）
+        </h1>
       </div>
 
       {/* Tabs 切换学段 */}
@@ -115,7 +125,8 @@ export function TextbookGallery() {
                         <p className="text-sm text-muted-foreground">{tb.publisher}</p>
                         {tb.grade && (
                           <p className="mt-1 text-xs text-muted-foreground">
-                            {tb.grade}{tb.semester ? ` · ${tb.semester}学期` : ''}
+                            {tb.grade}
+                            {tb.semester ? ` · ${tb.semester}学期` : ''}
                           </p>
                         )}
                       </CardContent>
@@ -126,11 +137,14 @@ export function TextbookGallery() {
       </div>
 
       {/* 单元选择 Dialog */}
-      <Dialog open={!!selectedTextbook} onOpenChange={(open) => !open && setSelectedTextbook(null)}>
+      <Dialog open={!!selectedTextbook} onOpenChange={open => !open && setSelectedTextbook(null)}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>
-              {selectedTextbook?.publisher} · {selectedTextbook?.name}
+              {selectedTextbook?.publisher}
+              {' '}
+              ·
+              {selectedTextbook?.name}
             </DialogTitle>
           </DialogHeader>
 

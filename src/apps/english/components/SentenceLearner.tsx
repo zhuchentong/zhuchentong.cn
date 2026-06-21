@@ -1,4 +1,4 @@
-import type { WordWithSentences } from '@english/interfaces'
+import type { TextbookSentenceResult } from '@english/interfaces'
 import type { EnglishTextbook } from '@/database/schema'
 
 import correctAudio from '@english/assets/audio/correct.wav'
@@ -18,11 +18,11 @@ import * as AppStore from '@/stores/app.store'
 type Phase = 'learning' | 'finished'
 
 interface ErrorRecord {
-  word: string
+  sentence: string
   typed: string
 }
 
-interface WordLearnerProps {
+interface SentenceLearnerProps {
   initialTextbookId: number
   initialUnitNumber: number
 }
@@ -60,7 +60,7 @@ function formatTime(seconds: number) {
   return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
 }
 
-export function WordLearner({ initialTextbookId, initialUnitNumber }: WordLearnerProps) {
+export function SentenceLearner({ initialTextbookId, initialUnitNumber }: SentenceLearnerProps) {
   // === 主题 ===
   const theme = useStore(AppStore.theme)
 
@@ -73,7 +73,7 @@ export function WordLearner({ initialTextbookId, initialUnitNumber }: WordLearne
 
   // === 学习阶段状态 ===
   const [phase, setPhase] = useState<Phase>('learning')
-  const [words, setWords] = useState<WordWithSentences[]>([])
+  const [sentences, setSentences] = useState<TextbookSentenceResult[]>([])
   const [currentIndex, setCurrentIndex] = useState(0)
   const [charIndex, setCharIndex] = useState(0)
   const [inputStatus, setInputStatus] = useState<('idle' | 'correct' | 'wrong')[]>([])
@@ -83,7 +83,7 @@ export function WordLearner({ initialTextbookId, initialUnitNumber }: WordLearne
   // === 功能条状态 ===
   const [accent, setAccent] = useState<'en-US' | 'en-GB'>('en-US')
   const [dictationMode, setDictationMode] = useState(false)
-  const [hideMeaning, setHideMeaning] = useState(false)
+  const [hideTranslation, setHideTranslation] = useState(false)
   const [autoSpeak, setAutoSpeak] = useState(true)
   const [soundEnabled, setSoundEnabled] = useState(true)
 
@@ -91,13 +91,13 @@ export function WordLearner({ initialTextbookId, initialUnitNumber }: WordLearne
   const [elapsed, setElapsed] = useState(0)
   const [totalInputs, setTotalInputs] = useState(0)
   const [correctInputs, setCorrectInputs] = useState(0)
-  const [correctWords, setCorrectWords] = useState(0)
+  const [correctSentences, setCorrectSentences] = useState(0)
   const [errors, setErrors] = useState<Map<string, ErrorRecord>>(() => new Map())
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
-  const wordCompleteTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const sentenceCompleteTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const pendingTimeoutsRef = useRef<Set<ReturnType<typeof setTimeout>>>(new Set())
-  const currentWordTypedRef = useRef('')
+  const currentTypedRef = useRef('')
   const isResettingRef = useRef(false)
   const resetTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const correctSoundRef = useRef<HTMLAudioElement | null>(null)
@@ -109,9 +109,9 @@ export function WordLearner({ initialTextbookId, initialUnitNumber }: WordLearne
       clearInterval(timerRef.current)
       timerRef.current = null
     }
-    if (wordCompleteTimeoutRef.current) {
-      clearTimeout(wordCompleteTimeoutRef.current)
-      wordCompleteTimeoutRef.current = null
+    if (sentenceCompleteTimeoutRef.current) {
+      clearTimeout(sentenceCompleteTimeoutRef.current)
+      sentenceCompleteTimeoutRef.current = null
     }
     if (resetTimeoutRef.current) {
       clearTimeout(resetTimeoutRef.current)
@@ -119,14 +119,14 @@ export function WordLearner({ initialTextbookId, initialUnitNumber }: WordLearne
     }
     isResettingRef.current = false
     cancelSpeech()
-    window.location.href = '/english/gallery'
+    window.location.href = '/english/gallery?type=sentence'
   }, [])
 
-  const goToNextWord = useCallback(() => {
-    wordCompleteTimeoutRef.current = null
+  const goToNextSentence = useCallback(() => {
+    sentenceCompleteTimeoutRef.current = null
     setCurrentIndex((prevIndex) => {
       const nextIndex = prevIndex + 1
-      if (nextIndex >= words.length) {
+      if (nextIndex >= sentences.length) {
         if (timerRef.current) {
           clearInterval(timerRef.current)
           timerRef.current = null
@@ -135,15 +135,15 @@ export function WordLearner({ initialTextbookId, initialUnitNumber }: WordLearne
         setPhase('finished')
         return prevIndex
       }
-      const nextWord = words[nextIndex]
-      const firstCharIdx = skipSpaces(nextWord.word, 0)
+      const nextSentence = sentences[nextIndex]
+      const firstCharIdx = skipSpaces(nextSentence.sentence, 0)
       setCharIndex(firstCharIdx)
-      setInputStatus(nextWord.word.split('').map(ch => ch === ' ' ? 'correct' : 'idle') as ('idle' | 'correct' | 'wrong')[])
-      setTypedChars(nextWord.word.split('').map(ch => ch === ' ' ? ' ' : ''))
-      currentWordTypedRef.current = ''
+      setInputStatus(nextSentence.sentence.split('').map(ch => ch === ' ' ? 'correct' : 'idle') as ('idle' | 'correct' | 'wrong')[])
+      setTypedChars(nextSentence.sentence.split('').map(ch => ch === ' ' ? ' ' : ''))
+      currentTypedRef.current = ''
       return nextIndex
     })
-  }, [words])
+  }, [sentences])
 
   // === 加载课本信息和单元列表，并自动开始学习 ===
   useEffect(() => {
@@ -160,28 +160,28 @@ export function WordLearner({ initialTextbookId, initialUnitNumber }: WordLearne
         const units = await apiRequest<number[]>(`/english/api/units?textbookId=${textbookId}`)
         setUnitNumbers(units)
 
-        // 加载单词并开始学习
-        const data = await apiRequest<WordWithSentences[]>(
-          `/english/api/words?textbookId=${textbookId}&unitNumber=${unitNumber}`,
+        // 加载课文句子并开始学习
+        const data = await apiRequest<TextbookSentenceResult[]>(
+          `/english/api/sentences?textbookId=${textbookId}&unitNumber=${unitNumber}`,
         )
         if (data.length === 0) {
-          alert('该单元暂无单词')
-          window.location.href = '/english/gallery'
+          alert('该单元暂无课文句子')
+          window.location.href = '/english/gallery?type=sentence'
           return
         }
         const shuffled = shuffle(data)
-        const firstWord = shuffled[0]
-        const firstCharIdx = skipSpaces(firstWord.word, 0)
-        setWords(shuffled)
+        const firstSentence = shuffled[0]
+        const firstCharIdx = skipSpaces(firstSentence.sentence, 0)
+        setSentences(shuffled)
         setCurrentIndex(0)
         setCharIndex(firstCharIdx)
-        setInputStatus(firstWord.word.split('').map(ch => ch === ' ' ? 'correct' : 'idle') as ('idle' | 'correct' | 'wrong')[])
-        setTypedChars(firstWord.word.split('').map(ch => ch === ' ' ? ' ' : ''))
+        setInputStatus(firstSentence.sentence.split('').map(ch => ch === ' ' ? 'correct' : 'idle') as ('idle' | 'correct' | 'wrong')[])
+        setTypedChars(firstSentence.sentence.split('').map(ch => ch === ' ' ? ' ' : ''))
       }
       catch (err) {
         console.error('加载数据失败:', err)
         alert('加载数据失败，请重试')
-        window.location.href = '/english/gallery'
+        window.location.href = '/english/gallery?type=sentence'
       }
       finally {
         setLoading(false)
@@ -212,14 +212,14 @@ export function WordLearner({ initialTextbookId, initialUnitNumber }: WordLearne
 
   // === 自动发音 ===
   useEffect(() => {
-    if (phase === 'learning' && autoSpeak && words[currentIndex]) {
+    if (phase === 'learning' && autoSpeak && sentences[currentIndex]) {
       const timer = setTimeout(() => {
-        speakWord(words[currentIndex].word, accent)
+        speakWord(sentences[currentIndex].sentence, accent)
       }, 100)
       return () => clearTimeout(timer)
     }
     return () => cancelSpeech()
-  }, [currentIndex, phase, words, autoSpeak, accent])
+  }, [currentIndex, phase, sentences, autoSpeak, accent])
 
   // === 全局键盘监听 ===
   useEffect(() => {
@@ -243,19 +243,19 @@ export function WordLearner({ initialTextbookId, initialUnitNumber }: WordLearne
       if (e.key.length > 1 && e.key !== 'Backspace')
         return
 
-      const word = words[currentIndex]
-      if (!word)
+      const sentence = sentences[currentIndex]
+      if (!sentence)
         return
 
       if (e.key === 'Backspace') {
         if (charIndex > 0) {
           let newIdx = charIndex - 1
           // 跳过空格位置
-          while (newIdx > 0 && word.word[newIdx] === ' ') {
+          while (newIdx > 0 && sentence.sentence[newIdx] === ' ') {
             newIdx--
           }
           // 如果当前位置是空格，不处理
-          if (word.word[newIdx] === ' ')
+          if (sentence.sentence[newIdx] === ' ')
             return
           setCharIndex(newIdx)
           setInputStatus((prev) => {
@@ -268,19 +268,19 @@ export function WordLearner({ initialTextbookId, initialUnitNumber }: WordLearne
             next[newIdx] = ''
             return next
           })
-          currentWordTypedRef.current = currentWordTypedRef.current.slice(0, -1)
+          currentTypedRef.current = currentTypedRef.current.slice(0, -1)
         }
         return
       }
 
       // 字母输入
-      const expected = word.word[charIndex]
+      const expected = sentence.sentence[charIndex]
       if (expected === undefined)
         return
 
-      // 如果当前位置是空格，自动跳过（理论上不会发生，因为初始化时已跳过）
+      // 如果当前位置是空格，自动跳过
       if (expected === ' ') {
-        setCharIndex(skipSpaces(word.word, charIndex))
+        setCharIndex(skipSpaces(sentence.sentence, charIndex))
         return
       }
 
@@ -307,17 +307,17 @@ export function WordLearner({ initialTextbookId, initialUnitNumber }: WordLearne
           next[charIndex] = e.key
           return next
         })
-        currentWordTypedRef.current += e.key
+        currentTypedRef.current += e.key
 
-        const nextCharIndex = skipSpaces(word.word, charIndex + 1)
-        if (nextCharIndex >= word.word.length) {
-          // 单词完成
-          setCorrectWords(c => c + 1)
+        const nextCharIndex = skipSpaces(sentence.sentence, charIndex + 1)
+        if (nextCharIndex >= sentence.sentence.length) {
+          // 句子完成
+          setCorrectSentences(c => c + 1)
           if (soundEnabled)
             playSound(correctSoundRef.current)
-          if (wordCompleteTimeoutRef.current)
-            clearTimeout(wordCompleteTimeoutRef.current)
-          wordCompleteTimeoutRef.current = setTimeout(goToNextWord, 500)
+          if (sentenceCompleteTimeoutRef.current)
+            clearTimeout(sentenceCompleteTimeoutRef.current)
+          sentenceCompleteTimeoutRef.current = setTimeout(goToNextSentence, 500)
         }
         setCharIndex(nextCharIndex)
       }
@@ -339,41 +339,41 @@ export function WordLearner({ initialTextbookId, initialUnitNumber }: WordLearne
           next[charIndex] = e.key
           return next
         })
-        currentWordTypedRef.current += e.key
+        currentTypedRef.current += e.key
 
         // 记录错误（无条件更新，记录最后一次错误）
         setErrors((prev) => {
           const next = new Map(prev)
-          next.set(word.word, { word: word.word, typed: currentWordTypedRef.current })
+          next.set(sentence.sentence, { sentence: sentence.sentence, typed: currentTypedRef.current })
           return next
         })
 
-        // 300ms后重置整个单词输入
+        // 300ms后重置整个句子输入
         if (resetTimeoutRef.current) {
           clearTimeout(resetTimeoutRef.current)
         }
         resetTimeoutRef.current = setTimeout(() => {
           resetTimeoutRef.current = null
-          const currentWord = words[currentIndex]
-          if (!currentWord) {
+          const currentSentence = sentences[currentIndex]
+          if (!currentSentence) {
             isResettingRef.current = false
             return
           }
 
-          const firstCharIdx = skipSpaces(currentWord.word, 0)
+          const firstCharIdx = skipSpaces(currentSentence.sentence, 0)
           setCharIndex(firstCharIdx)
-          setInputStatus(currentWord.word.split('').map(ch => ch === ' ' ? 'correct' : 'idle') as ('idle' | 'correct' | 'wrong')[])
-          setTypedChars(currentWord.word.split('').map(ch => ch === ' ' ? ' ' : ''))
-          currentWordTypedRef.current = ''
+          setInputStatus(currentSentence.sentence.split('').map(ch => ch === ' ' ? 'correct' : 'idle') as ('idle' | 'correct' | 'wrong')[])
+          setTypedChars(currentSentence.sentence.split('').map(ch => ch === ' ' ? ' ' : ''))
+          currentTypedRef.current = ''
           isResettingRef.current = false
 
-          if (wordCompleteTimeoutRef.current) {
-            clearTimeout(wordCompleteTimeoutRef.current)
-            wordCompleteTimeoutRef.current = null
+          if (sentenceCompleteTimeoutRef.current) {
+            clearTimeout(sentenceCompleteTimeoutRef.current)
+            sentenceCompleteTimeoutRef.current = null
           }
 
           if (autoSpeak) {
-            speakWord(currentWord.word, accent)
+            speakWord(currentSentence.sentence, accent)
           }
         }, 300)
       }
@@ -387,28 +387,28 @@ export function WordLearner({ initialTextbookId, initialUnitNumber }: WordLearne
       }
       pendingTimeouts.clear()
     }
-  }, [phase, currentIndex, charIndex, words, errors, soundEnabled, resetToGallery, goToNextWord])
+  }, [phase, currentIndex, charIndex, sentences, errors, soundEnabled, resetToGallery, goToNextSentence])
 
-  const restartWithSameWords = () => {
+  const restartWithSameSentences = () => {
     if (resetTimeoutRef.current) {
       clearTimeout(resetTimeoutRef.current)
       resetTimeoutRef.current = null
     }
     isResettingRef.current = false
-    const shuffled = shuffle(words)
-    const firstWord = shuffled[0]
-    const firstCharIdx = skipSpaces(firstWord.word, 0)
-    setWords(shuffled)
+    const shuffled = shuffle(sentences)
+    const firstSentence = shuffled[0]
+    const firstCharIdx = skipSpaces(firstSentence.sentence, 0)
+    setSentences(shuffled)
     setCurrentIndex(0)
     setCharIndex(firstCharIdx)
-    setInputStatus(firstWord.word.split('').map(ch => ch === ' ' ? 'correct' : 'idle') as ('idle' | 'correct' | 'wrong')[])
-    setTypedChars(firstWord.word.split('').map(ch => ch === ' ' ? ' ' : ''))
+    setInputStatus(firstSentence.sentence.split('').map(ch => ch === ' ' ? 'correct' : 'idle') as ('idle' | 'correct' | 'wrong')[])
+    setTypedChars(firstSentence.sentence.split('').map(ch => ch === ' ' ? ' ' : ''))
     setElapsed(0)
     setTotalInputs(0)
     setCorrectInputs(0)
-    setCorrectWords(0)
+    setCorrectSentences(0)
     setErrors(new Map())
-    currentWordTypedRef.current = ''
+    currentTypedRef.current = ''
     setPhase('learning')
   }
 
@@ -423,7 +423,7 @@ export function WordLearner({ initialTextbookId, initialUnitNumber }: WordLearne
     }
 
     const nextUnit = unitNumbers[currentIdx + 1]
-    window.location.href = `/english/learner?textbookId=${textbookId}&unitNumber=${nextUnit}`
+    window.location.href = `/english/learner?type=sentence&textbookId=${textbookId}&unitNumber=${nextUnit}`
   }, [textbookId, unitNumber, unitNumbers])
 
   const startDictation = useCallback(() => {
@@ -433,24 +433,24 @@ export function WordLearner({ initialTextbookId, initialUnitNumber }: WordLearne
     }
     isResettingRef.current = false
     setDictationMode(true)
-    const shuffled = shuffle(words)
-    const firstWord = shuffled[0]
-    const firstCharIdx = skipSpaces(firstWord.word, 0)
-    setWords(shuffled)
+    const shuffled = shuffle(sentences)
+    const firstSentence = shuffled[0]
+    const firstCharIdx = skipSpaces(firstSentence.sentence, 0)
+    setSentences(shuffled)
     setCurrentIndex(0)
     setCharIndex(firstCharIdx)
-    setInputStatus(firstWord.word.split('').map(ch => ch === ' ' ? 'correct' : 'idle') as ('idle' | 'correct' | 'wrong')[])
-    setTypedChars(firstWord.word.split('').map(ch => ch === ' ' ? ' ' : ''))
+    setInputStatus(firstSentence.sentence.split('').map(ch => ch === ' ' ? 'correct' : 'idle') as ('idle' | 'correct' | 'wrong')[])
+    setTypedChars(firstSentence.sentence.split('').map(ch => ch === ' ' ? ' ' : ''))
     setElapsed(0)
     setTotalInputs(0)
     setCorrectInputs(0)
-    setCorrectWords(0)
+    setCorrectSentences(0)
     setErrors(new Map())
-    currentWordTypedRef.current = ''
+    currentTypedRef.current = ''
     setPhase('learning')
-  }, [words])
+  }, [sentences])
 
-  const wpm = elapsed > 0 ? (correctWords / (elapsed / 60)).toFixed(1) : '0.0'
+  const wpm = elapsed > 0 ? (correctSentences / (elapsed / 60)).toFixed(1) : '0.0'
   const accuracy = totalInputs > 0 ? ((correctInputs / totalInputs) * 100).toFixed(1) : '100.0'
 
   // 加载中状态
@@ -464,8 +464,8 @@ export function WordLearner({ initialTextbookId, initialUnitNumber }: WordLearne
 
   // === 学习阶段 ===
   if (phase === 'learning') {
-    const currentWord = words[currentIndex]
-    const progress = ((currentIndex + 1) / words.length) * 100
+    const currentSentence = sentences[currentIndex]
+    const progress = ((currentIndex + 1) / sentences.length) * 100
 
     return (
       <div
@@ -505,14 +505,14 @@ export function WordLearner({ initialTextbookId, initialUnitNumber }: WordLearne
               <span>默写</span>
             </label>
 
-            {/* 隐藏释义 */}
+            {/* 隐藏翻译 */}
             <label className="flex cursor-pointer items-center gap-1.5 text-sm text-muted-foreground">
               <Switch
                 size="sm"
-                checked={hideMeaning}
-                onCheckedChange={setHideMeaning}
+                checked={hideTranslation}
+                onCheckedChange={setHideTranslation}
               />
-              <span>释义</span>
+              <span>翻译</span>
             </label>
 
             {/* 分隔线 */}
@@ -558,10 +558,10 @@ export function WordLearner({ initialTextbookId, initialUnitNumber }: WordLearne
 
         {/* 主内容区 - 居中显示 */}
         <div className="flex flex-1 flex-col items-center justify-center">
-          {/* 单词显示 */}
+          {/* 句子显示 */}
           <div className="mb-8 text-center">
-            <div className="mb-4 font-mono text-7xl font-bold tracking-widest">
-              {currentWord.word.split('').map((ch, i) => {
+            <div className="mb-4 font-mono text-4xl font-bold tracking-wider">
+              {currentSentence.sentence.split('').map((ch, i) => {
                 // 空格显示为 ␣
                 if (ch === ' ') {
                   return <span key={`${ch}-${i}`} className="inline-block text-muted-foreground/40">␣</span>
@@ -589,8 +589,8 @@ export function WordLearner({ initialTextbookId, initialUnitNumber }: WordLearne
                 )
               })}
             </div>
-            {!hideMeaning && (
-              <p className="text-2xl text-muted-foreground">{currentWord.meaning}</p>
+            {!hideTranslation && currentSentence.translation && (
+              <p className="text-xl text-muted-foreground">{currentSentence.translation}</p>
             )}
           </div>
 
@@ -600,7 +600,7 @@ export function WordLearner({ initialTextbookId, initialUnitNumber }: WordLearne
             <p className="text-center text-sm text-muted-foreground">
               {currentIndex + 1}
               {' / '}
-              {words.length}
+              {sentences.length}
             </p>
           </div>
         </div>
@@ -622,7 +622,7 @@ export function WordLearner({ initialTextbookId, initialUnitNumber }: WordLearne
             </div>
             <div className="text-center">
               <p className="text-xs text-muted-foreground">正确数</p>
-              <p className="font-mono text-lg font-semibold">{correctWords}</p>
+              <p className="font-mono text-lg font-semibold">{correctSentences}</p>
             </div>
             <div className="text-center">
               <p className="text-xs text-muted-foreground">正确率</p>
@@ -654,8 +654,8 @@ export function WordLearner({ initialTextbookId, initialUnitNumber }: WordLearne
               <p className="font-mono text-2xl font-bold">{formatTime(elapsed)}</p>
             </div>
             <div className="rounded-lg border border-border p-4 text-center">
-              <p className="text-sm text-muted-foreground">单词数</p>
-              <p className="font-mono text-2xl font-bold">{words.length}</p>
+              <p className="text-sm text-muted-foreground">句子数</p>
+              <p className="font-mono text-2xl font-bold">{sentences.length}</p>
             </div>
             <div className="rounded-lg border border-border p-4 text-center">
               <p className="text-sm text-muted-foreground">速度</p>
@@ -674,20 +674,21 @@ export function WordLearner({ initialTextbookId, initialUnitNumber }: WordLearne
             </div>
           </div>
 
-          {/* 错误单词 */}
+          {/* 错误句子 */}
           {errorList.length > 0 && (
             <div>
               <h3 className="mb-2 text-sm font-medium text-muted-foreground">
-                错误单词（
+                错误句子（
                 {errorList.length}
                 ）
               </h3>
               <div className="space-y-2">
                 {errorList.map(err => (
-                  <div key={err.word} className="flex items-center justify-between rounded border border-border p-2 text-sm">
-                    <span className="font-medium">{err.word}</span>
-                    <span className="text-red-500">
-                      → 你输入:
+                  <div key={err.sentence} className="flex items-center justify-between rounded border border-border p-2 text-sm">
+                    <span className="font-medium truncate max-w-[60%]">{err.sentence}</span>
+                    <span className="text-red-500 truncate max-w-[35%]">
+                      →
+                      {' '}
                       {err.typed}
                     </span>
                   </div>
@@ -707,7 +708,7 @@ export function WordLearner({ initialTextbookId, initialUnitNumber }: WordLearne
               </Button>
             </div>
             <div className="flex gap-3">
-              <Button className="flex-1" variant="outline" onClick={restartWithSameWords}>
+              <Button className="flex-1" variant="outline" onClick={restartWithSameSentences}>
                 重新学习
               </Button>
               <Button className="flex-1" variant="outline" onClick={resetToGallery}>

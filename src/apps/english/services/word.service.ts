@@ -12,10 +12,10 @@ import type {
 import { and, asc, eq, inArray } from 'drizzle-orm'
 import { db } from '@/database'
 import {
-  englishSentence,
   englishTextbook,
   englishTextbookWord,
   englishWord,
+  englishWordSentence,
 } from '@/database/schema'
 
 /**
@@ -71,7 +71,7 @@ export async function addWord(payload: AddWordPayload): Promise<AddWordResult> {
     // 3. 插入例句（唯一约束去重）
     if (payload.sentences?.length) {
       await tx
-        .insert(englishSentence)
+        .insert(englishWordSentence)
         .values(
           payload.sentences.map(s => ({
             wordId,
@@ -149,7 +149,7 @@ export async function batchAddWords(payload: BatchAddWordPayload): Promise<Batch
       // 3. 插入例句（唯一约束去重）
       if (item.sentences?.length) {
         await tx
-          .insert(englishSentence)
+          .insert(englishWordSentence)
           .values(
             item.sentences.map(s => ({
               wordId,
@@ -191,13 +191,13 @@ export async function listWords(textbookId: number, unitNumber: number): Promise
   const wordIds = words.map(w => w.id)
   const sentences = await db
     .select({
-      id: englishSentence.id,
-      wordId: englishSentence.wordId,
-      sentence: englishSentence.sentence,
-      translation: englishSentence.translation,
+      id: englishWordSentence.id,
+      wordId: englishWordSentence.wordId,
+      sentence: englishWordSentence.sentence,
+      translation: englishWordSentence.translation,
     })
-    .from(englishSentence)
-    .where(inArray(englishSentence.wordId, wordIds))
+    .from(englishWordSentence)
+    .where(inArray(englishWordSentence.wordId, wordIds))
 
   // 按单词分组例句
   const sentenceMap = new Map<number, WordWithSentences['sentences']>()
@@ -291,7 +291,7 @@ export async function batchAddSentences(payload: BatchAddSentencesPayload): Prom
 
       if (item.sentences.length > 0) {
         await tx
-          .insert(englishSentence)
+          .insert(englishWordSentence)
           .values(
             item.sentences.map(s => ({
               wordId: wordRow.id,

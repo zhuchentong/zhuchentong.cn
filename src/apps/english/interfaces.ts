@@ -117,3 +117,50 @@ export interface BatchAddSentencesResult {
   attached: number // 尝试插入的例句数
   missing: number // 未找到的单词数（word 不存在于 DB）
 }
+
+// ===== 课文句子相关 =====
+
+/**
+ * 课文句子查询结果
+ */
+export interface TextbookSentenceResult {
+  id: number
+  sentence: string
+  translation: string | null
+}
+
+/**
+ * 录入课文句子的请求体
+ */
+export interface AddTextbookSentencePayload {
+  textbookId: number
+  unitNumber: number
+  sentence: string
+  translation?: string
+}
+
+/**
+ * 批量导入课文句子的单条输入（不含 textbookId，由外层统一指定）
+ */
+export interface BatchTextbookSentenceItem {
+  unitNumber: number
+  sentence: string
+  translation?: string
+}
+
+/**
+ * 批量导入课文句子请求体
+ */
+export interface BatchAddTextbookSentencePayload {
+  textbookId: number
+  sentences: BatchTextbookSentenceItem[]
+}
+
+/**
+ * 批量导入课文句子返回结果
+ */
+export interface BatchAddTextbookSentenceResult {
+  total: number // 处理总数
+  created: number // 新建数
+  skipped: number // 跳过数（已存在）
+}

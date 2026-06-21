@@ -1,48 +1,41 @@
-import type { BatchAddSentencesItem } from '@english/interfaces'
+import type { BatchTextbookSentenceItem } from '@english/interfaces'
 
 import type { APIRoute } from 'astro'
 import { fail, ok } from '@english/services/response'
-import { batchAddSentences } from '@english/services/word.service'
+import { batchAddTextbookSentences } from '@english/services/sentence.service'
 
 /**
- * 批量为已有单词添加例句（不修改释义/音标）
+ * 批量导入课文句子到某课本（各条目内指定单元号）
  *
- * 请求体：{ items: [{ word: string, sentences: SentenceInput[] }] }
+ * 请求体：{ textbookId: number, sentences: BatchTextbookSentenceItem[] }
  */
 export const POST: APIRoute = async ({ request }) => {
-  const body = await request.json() as { items?: BatchAddSentencesItem[] }
-  const { items } = body
+  const body = await request.json() as { textbookId?: number, sentences?: BatchTextbookSentenceItem[] }
+  const { textbookId, sentences } = body
 
-  if (!Array.isArray(items) || items.length === 0) {
-    return fail('缺少必填字段：items[]')
+  if (!textbookId || !Array.isArray(sentences) || sentences.length === 0) {
+    return fail('缺少必填字段：textbookId, sentences[]')
   }
 
-  for (const item of items) {
-    if (!item.word || !Array.isArray(item.sentences) || item.sentences.length === 0) {
-      return fail(`存在不合法条目，需包含 word 和 sentences[]：${JSON.stringify(item)}`)
+  // 校验每条目，并做基本清洗
+  const cleaned: BatchTextbookSentenceItem[] = []
+  for (const item of sentences) {
+    if (item.unitNumber === undefined || !item.sentence) {
+      return fail(`存在不合法条目，需包含 unitNumber, sentence：${JSON.stringify(item)}`)
     }
-  }
-
-  const cleaned: BatchAddSentencesItem[] = items.map(item => ({
-    word: item.word.trim(),
-    sentences: item.sentences
-      .filter(s => s.sentence?.trim())
-      .map(s => ({
-        sentence: s.sentence.trim(),
-        translation: s.translation?.trim() || undefined,
-      })),
-  })).filter(item => item.sentences.length > 0)
-
-  if (cleaned.length === 0) {
-    return fail('清洗后无有效条目')
+    cleaned.push({
+      unitNumber: item.unitNumber,
+      sentence: item.sentence.trim(),
+      translation: item.translation?.trim() || undefined,
+    })
   }
 
   try {
-    const result = await batchAddSentences({ items: cleaned })
+    const result = await batchAddTextbookSentences({ textbookId, sentences: cleaned })
     return ok(result, 201)
   }
   catch (err) {
-    console.error('批量添加例句失败:', err)
-    return fail('批量添加例句失败', 500)
+    console.error('批量导入课文句子失败:', err)
+    return fail('批量导入课文句子失败', 500)
   }
 }
