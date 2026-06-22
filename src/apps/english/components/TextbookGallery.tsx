@@ -20,6 +20,7 @@ export function TextbookGallery() {
 
   // 从 URL 读取学习类型（惰性初始化，避免 useEffect 中同步 setState）
   const [learnType] = useState<'word' | 'sentence'>(() => {
+    if (typeof window === 'undefined') return 'word'
     const params = new URLSearchParams(window.location.search)
     return params.get('type') === 'sentence' ? 'sentence' : 'word'
   })
