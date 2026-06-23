@@ -175,6 +175,15 @@ const wordItems = units.flatMap(unit =>
   })),
 )
 
+async function findTextbook() {
+  const res = await fetch(`${BASE}/english/api/textbooks`)
+  const json = await res.json()
+  if (!res.ok) {
+    throw new Error(`查询教材失败: ${json.error ?? res.status}`)
+  }
+  return json.data.find(tb => tb.publisher === textbook.publisher && tb.name === textbook.name)
+}
+
 async function createTextbook() {
   const res = await fetch(`${BASE}/english/api/textbooks`, {
     method: 'POST',
@@ -205,10 +214,17 @@ async function main() {
   console.log(`目标服务：${BASE}`)
   console.log(`待导入：${wordItems.length} 个词条，分布于 ${units.length} 个单元\n`)
 
-  // 1. 创建教材
-  console.log('创建教材…')
-  const tb = await createTextbook()
-  console.log(`  ✓ 教材已创建：id=${tb.id} ${tb.publisher}·${tb.stage}·${tb.name}\n`)
+  // 1. 查询或创建教材
+  console.log('查询教材…')
+  let tb = await findTextbook()
+  if (tb) {
+    console.log(`  ✓ 教材已存在：id=${tb.id} ${tb.publisher}·${tb.stage}·${tb.name}\n`)
+  }
+  else {
+    console.log('  教材不存在，创建中…')
+    tb = await createTextbook()
+    console.log(`  ✓ 教材已创建：id=${tb.id} ${tb.publisher}·${tb.stage}·${tb.name}\n`)
+  }
 
   // 2. 批量导入单词
   console.log('批量导入单词…')

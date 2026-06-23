@@ -20,7 +20,8 @@ export function TextbookGallery() {
 
   // 从 URL 读取学习类型（惰性初始化，避免 useEffect 中同步 setState）
   const [learnType] = useState<'word' | 'sentence'>(() => {
-    if (typeof window === 'undefined') return 'word'
+    if (typeof window === 'undefined')
+      return 'word'
     const params = new URLSearchParams(window.location.search)
     return params.get('type') === 'sentence' ? 'sentence' : 'word'
   })
@@ -32,6 +33,7 @@ export function TextbookGallery() {
 
   // 加载课本列表
   useEffect(() => {
+    // eslint-disable-next-line react/set-state-in-effect -- 数据获取的标准 loading 模式，多一次渲染可忽略
     setLoading(true)
     apiRequest<EnglishTextbook[]>(`/english/api/textbooks?stage=${encodeURIComponent(stage)}`)
       .then(setTextbooks)
@@ -165,7 +167,7 @@ export function TextbookGallery() {
                 : (
                     <div className="space-y-4">
                       <p className="text-sm text-muted-foreground">选择学习单元：</p>
-                      <div className="grid grid-cols-3 gap-2">
+                      <div className="grid max-h-[60vh] grid-cols-3 gap-2 overflow-y-auto pr-1">
                         {unitNumbers.map(n => (
                           <Button
                             key={n}

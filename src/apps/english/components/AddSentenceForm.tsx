@@ -126,6 +126,7 @@ export function SentenceList({ refreshKey }: SentenceListProps) {
     if (textbookId && unitNumber !== null) {
       loadSentences()
     }
+    // eslint-disable-next-line react/exhaustive-deps -- loadSentences 仅依赖已在 deps 中的值，加入会导致重复请求
   }, [refreshKey, textbookId, unitNumber])
 
   if (!textbookId || unitNumber === null)

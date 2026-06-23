@@ -9,7 +9,7 @@ import type {
   WordWithSentences,
 } from '@english/interfaces'
 
-import { and, asc, eq, inArray } from 'drizzle-orm'
+import { and, asc, eq, inArray, max } from 'drizzle-orm'
 import { db } from '@/database'
 import {
   englishTextbook,
@@ -58,13 +58,21 @@ export async function addWord(payload: AddWordPayload): Promise<AddWordResult> {
       throw new Error('单词 upsert 失败')
     }
 
-    // 2. 关联课本单元（联合主键去重）
+    // 2. 关联课本单元（联合主键去重；新关联追加到单元末尾）
+    const [maxRow] = await tx
+      .select({ p: max(englishTextbookWord.position) })
+      .from(englishTextbookWord)
+      .where(and(
+        eq(englishTextbookWord.textbookId, payload.textbookId),
+        eq(englishTextbookWord.unitNumber, payload.unitNumber),
+      ))
     await tx
       .insert(englishTextbookWord)
       .values({
         textbookId: payload.textbookId,
         wordId,
         unitNumber: payload.unitNumber,
+        position: (maxRow?.p ?? -1) + 1,
       })
       .onConflictDoNothing()
 
@@ -95,6 +103,8 @@ export async function addWord(payload: AddWordPayload): Promise<AddWordResult> {
 export async function batchAddWords(payload: BatchAddWordPayload): Promise<BatchAddWordResult> {
   let created = 0
   let updated = 0
+  // 每个单元的 position 计数器：按条目出现顺序 0,1,2... 递增
+  const posCounter = new Map<number, number>()
 
   await db.transaction(async (tx) => {
     for (const item of payload.words) {
@@ -136,15 +146,21 @@ export async function batchAddWords(payload: BatchAddWordPayload): Promise<Batch
         throw new Error(`单词 upsert 失败: ${item.word}`)
       }
 
-      // 2. 关联课本单元（联合主键去重）
+      // 2. 关联课本单元（按单元分配 position；onConflictDoUpdate 以便重导更新顺序）
+      const pos = posCounter.get(item.unitNumber) ?? 0
+      posCounter.set(item.unitNumber, pos + 1)
       await tx
         .insert(englishTextbookWord)
         .values({
           textbookId: payload.textbookId,
           wordId,
           unitNumber: item.unitNumber,
+          position: pos,
         })
-        .onConflictDoNothing()
+        .onConflictDoUpdate({
+          target: [englishTextbookWord.textbookId, englishTextbookWord.wordId, englishTextbookWord.unitNumber],
+          set: { position: pos },
+        })
 
       // 3. 插入例句（唯一约束去重）
       if (item.sentences?.length) {
@@ -182,6 +198,7 @@ export async function listWords(textbookId: number, unitNumber: number): Promise
       eq(englishTextbookWord.textbookId, textbookId),
       eq(englishTextbookWord.unitNumber, unitNumber),
     ))
+    .orderBy(asc(englishTextbookWord.position))
 
   if (words.length === 0) {
     return []

@@ -84,6 +84,7 @@ export function SentenceLearner({ initialTextbookId, initialUnitNumber }: Senten
   const [accent, setAccent] = useState<'en-US' | 'en-GB'>('en-US')
   const [dictationMode, setDictationMode] = useState(false)
   const [hideTranslation, setHideTranslation] = useState(false)
+  const [showSpace, setShowSpace] = useState(false)
   const [autoSpeak, setAutoSpeak] = useState(true)
   const [soundEnabled, setSoundEnabled] = useState(true)
 
@@ -348,7 +349,7 @@ export function SentenceLearner({ initialTextbookId, initialUnitNumber }: Senten
           return next
         })
 
-        // 300ms后重置整个句子输入
+        // 300ms后重置当前单词输入（从出错单词的起始位置重新输入）
         if (resetTimeoutRef.current) {
           clearTimeout(resetTimeoutRef.current)
         }
@@ -360,11 +361,43 @@ export function SentenceLearner({ initialTextbookId, initialUnitNumber }: Senten
             return
           }
 
-          const firstCharIdx = skipSpaces(currentSentence.sentence, 0)
-          setCharIndex(firstCharIdx)
-          setInputStatus(currentSentence.sentence.split('').map(ch => ch === ' ' ? 'correct' : 'idle') as ('idle' | 'correct' | 'wrong')[])
-          setTypedChars(currentSentence.sentence.split('').map(ch => ch === ' ' ? ' ' : ''))
-          currentTypedRef.current = ''
+          // 从出错位置向前扫描，定位当前单词的起始字符
+          let wordStart = charIndex
+          while (wordStart > 0 && currentSentence.sentence[wordStart - 1] !== ' ') {
+            wordStart--
+          }
+
+          // 定位出错单词的结束位置（下一个空格或句末），用于单词级发音
+          let wordEnd = wordStart
+          while (wordEnd < currentSentence.sentence.length && currentSentence.sentence[wordEnd] !== ' ') {
+            wordEnd++
+          }
+          const errorWord = currentSentence.sentence.slice(wordStart, wordEnd)
+
+          // 仅重置当前单词及之后的内容，之前已正确的单词保持不变
+          setCharIndex(wordStart)
+          setInputStatus((prev) => {
+            const next = [...prev]
+            for (let i = wordStart; i < next.length; i++) {
+              next[i] = currentSentence.sentence[i] === ' ' ? 'correct' : 'idle'
+            }
+            return next
+          })
+          setTypedChars((prev) => {
+            const next = [...prev]
+            for (let i = wordStart; i < next.length; i++) {
+              next[i] = currentSentence.sentence[i] === ' ' ? ' ' : ''
+            }
+            return next
+          })
+
+          // currentTypedRef 只保留 wordStart 之前已正确输入的非空格字符
+          let kept = ''
+          for (let i = 0; i < wordStart; i++) {
+            if (currentSentence.sentence[i] !== ' ')
+              kept += currentSentence.sentence[i]
+          }
+          currentTypedRef.current = kept
           isResettingRef.current = false
 
           if (sentenceCompleteTimeoutRef.current) {
@@ -373,7 +406,7 @@ export function SentenceLearner({ initialTextbookId, initialUnitNumber }: Senten
           }
 
           if (autoSpeak) {
-            speakWord(currentSentence.sentence, accent)
+            speakWord(errorWord, accent)
           }
         }, 300)
       }
@@ -387,7 +420,7 @@ export function SentenceLearner({ initialTextbookId, initialUnitNumber }: Senten
       }
       pendingTimeouts.clear()
     }
-  }, [phase, currentIndex, charIndex, sentences, errors, soundEnabled, resetToGallery, goToNextSentence])
+  }, [phase, currentIndex, charIndex, sentences, errors, soundEnabled, resetToGallery, goToNextSentence, accent, autoSpeak])
 
   const restartWithSameSentences = () => {
     if (resetTimeoutRef.current) {
@@ -467,6 +500,22 @@ export function SentenceLearner({ initialTextbookId, initialUnitNumber }: Senten
     const currentSentence = sentences[currentIndex]
     const progress = ((currentIndex + 1) / sentences.length) * 100
 
+    // 按单词分段，保证换行时不拆分单词（保留绝对字符索引用于状态着色）
+    const sentenceChars = currentSentence.sentence
+    const segments: Array<{ type: 'word', start: number, end: number } | { type: 'space', index: number }> = []
+    for (let i = 0; i < sentenceChars.length;) {
+      if (sentenceChars[i] === ' ') {
+        segments.push({ type: 'space', index: i })
+        i++
+      }
+      else {
+        const start = i
+        while (i < sentenceChars.length && sentenceChars[i] !== ' ')
+          i++
+        segments.push({ type: 'word', start, end: i })
+      }
+    }
+
     return (
       <div
         className={`flex h-full flex-col bg-background transition-colors ${wrongFlash ? 'bg-red-50 dark:bg-red-950/30' : ''}`}
@@ -515,6 +564,16 @@ export function SentenceLearner({ initialTextbookId, initialUnitNumber }: Senten
               <span>翻译</span>
             </label>
 
+            {/* 显示空格符号 */}
+            <label className="flex cursor-pointer items-center gap-1.5 text-sm text-muted-foreground">
+              <Switch
+                size="sm"
+                checked={showSpace}
+                onCheckedChange={setShowSpace}
+              />
+              <span>空格</span>
+            </label>
+
             {/* 分隔线 */}
             <div className="h-4 w-px bg-border" />
 
@@ -557,34 +616,47 @@ export function SentenceLearner({ initialTextbookId, initialUnitNumber }: Senten
         </div>
 
         {/* 主内容区 - 居中显示 */}
-        <div className="flex flex-1 flex-col items-center justify-center">
+        <div className="flex flex-1 flex-col items-center justify-center px-8 sm:px-16">
           {/* 句子显示 */}
-          <div className="mb-8 text-center">
+          <div className="mb-8 w-full max-w-5xl text-center">
             <div className="mb-4 font-mono text-4xl font-bold tracking-wider">
-              {currentSentence.sentence.split('').map((ch, i) => {
-                // 空格显示为 ␣
-                if (ch === ' ') {
-                  return <span key={`${ch}-${i}`} className="inline-block text-muted-foreground/40">␣</span>
-                }
-                if (dictationMode) {
-                  const typed = typedChars[i]
-                  if (!typed)
-                    return <span key={`${ch}-${i}`} className="inline-block text-muted-foreground">_</span>
-                  const isCorrect = typed.toLowerCase() === ch.toLowerCase()
+              {segments.map((seg) => {
+                if (seg.type === 'space') {
                   return (
-                    <span key={`${ch}-${i}`} className={`inline-block transition-colors ${isCorrect ? 'text-green-500' : 'text-red-500'}`}>
-                      {typed}
+                    <span
+                      key={`s-${seg.index}`}
+                      className={`inline-block ${showSpace ? 'text-muted-foreground/40' : 'text-transparent'}`}
+                    >
+                      ␣
                     </span>
                   )
                 }
-                let color = 'text-muted-foreground/40'
-                if (inputStatus[i] === 'correct')
-                  color = 'text-green-500'
-                else if (inputStatus[i] === 'wrong')
-                  color = 'text-red-500'
                 return (
-                  <span key={`${ch}-${i}`} className={`${color} inline-block transition-colors`}>
-                    {ch}
+                  <span key={`w-${seg.start}`} className="inline-block whitespace-nowrap">
+                    {sentenceChars.slice(seg.start, seg.end).split('').map((ch, k) => {
+                      const i = seg.start + k
+                      if (dictationMode) {
+                        const typed = typedChars[i]
+                        if (!typed)
+                          return <span key={i} className="inline-block text-muted-foreground">_</span>
+                        const isCorrect = typed.toLowerCase() === ch.toLowerCase()
+                        return (
+                          <span key={i} className={`inline-block transition-colors ${isCorrect ? 'text-green-500' : 'text-red-500'}`}>
+                            {typed}
+                          </span>
+                        )
+                      }
+                      let color = 'text-muted-foreground/40'
+                      if (inputStatus[i] === 'correct')
+                        color = 'text-green-500'
+                      else if (inputStatus[i] === 'wrong')
+                        color = 'text-red-500'
+                      return (
+                        <span key={i} className={`${color} inline-block transition-colors`}>
+                          {ch}
+                        </span>
+                      )
+                    })}
                   </span>
                 )
               })}

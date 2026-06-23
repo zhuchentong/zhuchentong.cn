@@ -1,5 +1,6 @@
 import { writeFileSync } from 'node:fs'
 import { createRequire } from 'node:module'
+import process from 'node:process'
 
 const require = createRequire(import.meta.url)
 const cnchar = require('cnchar')

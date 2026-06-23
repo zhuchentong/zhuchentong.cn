@@ -84,6 +84,7 @@ export function WordLearner({ initialTextbookId, initialUnitNumber }: WordLearne
   const [accent, setAccent] = useState<'en-US' | 'en-GB'>('en-US')
   const [dictationMode, setDictationMode] = useState(false)
   const [hideMeaning, setHideMeaning] = useState(false)
+  const [showSpace, setShowSpace] = useState(false)
   const [autoSpeak, setAutoSpeak] = useState(true)
   const [soundEnabled, setSoundEnabled] = useState(true)
 
@@ -387,7 +388,7 @@ export function WordLearner({ initialTextbookId, initialUnitNumber }: WordLearne
       }
       pendingTimeouts.clear()
     }
-  }, [phase, currentIndex, charIndex, words, errors, soundEnabled, resetToGallery, goToNextWord])
+  }, [phase, currentIndex, charIndex, words, errors, soundEnabled, resetToGallery, goToNextWord, accent, autoSpeak])
 
   const restartWithSameWords = () => {
     if (resetTimeoutRef.current) {
@@ -515,6 +516,16 @@ export function WordLearner({ initialTextbookId, initialUnitNumber }: WordLearne
               <span>释义</span>
             </label>
 
+            {/* 显示空格符号 */}
+            <label className="flex cursor-pointer items-center gap-1.5 text-sm text-muted-foreground">
+              <Switch
+                size="sm"
+                checked={showSpace}
+                onCheckedChange={setShowSpace}
+              />
+              <span>空格</span>
+            </label>
+
             {/* 分隔线 */}
             <div className="h-4 w-px bg-border" />
 
@@ -562,9 +573,17 @@ export function WordLearner({ initialTextbookId, initialUnitNumber }: WordLearne
           <div className="mb-8 text-center">
             <div className="mb-4 font-mono text-7xl font-bold tracking-widest">
               {currentWord.word.split('').map((ch, i) => {
-                // 空格显示为 ␣
+                /* eslint-disable react/no-array-index-key -- 单词字符数组为静态位置列表，不增删/重排 */
+                // 空格：按开关显示 ␣ 或不可见占位（nbsp 防折叠）
                 if (ch === ' ') {
-                  return <span key={`${ch}-${i}`} className="inline-block text-muted-foreground/40">␣</span>
+                  return (
+                    <span
+                      key={`${ch}-${i}`}
+                      className={`inline-block ${showSpace ? 'text-muted-foreground/40' : 'text-transparent'}`}
+                    >
+                      ␣
+                    </span>
+                  )
                 }
                 if (dictationMode) {
                   const typed = typedChars[i]
@@ -587,6 +606,7 @@ export function WordLearner({ initialTextbookId, initialUnitNumber }: WordLearne
                     {ch}
                   </span>
                 )
+                /* eslint-enable react/no-array-index-key */
               })}
             </div>
             {!hideMeaning && (

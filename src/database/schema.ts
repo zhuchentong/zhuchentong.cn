@@ -37,6 +37,7 @@ export const englishTextbookWord = pgTable('english_textbook_word', {
   textbookId: integer('textbook_id').references(() => englishTextbook.id).notNull(),
   wordId: integer('word_id').references(() => englishWord.id).notNull(),
   unitNumber: integer('unit_number').notNull(),
+  position: integer('position').notNull().default(0),
 }, table => [
   primaryKey({ columns: [table.textbookId, table.wordId, table.unitNumber] }),
 ])
@@ -59,9 +60,10 @@ export const englishSentence = pgTable('english_sentence', {
   unitNumber: integer('unit_number').notNull(),
   sentence: text('sentence').notNull(),
   translation: text('translation'),
+  position: integer('position').notNull().default(0),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 }, table => [
-  unique('english_sentence_textbook_unit_sentence_unique').on(table.textbookId, table.unitNumber, table.sentence),
+  unique('english_sentence_textbook_unit_position_unique').on(table.textbookId, table.unitNumber, table.position),
 ])
 
 // ===== 类型导出 =====
