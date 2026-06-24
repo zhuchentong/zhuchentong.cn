@@ -1,0 +1,8 @@
+---
+import EnglishLayout from '@english/layout.astro'
+import { WrongWordsBook } from '@english/components/WrongWordsBook'
+---
+
+<EnglishLayout title="错题本">
+  <WrongWordsBook client:only="react" />
+</EnglishLayout>

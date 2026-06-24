@@ -66,6 +66,17 @@ export const englishSentence = pgTable('english_sentence', {
   unique('english_sentence_textbook_unit_position_unique').on(table.textbookId, table.unitNumber, table.position),
 ])
 
+// 6. 单元元数据表（标题/排序，可选；无记录的课本回退到由句子/单词派生单元）
+export const englishUnit = pgTable('english_unit', {
+  textbookId: integer('textbook_id').references(() => englishTextbook.id).notNull(),
+  unitNumber: integer('unit_number').notNull(),
+  title: text('title'),
+  position: integer('position').notNull().default(0),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+}, table => [
+  primaryKey({ columns: [table.textbookId, table.unitNumber] }),
+])
+
 // ===== 类型导出 =====
 
 // 课本表
@@ -87,3 +98,7 @@ export type NewEnglishWordSentence = typeof englishWordSentence.$inferInsert
 // 课文句子表
 export type EnglishSentence = typeof englishSentence.$inferSelect
 export type NewEnglishSentence = typeof englishSentence.$inferInsert
+
+// 单元元数据表
+export type EnglishUnit = typeof englishUnit.$inferSelect
+export type NewEnglishUnit = typeof englishUnit.$inferInsert

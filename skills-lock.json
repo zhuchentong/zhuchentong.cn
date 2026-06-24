@@ -6,6 +6,12 @@
       "sourceType": "github",
       "skillPath": "skills/context7/SKILL.md",
       "computedHash": "fccbea654f8e35824a8bdce3e059e206efeb6c1fab9f6c096c3867e761081983"
+    },
+    "iconify-skill": {
+      "source": "bingal/iconify-skill",
+      "sourceType": "github",
+      "skillPath": "SKILL.md",
+      "computedHash": "ec07bdccce95dc52f6ac471c5838fba266b688e42a60a9c7cf8064f6a91bba98"
     }
   }
 }

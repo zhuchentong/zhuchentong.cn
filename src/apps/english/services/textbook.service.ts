@@ -2,7 +2,7 @@ import type { CreateTextbookPayload } from '@english/interfaces'
 
 import { eq } from 'drizzle-orm'
 import { db } from '@/database'
-import { englishTextbook } from '@/database/schema'
+import { englishSentence, englishTextbook, englishTextbookWord, englishUnit } from '@/database/schema'
 
 /** 中文数字映射，用于年级排序 */
 const CN_NUM: Record<string, number> = {
@@ -73,4 +73,62 @@ export async function createTextbook(payload: CreateTextbookPayload) {
     })
     .returning()
   return row
+}
+
+/**
+ * 查询某课本下所有单元（含标题）
+ *
+ * 三源 union：english_unit 元数据（标题来源）+ english_sentence（句子派生）+
+ * english_textbook_word（单词派生）。无元数据的课本（如新概念）title 为 null。
+ * 排序：有 position 的按 position，否则按 unitNumber 升序。
+ */
+export async function listUnits(textbookId: number): Promise<{ unitNumber: number, title: string | null }[]> {
+  // 1. 单元元数据（标题 + 自定义排序）
+  const unitRows = await db
+    .select({
+      unitNumber: englishUnit.unitNumber,
+      title: englishUnit.title,
+      position: englishUnit.position,
+    })
+    .from(englishUnit)
+    .where(eq(englishUnit.textbookId, textbookId))
+
+  const metaMap = new Map<number, { title: string | null, position: number }>()
+  for (const r of unitRows)
+    metaMap.set(r.unitNumber, { title: r.title, position: r.position })
+
+  // 2. 句子派生的单元号
+  const sentRows = await db
+    .selectDistinct({ unitNumber: englishSentence.unitNumber })
+    .from(englishSentence)
+    .where(eq(englishSentence.textbookId, textbookId))
+
+  // 3. 单词派生的单元号
+  const wordRows = await db
+    .selectDistinct({ unitNumber: englishTextbookWord.unitNumber })
+    .from(englishTextbookWord)
+    .where(eq(englishTextbookWord.textbookId, textbookId))
+
+  // 合并所有单元号
+  const allUnits = new Set<number>()
+  for (const r of unitRows)
+    allUnits.add(r.unitNumber)
+  for (const r of sentRows)
+    allUnits.add(r.unitNumber)
+  for (const r of wordRows)
+    allUnits.add(r.unitNumber)
+
+  // 拼装标题并排序
+  const result = [...allUnits].map(unitNumber => ({
+    unitNumber,
+    title: metaMap.get(unitNumber)?.title ?? null,
+  }))
+  result.sort((a, b) => {
+    const pa = metaMap.get(a.unitNumber)?.position
+    const pb = metaMap.get(b.unitNumber)?.position
+    if (pa !== undefined && pb !== undefined)
+      return pa - pb
+    return a.unitNumber - b.unitNumber
+  })
+  return result
 }

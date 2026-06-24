@@ -19,6 +19,7 @@ export default defineConfig({
       '/english/admin': './src/apps/english/pages/admin.astro',
       '/english/gallery': './src/apps/english/pages/gallery.astro',
       '/english/learner': './src/apps/english/pages/learner.astro',
+      '/english/wrong-words': './src/apps/english/pages/wrong-words.astro',
       '/english/api/textbooks': './src/apps/english/pages/api/textbooks.ts',
       '/english/api/units': './src/apps/english/pages/api/units.ts',
       '/english/api/words': './src/apps/english/pages/api/words.ts',

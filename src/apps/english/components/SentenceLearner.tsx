@@ -17,11 +17,6 @@ import * as AppStore from '@/stores/app.store'
 
 type Phase = 'learning' | 'finished'
 
-interface ErrorRecord {
-  sentence: string
-  typed: string
-}
-
 interface SentenceLearnerProps {
   initialTextbookId: number
   initialUnitNumber: number
@@ -83,6 +78,7 @@ export function SentenceLearner({ initialTextbookId, initialUnitNumber }: Senten
   // === 功能条状态 ===
   const [accent, setAccent] = useState<'en-US' | 'en-GB'>('en-US')
   const [dictationMode, setDictationMode] = useState(false)
+  const [showAnswer, setShowAnswer] = useState(false)
   const [hideTranslation, setHideTranslation] = useState(false)
   const [showSpace, setShowSpace] = useState(false)
   const [autoSpeak, setAutoSpeak] = useState(true)
@@ -93,12 +89,11 @@ export function SentenceLearner({ initialTextbookId, initialUnitNumber }: Senten
   const [totalInputs, setTotalInputs] = useState(0)
   const [correctInputs, setCorrectInputs] = useState(0)
   const [correctSentences, setCorrectSentences] = useState(0)
-  const [errors, setErrors] = useState<Map<string, ErrorRecord>>(() => new Map())
+  const [errors, setErrors] = useState<Set<string>>(() => new Set())
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const sentenceCompleteTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const pendingTimeoutsRef = useRef<Set<ReturnType<typeof setTimeout>>>(new Set())
-  const currentTypedRef = useRef('')
   const isResettingRef = useRef(false)
   const resetTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const correctSoundRef = useRef<HTMLAudioElement | null>(null)
@@ -125,6 +120,7 @@ export function SentenceLearner({ initialTextbookId, initialUnitNumber }: Senten
 
   const goToNextSentence = useCallback(() => {
     sentenceCompleteTimeoutRef.current = null
+    setShowAnswer(false)
     setCurrentIndex((prevIndex) => {
       const nextIndex = prevIndex + 1
       if (nextIndex >= sentences.length) {
@@ -141,7 +137,6 @@ export function SentenceLearner({ initialTextbookId, initialUnitNumber }: Senten
       setCharIndex(firstCharIdx)
       setInputStatus(nextSentence.sentence.split('').map(ch => ch === ' ' ? 'correct' : 'idle') as ('idle' | 'correct' | 'wrong')[])
       setTypedChars(nextSentence.sentence.split('').map(ch => ch === ' ' ? ' ' : ''))
-      currentTypedRef.current = ''
       return nextIndex
     })
   }, [sentences])
@@ -158,8 +153,8 @@ export function SentenceLearner({ initialTextbookId, initialUnitNumber }: Senten
         }
 
         // 加载单元列表
-        const units = await apiRequest<number[]>(`/english/api/units?textbookId=${textbookId}`)
-        setUnitNumbers(units)
+        const units = await apiRequest<{ unitNumber: number, title: string | null }[]>(`/english/api/units?textbookId=${textbookId}`)
+        setUnitNumbers(units.map(u => u.unitNumber))
 
         // 加载课文句子并开始学习
         const data = await apiRequest<TextbookSentenceResult[]>(
@@ -248,6 +243,41 @@ export function SentenceLearner({ initialTextbookId, initialUnitNumber }: Senten
       if (!sentence)
         return
 
+      // 答案模式：按下任意键隐藏答案并重新开始输入（重置当前单词）
+      if (showAnswer) {
+        setShowAnswer(false)
+        if (resetTimeoutRef.current) {
+          clearTimeout(resetTimeoutRef.current)
+          resetTimeoutRef.current = null
+        }
+        if (sentenceCompleteTimeoutRef.current) {
+          clearTimeout(sentenceCompleteTimeoutRef.current)
+          sentenceCompleteTimeoutRef.current = null
+        }
+        isResettingRef.current = false
+        // 定位当前单词起始位置
+        let wordStart = charIndex
+        while (wordStart > 0 && sentence.sentence[wordStart - 1] !== ' ') {
+          wordStart--
+        }
+        setCharIndex(wordStart)
+        setInputStatus((prev) => {
+          const next = [...prev]
+          for (let i = wordStart; i < next.length; i++) {
+            next[i] = sentence.sentence[i] === ' ' ? 'correct' : 'idle'
+          }
+          return next
+        })
+        setTypedChars((prev) => {
+          const next = [...prev]
+          for (let i = wordStart; i < next.length; i++) {
+            next[i] = sentence.sentence[i] === ' ' ? ' ' : ''
+          }
+          return next
+        })
+        return
+      }
+
       if (e.key === 'Backspace') {
         if (charIndex > 0) {
           let newIdx = charIndex - 1
@@ -269,7 +299,6 @@ export function SentenceLearner({ initialTextbookId, initialUnitNumber }: Senten
             next[newIdx] = ''
             return next
           })
-          currentTypedRef.current = currentTypedRef.current.slice(0, -1)
         }
         return
       }
@@ -308,7 +337,6 @@ export function SentenceLearner({ initialTextbookId, initialUnitNumber }: Senten
           next[charIndex] = e.key
           return next
         })
-        currentTypedRef.current += e.key
 
         const nextCharIndex = skipSpaces(sentence.sentence, charIndex + 1)
         if (nextCharIndex >= sentence.sentence.length) {
@@ -340,12 +368,11 @@ export function SentenceLearner({ initialTextbookId, initialUnitNumber }: Senten
           next[charIndex] = e.key
           return next
         })
-        currentTypedRef.current += e.key
 
         // 记录错误（无条件更新，记录最后一次错误）
         setErrors((prev) => {
-          const next = new Map(prev)
-          next.set(sentence.sentence, { sentence: sentence.sentence, typed: currentTypedRef.current })
+          const next = new Set(prev)
+          next.add(sentence.sentence)
           return next
         })
 
@@ -391,13 +418,6 @@ export function SentenceLearner({ initialTextbookId, initialUnitNumber }: Senten
             return next
           })
 
-          // currentTypedRef 只保留 wordStart 之前已正确输入的非空格字符
-          let kept = ''
-          for (let i = 0; i < wordStart; i++) {
-            if (currentSentence.sentence[i] !== ' ')
-              kept += currentSentence.sentence[i]
-          }
-          currentTypedRef.current = kept
           isResettingRef.current = false
 
           if (sentenceCompleteTimeoutRef.current) {
@@ -420,7 +440,7 @@ export function SentenceLearner({ initialTextbookId, initialUnitNumber }: Senten
       }
       pendingTimeouts.clear()
     }
-  }, [phase, currentIndex, charIndex, sentences, errors, soundEnabled, resetToGallery, goToNextSentence, accent, autoSpeak])
+  }, [phase, currentIndex, charIndex, sentences, errors, soundEnabled, resetToGallery, goToNextSentence, accent, autoSpeak, showAnswer])
 
   const restartWithSameSentences = () => {
     if (resetTimeoutRef.current) {
@@ -428,6 +448,7 @@ export function SentenceLearner({ initialTextbookId, initialUnitNumber }: Senten
       resetTimeoutRef.current = null
     }
     isResettingRef.current = false
+    setShowAnswer(false)
     const shuffled = shuffle(sentences)
     const firstSentence = shuffled[0]
     const firstCharIdx = skipSpaces(firstSentence.sentence, 0)
@@ -440,8 +461,7 @@ export function SentenceLearner({ initialTextbookId, initialUnitNumber }: Senten
     setTotalInputs(0)
     setCorrectInputs(0)
     setCorrectSentences(0)
-    setErrors(new Map())
-    currentTypedRef.current = ''
+    setErrors(new Set())
     setPhase('learning')
   }
 
@@ -466,6 +486,7 @@ export function SentenceLearner({ initialTextbookId, initialUnitNumber }: Senten
     }
     isResettingRef.current = false
     setDictationMode(true)
+    setShowAnswer(false)
     const shuffled = shuffle(sentences)
     const firstSentence = shuffled[0]
     const firstCharIdx = skipSpaces(firstSentence.sentence, 0)
@@ -478,8 +499,7 @@ export function SentenceLearner({ initialTextbookId, initialUnitNumber }: Senten
     setTotalInputs(0)
     setCorrectInputs(0)
     setCorrectSentences(0)
-    setErrors(new Map())
-    currentTypedRef.current = ''
+    setErrors(new Set())
     setPhase('learning')
   }, [sentences])
 
@@ -532,6 +552,18 @@ export function SentenceLearner({ initialTextbookId, initialUnitNumber }: Senten
           </div>
 
           <div className="flex items-center gap-3">
+            {/* 显示答案（仅默写模式） */}
+            {dictationMode && (
+              <button
+                type="button"
+                className={`flex items-center gap-1 rounded-md px-2 py-1 text-sm hover:bg-accent hover:text-accent-foreground ${showAnswer ? 'text-amber-500' : 'text-muted-foreground'}`}
+                onClick={() => setShowAnswer(true)}
+              >
+                <Icon icon="icon-park-outline:preview-open" className="size-4" />
+                <span>答案</span>
+              </button>
+            )}
+
             {/* 发音切换 */}
             <button
               className="flex items-center gap-1 rounded-md px-2 py-1 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground"
@@ -549,7 +581,11 @@ export function SentenceLearner({ initialTextbookId, initialUnitNumber }: Senten
               <Switch
                 size="sm"
                 checked={dictationMode}
-                onCheckedChange={setDictationMode}
+                onCheckedChange={(checked) => {
+                  setDictationMode(checked)
+                  if (!checked)
+                    setShowAnswer(false)
+                }}
               />
               <span>默写</span>
             </label>
@@ -636,6 +672,14 @@ export function SentenceLearner({ initialTextbookId, initialUnitNumber }: Senten
                     {sentenceChars.slice(seg.start, seg.end).split('').map((ch, k) => {
                       const i = seg.start + k
                       if (dictationMode) {
+                        // 答案模式：显示真实字符（琥珀色）
+                        if (showAnswer) {
+                          return (
+                            <span key={i} className="inline-block text-amber-500">
+                              {ch}
+                            </span>
+                          )
+                        }
                         const typed = typedChars[i]
                         if (!typed)
                           return <span key={i} className="inline-block text-muted-foreground">_</span>
@@ -710,7 +754,7 @@ export function SentenceLearner({ initialTextbookId, initialUnitNumber }: Senten
   }
 
   // === 完成阶段 ===
-  const errorList = Array.from(errors.values())
+  const errorList = Array.from(errors)
 
   return (
     <div className="flex h-full items-center justify-center bg-background p-6">
@@ -755,14 +799,9 @@ export function SentenceLearner({ initialTextbookId, initialUnitNumber }: Senten
                 ）
               </h3>
               <div className="space-y-2">
-                {errorList.map(err => (
-                  <div key={err.sentence} className="flex items-center justify-between rounded border border-border p-2 text-sm">
-                    <span className="font-medium truncate max-w-[60%]">{err.sentence}</span>
-                    <span className="text-red-500 truncate max-w-[35%]">
-                      →
-                      {' '}
-                      {err.typed}
-                    </span>
+                {errorList.map(sentence => (
+                  <div key={sentence} className="flex items-center justify-between rounded border border-border p-2 text-sm">
+                    <span className="font-medium truncate max-w-[60%]">{sentence}</span>
                   </div>
                 ))}
               </div>

@@ -28,7 +28,7 @@ export function TextbookGallery() {
 
   // Dialog 状态
   const [selectedTextbook, setSelectedTextbook] = useState<EnglishTextbook | null>(null)
-  const [unitNumbers, setUnitNumbers] = useState<number[]>([])
+  const [units, setUnits] = useState<{ unitNumber: number, title: string | null }[]>([])
   const [loadingUnits, setLoadingUnits] = useState(false)
 
   // 加载课本列表
@@ -45,8 +45,10 @@ export function TextbookGallery() {
     setSelectedTextbook(textbook)
     setLoadingUnits(true)
     try {
-      const units = await apiRequest<number[]>(`/english/api/units?textbookId=${textbook.id}`)
-      setUnitNumbers(units)
+      const list = await apiRequest<{ unitNumber: number, title: string | null }[]>(
+        `/english/api/units?textbookId=${textbook.id}`,
+      )
+      setUnits(list)
     }
     finally {
       setLoadingUnits(false)
@@ -158,7 +160,7 @@ export function TextbookGallery() {
                     加载中...
                   </div>
                 )
-              : unitNumbers.length === 0
+              : units.length === 0
                 ? (
                     <div className="flex h-20 items-center justify-center text-muted-foreground">
                       暂无单元数据
@@ -167,15 +169,15 @@ export function TextbookGallery() {
                 : (
                     <div className="space-y-4">
                       <p className="text-sm text-muted-foreground">选择学习单元：</p>
-                      <div className="grid max-h-[60vh] grid-cols-3 gap-2 overflow-y-auto pr-1">
-                        {unitNumbers.map(n => (
+                      <div className="grid max-h-[60vh] grid-cols-2 gap-2 overflow-y-auto pr-1">
+                        {units.map(u => (
                           <Button
-                            key={n}
+                            key={u.unitNumber}
                             variant="outline"
-                            className="h-auto py-3"
-                            onClick={() => handleUnitClick(n)}
+                            className="h-auto justify-start py-2 text-left text-xs"
+                            onClick={() => handleUnitClick(u.unitNumber)}
                           >
-                            {n === 0 ? '全部' : `Unit ${n}`}
+                            {u.title ?? (u.unitNumber === 0 ? '全部' : `Unit ${u.unitNumber}`)}
                           </Button>
                         ))}
                       </div>

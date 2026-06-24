@@ -1,9 +1,9 @@
 import type { APIRoute } from 'astro'
 
 import { fail, ok } from '@english/services/response'
-import { listUnitNumbers } from '@english/services/word.service'
+import { listUnits } from '@english/services/textbook.service'
 
-/** 查询某课本下已有的单元号（去重升序），?textbookId=1 */
+/** 查询某课本下所有单元（含标题），?textbookId=1 */
 export const GET: APIRoute = async ({ url }) => {
   const textbookIdStr = url.searchParams.get('textbookId')
   if (!textbookIdStr) {
@@ -13,6 +13,6 @@ export const GET: APIRoute = async ({ url }) => {
   if (!Number.isFinite(textbookId)) {
     return fail('textbookId 不是合法数字')
   }
-  const unitNumbers = await listUnitNumbers(textbookId)
-  return ok(unitNumbers)
+  const units = await listUnits(textbookId)
+  return ok(units)
 }
