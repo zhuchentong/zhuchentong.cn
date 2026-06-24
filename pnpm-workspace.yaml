@@ -11,6 +11,13 @@ shellEmulator: true
 strictTrust: false
 
 trustPolicy: no-downgrade
+strict-peer-dependencies: false
+auto-install-peers: true
+
+trustPolicyExclude:
+  - tinyclip
+  - tinyexec
+
 onlyBuiltDependencies:
   - '@parcel/watcher'
   - core-js
@@ -18,6 +25,3 @@ onlyBuiltDependencies:
   - msw
   - sharp
   - ttf2woff2
-
-strict-peer-dependencies: false
-auto-install-peers: true
