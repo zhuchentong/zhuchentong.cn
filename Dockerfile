@@ -1,4 +1,4 @@
-FROM node:24-alpine AS base
+FROM docker.1ms.run/library/node:24-alpine AS base
 RUN apk add --no-cache python3 py3-setuptools make g++
 WORKDIR /app
 RUN corepack enable
@@ -10,7 +10,7 @@ COPY . .
 RUN pnpm run build
 RUN pnpm prune --prod
 
-FROM node:24-alpine AS runner
+FROM docker.1ms.run/library/node:24-alpine AS runner
 WORKDIR /app
 COPY --from=build /app/node_modules /app/node_modules
 COPY --from=build /app/dist /app/dist
