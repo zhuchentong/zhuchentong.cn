@@ -20,6 +20,7 @@ export const englishTextbook = pgTable('english_textbook', {
   publisher: text('publisher').notNull(),
   grade: text('grade'),
   semester: text('semester'),
+  coverUrl: text('cover_url'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 })
 

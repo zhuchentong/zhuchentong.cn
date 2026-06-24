@@ -3,6 +3,9 @@ import react from '@astrojs/react'
 import { customRouting } from '@inox-tools/custom-routing'
 import tailwindcss from '@tailwindcss/vite'
 import { defineConfig, passthroughImageService } from 'astro/config'
+import { copybookRoutes } from './src/apps/copybook/route'
+import { englishRoutes } from './src/apps/english/route'
+import { workbookRoutes } from './src/apps/workbook/route'
 
 export default defineConfig({
   site: 'https://www.zhuchentong.cn',
@@ -13,21 +16,9 @@ export default defineConfig({
   integrations: [
     react(),
     customRouting({
-      '/copybook/hanzi': './src/apps/copybook/pages/hanzi.astro',
-      '/workbook/pinyin': './src/apps/workbook/pages/pinyin.astro',
-      '/english': './src/apps/english/pages/index.astro',
-      '/english/admin': './src/apps/english/pages/admin.astro',
-      '/english/gallery': './src/apps/english/pages/gallery.astro',
-      '/english/learner': './src/apps/english/pages/learner.astro',
-      '/english/wrong-words': './src/apps/english/pages/wrong-words.astro',
-      '/english/api/textbooks': './src/apps/english/pages/api/textbooks.ts',
-      '/english/api/units': './src/apps/english/pages/api/units.ts',
-      '/english/api/words': './src/apps/english/pages/api/words.ts',
-      '/english/api/sentences': './src/apps/english/pages/api/sentences.ts',
-      '/english/api/batch/words': './src/apps/english/pages/api/batch/words.ts',
-      '/english/api/batch/sentences': './src/apps/english/pages/api/batch/sentences.ts',
-      '/english/api/batch/word-sentences': './src/apps/english/pages/api/batch/word-sentences.ts',
-      '/english/api/words-search': './src/apps/english/pages/api/words-search.ts',
+      ...copybookRoutes,
+      ...workbookRoutes,
+      ...englishRoutes,
     }),
   ],
   vite: {

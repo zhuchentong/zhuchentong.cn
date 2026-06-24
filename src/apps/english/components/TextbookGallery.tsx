@@ -5,7 +5,7 @@ import { apiRequest } from '@english/lib/request'
 import { Icon } from '@iconify/react'
 import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card } from '@/components/ui/card'
 import {
   Dialog,
   DialogContent,
@@ -113,28 +113,34 @@ export function TextbookGallery() {
                   {textbooks.map(tb => (
                     <Card
                       key={tb.id}
-                      className="cursor-pointer transition-all hover:border-foreground/20 hover:shadow-md"
+                      className="cursor-pointer overflow-hidden transition-all hover:border-foreground/20 hover:shadow-md"
                       onClick={() => handleCardClick(tb)}
                     >
-                      <CardHeader className="pb-2">
-                        <div className="flex items-center gap-2">
-                          <div className="flex size-10 items-center justify-center rounded-lg bg-primary/10">
-                            <Icon icon="icon-park-outline:book-one" className="size-5 text-primary" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <CardTitle className="truncate text-base">{tb.name}</CardTitle>
-                          </div>
-                        </div>
-                      </CardHeader>
-                      <CardContent>
-                        <p className="text-sm text-muted-foreground">{tb.publisher}</p>
+                      <div className="mx-auto aspect-[277/388] w-full max-w-[300px] bg-primary/10">
+                        {tb.coverUrl
+                          ? (
+                              <img
+                                src={tb.coverUrl}
+                                alt={tb.name}
+                                className="size-full object-contain"
+                              />
+                            )
+                          : (
+                              <div className="flex size-full items-center justify-center">
+                                <Icon icon="icon-park-outline:book-one" className="size-12 text-primary" />
+                              </div>
+                            )}
+                      </div>
+                      <div className="p-3">
+                        <p className="truncate text-sm font-medium">{tb.name}</p>
+                        <p className="mt-0.5 truncate text-xs text-muted-foreground">{tb.publisher}</p>
                         {tb.grade && (
-                          <p className="mt-1 text-xs text-muted-foreground">
+                          <p className="mt-0.5 text-xs text-muted-foreground">
                             {tb.grade}
                             {tb.semester ? ` · ${tb.semester}学期` : ''}
                           </p>
                         )}
-                      </CardContent>
+                      </div>
                     </Card>
                   ))}
                 </div>

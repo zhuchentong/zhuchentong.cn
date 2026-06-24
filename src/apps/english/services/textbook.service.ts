@@ -132,3 +132,14 @@ export async function listUnits(textbookId: number): Promise<{ unitNumber: numbe
   })
   return result
 }
+
+/**
+ * 更新课本封面 URL
+ */
+export async function updateTextbookCover(textbookId: number, coverUrl: string) {
+  const [row] = await db.update(englishTextbook)
+    .set({ coverUrl })
+    .where(eq(englishTextbook.id, textbookId))
+    .returning()
+  return row
+}

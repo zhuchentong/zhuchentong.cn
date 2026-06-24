@@ -1,0 +1,468 @@
+{
+  "id": "d0ed81cd-e9bb-4515-bccd-a0bcd19c71af",
+  "prevId": "a4f32746-1b71-4079-9ab3-68e9f55befd6",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.english_sentence": {
+      "name": "english_sentence",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "textbook_id": {
+          "name": "textbook_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "unit_number": {
+          "name": "unit_number",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "sentence": {
+          "name": "sentence",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "translation": {
+          "name": "translation",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "position": {
+          "name": "position",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "english_sentence_textbook_id_english_textbook_id_fk": {
+          "name": "english_sentence_textbook_id_english_textbook_id_fk",
+          "tableFrom": "english_sentence",
+          "tableTo": "english_textbook",
+          "columnsFrom": [
+            "textbook_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "english_sentence_textbook_unit_position_unique": {
+          "name": "english_sentence_textbook_unit_position_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "textbook_id",
+            "unit_number",
+            "position"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.english_textbook": {
+      "name": "english_textbook",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "stage": {
+          "name": "stage",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "publisher": {
+          "name": "publisher",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "grade": {
+          "name": "grade",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "semester": {
+          "name": "semester",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "cover_url": {
+          "name": "cover_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.english_textbook_word": {
+      "name": "english_textbook_word",
+      "schema": "",
+      "columns": {
+        "textbook_id": {
+          "name": "textbook_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "word_id": {
+          "name": "word_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "unit_number": {
+          "name": "unit_number",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "position": {
+          "name": "position",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "english_textbook_word_textbook_id_english_textbook_id_fk": {
+          "name": "english_textbook_word_textbook_id_english_textbook_id_fk",
+          "tableFrom": "english_textbook_word",
+          "tableTo": "english_textbook",
+          "columnsFrom": [
+            "textbook_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "english_textbook_word_word_id_english_word_id_fk": {
+          "name": "english_textbook_word_word_id_english_word_id_fk",
+          "tableFrom": "english_textbook_word",
+          "tableTo": "english_word",
+          "columnsFrom": [
+            "word_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "english_textbook_word_textbook_id_word_id_unit_number_pk": {
+          "name": "english_textbook_word_textbook_id_word_id_unit_number_pk",
+          "columns": [
+            "textbook_id",
+            "word_id",
+            "unit_number"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.english_unit": {
+      "name": "english_unit",
+      "schema": "",
+      "columns": {
+        "textbook_id": {
+          "name": "textbook_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "unit_number": {
+          "name": "unit_number",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "title": {
+          "name": "title",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "position": {
+          "name": "position",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "english_unit_textbook_id_english_textbook_id_fk": {
+          "name": "english_unit_textbook_id_english_textbook_id_fk",
+          "tableFrom": "english_unit",
+          "tableTo": "english_textbook",
+          "columnsFrom": [
+            "textbook_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "english_unit_textbook_id_unit_number_pk": {
+          "name": "english_unit_textbook_id_unit_number_pk",
+          "columns": [
+            "textbook_id",
+            "unit_number"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.english_word": {
+      "name": "english_word",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "word": {
+          "name": "word",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "phonetic": {
+          "name": "phonetic",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "meaning": {
+          "name": "meaning",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "english_word_word_unique": {
+          "name": "english_word_word_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "word"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.english_word_sentence": {
+      "name": "english_word_sentence",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "word_id": {
+          "name": "word_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "sentence": {
+          "name": "sentence",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "translation": {
+          "name": "translation",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "english_word_sentence_word_id_english_word_id_fk": {
+          "name": "english_word_sentence_word_id_english_word_id_fk",
+          "tableFrom": "english_word_sentence",
+          "tableTo": "english_word",
+          "columnsFrom": [
+            "word_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "english_word_sentence_word_id_sentence_unique": {
+          "name": "english_word_sentence_word_id_sentence_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "word_id",
+            "sentence"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.users": {
+      "name": "users",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "email": {
+          "name": "email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "users_email_unique": {
+          "name": "users_email_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "email"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {},
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}
