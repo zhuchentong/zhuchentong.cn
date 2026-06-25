@@ -15,6 +15,9 @@ export function mmToPx(mm: number, dpi: number): number {
 
 /**
  * 缩放值辅助函数：将原始值乘以缩放系数
+ * @param value - 原始值
+ * @param scale - 缩放系数
+ * @returns 缩放后的值
  */
 function s(value: number, scale: number): number {
   return value * scale
@@ -97,6 +100,12 @@ export function createGridCell(
 /**
  * 创建十字虚线（田字格/米字格的内部辅助线）
  * 水平和垂直各一条虚线，将单元格四等分
+ * @param x - 单元格左上角 X 坐标（mm）
+ * @param y - 单元格左上角 Y 坐标（mm）
+ * @param size - 单元格尺寸（mm）
+ * @param color - 线条颜色
+ * @param scale - 缩放系数
+ * @returns 十字虚线元素数组
  */
 function createCross(x: number, y: number, size: number, color: string, scale: number): Line[] {
   return [
@@ -120,6 +129,12 @@ function createCross(x: number, y: number, size: number, color: string, scale: n
 /**
  * 创建对角虚线（米字格的对角辅助线）
  * 两条对角线从四个角交叉
+ * @param x - 单元格左上角 X 坐标（mm）
+ * @param y - 单元格左上角 Y 坐标（mm）
+ * @param size - 单元格尺寸（mm）
+ * @param color - 线条颜色
+ * @param scale - 缩放系数
+ * @returns 对角虚线元素数组
  */
 function createDiagonals(x: number, y: number, size: number, color: string, scale: number): Line[] {
   return [
@@ -143,6 +158,12 @@ function createDiagonals(x: number, y: number, size: number, color: string, scal
 /**
  * 创建内部小方框（回宫格的内框）
  * 内框向内缩进 1/3，形成"回"字结构
+ * @param x - 单元格左上角 X 坐标（mm）
+ * @param y - 单元格左上角 Y 坐标（mm）
+ * @param size - 单元格尺寸（mm）
+ * @param color - 线条颜色
+ * @param scale - 缩放系数
+ * @returns 内部小方框元素数组
  */
 function createInnerBox(x: number, y: number, size: number, color: string, scale: number): Rect[] {
   // 内框缩进量为单元格尺寸的 1/3
@@ -163,6 +184,12 @@ function createInnerBox(x: number, y: number, size: number, color: string, scale
 /**
  * 创建九宫格（3x3 等分线）
  * 水平和垂直各两条虚线将单元格九等分
+ * @param x - 单元格左上角 X 坐标（mm）
+ * @param y - 单元格左上角 Y 坐标（mm）
+ * @param size - 单元格尺寸（mm）
+ * @param color - 线条颜色
+ * @param scale - 缩放系数
+ * @returns 九宫格线条元素数组
  */
 function createNineGrid(x: number, y: number, size: number, color: string, scale: number): Line[] {
   // 每个小格的尺寸
@@ -239,6 +266,8 @@ export function createChar(
 
 /**
  * 解析字体名称，回退到默认衬线字体
+ * @param fontName - 字体名称（为空时回退到 'serif'）
+ * @returns 解析后的字体名称
  */
 function resolveFontFamily(fontName: string): string {
   return fontName || 'serif'

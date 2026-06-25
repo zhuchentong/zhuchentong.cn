@@ -17,5 +17,8 @@ const connectionString = `postgres://${getEnv('DATABASE_USER')}:${getEnv('DATABA
 // 创建 postgres 客户端实例
 const client = postgres(connectionString)
 
-// 创建 Drizzle ORM 实例（绑定 schema 以支持类型安全的查询）
+/**
+ * Drizzle ORM 实例（绑定 schema 以支持类型安全的查询）
+ * 用于执行数据库操作，如查询、插入、更新等
+ */
 export const db = drizzle(client, { schema })
