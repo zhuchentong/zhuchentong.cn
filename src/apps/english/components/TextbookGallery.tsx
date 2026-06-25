@@ -13,18 +13,14 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 
-export function TextbookGallery() {
+interface TextbookGalleryProps {
+  learnType: 'word' | 'sentence'
+}
+
+export function TextbookGallery({ learnType }: TextbookGalleryProps) {
   const [stage, setStage] = useState<string>(STAGES[0])
   const [textbooks, setTextbooks] = useState<EnglishTextbook[]>([])
   const [loading, setLoading] = useState(true)
-
-  // 从 URL 读取学习类型（惰性初始化，避免 useEffect 中同步 setState）
-  const [learnType] = useState<'word' | 'sentence'>(() => {
-    if (typeof window === 'undefined')
-      return 'word'
-    const params = new URLSearchParams(window.location.search)
-    return params.get('type') === 'sentence' ? 'sentence' : 'word'
-  })
 
   // Dialog 状态
   const [selectedTextbook, setSelectedTextbook] = useState<EnglishTextbook | null>(null)

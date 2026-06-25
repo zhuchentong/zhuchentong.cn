@@ -1,8 +1,10 @@
 ---
 import EnglishLayout from '@english/layout.astro'
 import { TextbookGallery } from '@english/components/TextbookGallery'
+
+const learnType = Astro.url.searchParams.get('type') === 'sentence' ? 'sentence' : 'word'
 ---
 
 <EnglishLayout title="选择学习内容">
-  <TextbookGallery client:load />
+  <TextbookGallery client:load learnType={learnType} />
 </EnglishLayout>
