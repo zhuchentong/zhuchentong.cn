@@ -17,6 +17,7 @@ auto-install-peers: true
 trustPolicyExclude:
   - tinyclip
   - tinyexec
+  - semver
 
 onlyBuiltDependencies:
   - '@parcel/watcher'
