@@ -5,6 +5,7 @@ import tailwindcss from '@tailwindcss/vite'
 import { defineConfig, passthroughImageService } from 'astro/config'
 import { copybookRoutes } from './src/apps/copybook/route'
 import { englishRoutes } from './src/apps/english/route'
+import { historyRoutes } from './src/apps/history/route'
 import { workbookRoutes } from './src/apps/workbook/route'
 
 export default defineConfig({
@@ -19,6 +20,7 @@ export default defineConfig({
       ...copybookRoutes,
       ...workbookRoutes,
       ...englishRoutes,
+      ...historyRoutes,
     }),
   ],
   vite: {

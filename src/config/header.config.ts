@@ -10,20 +10,6 @@ export const NavBarLinks = [
     link: '/',
   },
   {
-    text: '关于',
-    link: '/about',
-  },
-  {
-    text: 'Demo',
-    children: [{
-      text: '图标',
-      link: '/demo/icon',
-    }, {
-      text: '组件',
-      link: '/demo/component',
-    }],
-  },
-  {
     text: '字帖',
     link: '/copybook/hanzi',
   },
@@ -34,5 +20,9 @@ export const NavBarLinks = [
   {
     text: '单词',
     link: '/english',
+  },
+  {
+    text: '历史朝代',
+    link: '/history/dynasty',
   },
 ] as NavBarItem[]

@@ -100,6 +100,19 @@
   --chart-3: oklch(0.439 0 0);
   --chart-4: oklch(0.371 0 0);
   --chart-5: oklch(0.269 0 0);
+  /* 历史朝代配色板：12 个色相循环，白色文字在条带上可读 */
+  --dynasty-0: oklch(0.55 0.16 15);
+  --dynasty-1: oklch(0.55 0.16 45);
+  --dynasty-2: oklch(0.55 0.15 85);
+  --dynasty-3: oklch(0.55 0.15 140);
+  --dynasty-4: oklch(0.55 0.14 175);
+  --dynasty-5: oklch(0.55 0.14 210);
+  --dynasty-6: oklch(0.55 0.15 245);
+  --dynasty-7: oklch(0.55 0.16 275);
+  --dynasty-8: oklch(0.55 0.16 305);
+  --dynasty-9: oklch(0.55 0.15 335);
+  --dynasty-10: oklch(0.55 0.15 355);
+  --dynasty-11: oklch(0.55 0.14 30);
 }
 
 .dark {
@@ -137,6 +150,19 @@
   --chart-3: oklch(0.439 0 0);
   --chart-4: oklch(0.371 0 0);
   --chart-5: oklch(0.269 0 0);
+  /* 历史朝代配色板：暗色模式下略微提亮以保证可见度 */
+  --dynasty-0: oklch(0.62 0.15 15);
+  --dynasty-1: oklch(0.62 0.15 45);
+  --dynasty-2: oklch(0.62 0.14 85);
+  --dynasty-3: oklch(0.62 0.14 140);
+  --dynasty-4: oklch(0.62 0.13 175);
+  --dynasty-5: oklch(0.62 0.13 210);
+  --dynasty-6: oklch(0.62 0.14 245);
+  --dynasty-7: oklch(0.62 0.15 275);
+  --dynasty-8: oklch(0.62 0.15 305);
+  --dynasty-9: oklch(0.62 0.14 335);
+  --dynasty-10: oklch(0.62 0.14 355);
+  --dynasty-11: oklch(0.62 0.13 30);
 }
 
 html,

@@ -1,0 +1,9 @@
+---
+import DynastyTimeline from '@history/components/DynastyTimeline.tsx'
+import { ALL_COUNTRIES } from '@history/data'
+import HistoryLayout from '@history/layout.astro'
+---
+
+<HistoryLayout title="历史朝代">
+  <DynastyTimeline client:only="react" countries={ALL_COUNTRIES} />
+</HistoryLayout>

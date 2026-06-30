@@ -1,30 +1,61 @@
 ---
 import MainLayout from '@/layouts/MainLayout.astro'
-import { Image } from 'astro:assets'
-import AvatarImage from '@/assets/images/avatar.jpg'
+import Icon from '@/components/widgets/Icon.tsx'
+
+const cards = [
+  {
+    href: '/copybook/hanzi',
+    icon: 'icon-park-outline:edit',
+    title: '字帖',
+    desc: '生成汉字田字格、米字格描红字帖',
+  },
+  {
+    href: '/workbook/pinyin',
+    icon: 'icon-park-outline:notebook',
+    title: '练习册',
+    desc: '拼音声母韵母练习题生成',
+  },
+  {
+    href: '/english',
+    icon: 'icon-park-outline:book-open',
+    title: '单词',
+    desc: '英语单词与课文句子学习',
+  },
+  {
+    href: '/history/dynasty',
+    icon: 'icon-park-outline:history',
+    title: '历史朝代',
+    desc: '多文明历史朝代时间轴对比',
+  },
+]
 ---
 
 <MainLayout title="首页">
-  <section class="py-20 space-y-20">
-    <div class="w-[80%] m-auto">
-      <h1 class="leading-loose! max-md:text-[48px] md:text-[72px]">
-        The QuickStart Template Use
-        <span class="text-[--primary]">Astro</span>
-        And
-        <span class="text-[--primary]">Vue</span>
-        For Content Site
-      </h1>
-    </div>
-    <div>
-      <Image src={AvatarImage} alt="avatar" class="m-auto rounded-full md:w-[400px] max-md:w-[200px]" />
+  <section class="flex min-h-[60vh] items-center justify-center py-20">
+    <div class="grid w-full max-w-4xl gap-6 px-4 sm:grid-cols-2 lg:grid-cols-3">
+      {
+        cards.map((card) => (
+          <a
+            href={card.href}
+            class="group flex flex-col items-center gap-4 rounded-xl border border-border bg-card p-8 text-center transition-all hover:border-foreground/20 hover:shadow-lg"
+          >
+            <div class="flex size-16 items-center justify-center rounded-full bg-muted transition-colors group-hover:bg-primary/10">
+              <Icon
+                icon={card.icon}
+                class="size-8 text-muted-foreground transition-colors group-hover:text-primary"
+                client:load
+              />
+            </div>
+            <div>
+              <h2 class="text-lg font-semibold">{card.title}</h2>
+              <p class="mt-1 text-sm text-muted-foreground">{card.desc}</p>
+            </div>
+            <span class="mt-auto text-sm font-medium text-primary opacity-0 transition-opacity group-hover:opacity-100">
+              进入 →
+            </span>
+          </a>
+        ))
+      }
     </div>
   </section>
 </MainLayout>
-
-<style>
-  h1 {
-    font-weight: 700;
-    line-height: 1;
-    text-align: center;
-  }
-</style>
