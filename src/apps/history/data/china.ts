@@ -56,7 +56,6 @@ export const china: Country = {
     { name: '明', start: 1368, end: 1644 },
     { name: '清', start: 1636, end: 1912 },
     { name: '中华民国', start: 1912, end: 1949 },
-    // 当今政权延续至今，结束年取当前年份
-    { name: '中华人民共和国', start: 1949, end: new Date().getFullYear() },
+    { name: '中华人民共和国', start: 1949, end: 2014 },
   ],
 }

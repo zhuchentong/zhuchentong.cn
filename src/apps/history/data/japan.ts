@@ -33,6 +33,7 @@ export const japan: Country = {
     { name: '明治时代', start: 1868, end: 1912 },
     { name: '大正时代', start: 1912, end: 1926 },
     { name: '昭和时代', start: 1926, end: 1989 },
-    { name: '平成时代', start: 1989, end: 2014 },
+    { name: '平成时代', start: 1989, end: 2019 },
+    { name: '令和时代', start: 2019, end: 2019 },
   ],
 }
