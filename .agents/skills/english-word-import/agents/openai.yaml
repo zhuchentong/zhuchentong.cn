@@ -1,0 +1,4 @@
+interface:
+  display_name: "English Word Import"
+  short_description: "Import English words into the learning system"
+  default_prompt: "Use $english-word-import to import a vocabulary list into the English learning system"

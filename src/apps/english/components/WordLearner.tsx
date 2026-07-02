@@ -15,6 +15,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { Switch } from '@/components/ui/switch'
 import * as AppStore from '@/stores/app.store'
+import { StartOverlay } from './StartOverlay'
 
 type Phase = 'learning' | 'finished'
 
@@ -75,6 +76,7 @@ export function WordLearner({ initialTextbookId, initialUnitNumber }: WordLearne
   const [inputStatus, setInputStatus] = useState<('idle' | 'correct' | 'wrong')[]>([])
   const [typedChars, setTypedChars] = useState<string[]>([])
   const [wrongFlash, setWrongFlash] = useState(false)
+  const [started, setStarted] = useState(false)
 
   // === 功能条状态 ===
   const [accent, setAccent] = useState<'en-US' | 'en-GB'>('en-US')
@@ -196,7 +198,7 @@ export function WordLearner({ initialTextbookId, initialUnitNumber }: WordLearne
 
   // === 计时器 ===
   useEffect(() => {
-    if (phase === 'learning') {
+    if (phase === 'learning' && started) {
       timerRef.current = setInterval(() => setElapsed(e => e + 1), 1000)
     }
     return () => {
@@ -205,18 +207,18 @@ export function WordLearner({ initialTextbookId, initialUnitNumber }: WordLearne
         timerRef.current = null
       }
     }
-  }, [phase])
+  }, [phase, started])
 
   // === 自动发音 ===
   useEffect(() => {
-    if (phase === 'learning' && autoSpeak && words[currentIndex]) {
+    if (started && phase === 'learning' && autoSpeak && words[currentIndex]) {
       const timer = setTimeout(() => {
         speakWord(words[currentIndex].word, accent)
       }, 100)
       return () => clearTimeout(timer)
     }
     return () => cancelSpeech()
-  }, [currentIndex, phase, words, autoSpeak, accent])
+  }, [currentIndex, phase, words, autoSpeak, accent, started])
 
   // === 全局键盘监听 ===
   useEffect(() => {
@@ -229,6 +231,19 @@ export function WordLearner({ initialTextbookId, initialUnitNumber }: WordLearne
       // 重置过程中忽略所有输入
       if (isResettingRef.current)
         return
+
+      // 未开始：等待任意键启动（首词发音由自动发音 effect 在 started 变化时触发）
+      if (!started) {
+        if (e.key === 'Escape') {
+          resetToGallery()
+          return
+        }
+        if (e.key.length > 1)
+          return
+        e.preventDefault()
+        setStarted(true)
+        return
+      }
 
       // Esc 返回选择
       if (e.key === 'Escape') {
@@ -400,7 +415,7 @@ export function WordLearner({ initialTextbookId, initialUnitNumber }: WordLearne
       }
       pendingTimeouts.clear()
     }
-  }, [phase, currentIndex, charIndex, words, errors, soundEnabled, resetToGallery, goToNextWord, accent, autoSpeak, showAnswer])
+  }, [phase, currentIndex, charIndex, words, errors, soundEnabled, resetToGallery, goToNextWord, accent, autoSpeak, showAnswer, started])
 
   const restartWithSameWords = () => {
     if (resetTimeoutRef.current) {
@@ -482,8 +497,9 @@ export function WordLearner({ initialTextbookId, initialUnitNumber }: WordLearne
 
     return (
       <div
-        className={`flex h-full flex-col bg-background transition-colors ${wrongFlash ? 'bg-red-50 dark:bg-red-950/30' : ''}`}
+        className={`relative flex h-full flex-col bg-background transition-colors ${wrongFlash ? 'bg-red-50 dark:bg-red-950/30' : ''}`}
       >
+        {!started && <StartOverlay />}
         {/* 功能条 */}
         <div className="flex items-center justify-between border-b border-border px-4 py-2">
           <div className="flex items-center gap-4">

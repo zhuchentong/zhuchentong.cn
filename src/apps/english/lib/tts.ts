@@ -6,16 +6,25 @@ function youdaoType(lang: string): 1 | 2 {
 // 回退音频实例引用，便于取消
 let fallbackAudio: HTMLAudioElement | null = null
 
-/** 本地 Web Speech API 是否有可用语音引擎 */
-function hasLocalVoices(): boolean {
-  return typeof window !== 'undefined'
-    && 'speechSynthesis' in window
-    && window.speechSynthesis.getVoices().length > 0
+/** 本地是否支持 Web Speech API 语音合成 */
+function hasSpeechSynthesis(): boolean {
+  return typeof window !== 'undefined' && 'speechSynthesis' in window
+}
+
+// 预热 voices：浏览器页面加载时异步加载 voices，首次 getVoices() 可能返回空数组
+if (hasSpeechSynthesis()) {
+  window.speechSynthesis.getVoices()
+  window.speechSynthesis.onvoiceschanged = () => {
+    window.speechSynthesis.getVoices()
+  }
 }
 
 /**
  * 朗读英文单词/句子：优先本地 Web Speech API（离线、即时），
- * 本地无语音引擎时回退到 YouDao 在线音频（真实录音，无本地引擎也能用）
+ * 无本地引擎时回退到 YouDao 在线音频
+ *
+ * 刷新页面时 voices 尚未异步加载，getVoices() 返回空数组，
+ * 但 speechSynthesis.speak() 仍可调用，且比 Audio.play() 更不易被自动播放策略拦截。
  */
 export function speakWord(text: string, lang = 'en-US'): void {
   if (typeof window === 'undefined')
@@ -28,7 +37,7 @@ export function speakWord(text: string, lang = 'en-US'): void {
   }
 
   // 优先本地 Web Speech API
-  if (hasLocalVoices()) {
+  if (hasSpeechSynthesis()) {
     window.speechSynthesis.cancel()
     const utterance = new SpeechSynthesisUtterance(text)
     utterance.lang = lang
@@ -47,7 +56,7 @@ export function speakWord(text: string, lang = 'en-US'): void {
  * 取消当前发音
  */
 export function cancelSpeech(): void {
-  if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+  if (hasSpeechSynthesis()) {
     window.speechSynthesis.cancel()
   }
   if (fallbackAudio) {

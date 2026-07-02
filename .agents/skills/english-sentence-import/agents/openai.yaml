@@ -1,0 +1,4 @@
+interface:
+  display_name: "English Sentence Import"
+  short_description: "Import English textbook sentences into the system"
+  default_prompt: "Use $english-sentence-import to import textbook sentences"
