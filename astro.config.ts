@@ -3,6 +3,7 @@ import react from '@astrojs/react'
 import { customRouting } from '@inox-tools/custom-routing'
 import tailwindcss from '@tailwindcss/vite'
 import { defineConfig, passthroughImageService } from 'astro/config'
+import { chineseRoutes } from './src/apps/chinese/route'
 import { copybookRoutes } from './src/apps/copybook/route'
 import { englishRoutes } from './src/apps/english/route'
 import { historyRoutes } from './src/apps/history/route'
@@ -23,6 +24,7 @@ export default defineConfig({
       ...copybookRoutes,
       ...workbookRoutes,
       ...englishRoutes,
+      ...chineseRoutes,
       ...historyRoutes,
     }),
   ],

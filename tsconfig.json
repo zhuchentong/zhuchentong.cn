@@ -15,6 +15,9 @@
       "@english/*": [
         "./src/apps/english/*"
       ],
+      "@chinese/*": [
+        "./src/apps/chinese/*"
+      ],
       "@history/*": [
         "./src/apps/history/*"
       ],

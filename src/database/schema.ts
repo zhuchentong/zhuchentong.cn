@@ -103,3 +103,112 @@ export type NewEnglishSentence = typeof englishSentence.$inferInsert
 // 单元元数据表
 export type EnglishUnit = typeof englishUnit.$inferSelect
 export type NewEnglishUnit = typeof englishUnit.$inferInsert
+
+// ===== 语文数据库表 =====
+
+// 1. 语文教材表
+export const chineseTextbook = pgTable('chinese_textbook', {
+  id: serial('id').primaryKey(),
+  name: text('name').notNull(),
+  publisher: text('publisher').notNull(),
+  grade: text('grade'),
+  semester: text('semester'),
+  coverUrl: text('cover_url'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+})
+
+// 2. 单元表
+export const chineseUnit = pgTable('chinese_unit', {
+  id: serial('id').primaryKey(),
+  textbookId: integer('textbook_id').references(() => chineseTextbook.id).notNull(),
+  unitNumber: integer('unit_number').notNull(),
+  title: text('title'),
+  position: integer('position').notNull().default(0),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+}, table => [
+  unique('chinese_unit_textbook_unit_unique').on(table.textbookId, table.unitNumber),
+])
+
+// 3. 篇目表（课文 + 语文园地统一表，靠 type 区分）
+export const chineseLesson = pgTable('chinese_lesson', {
+  id: serial('id').primaryKey(),
+  unitId: integer('unit_id').references(() => chineseUnit.id).notNull(),
+  lessonNumber: integer('lesson_number'), // 全书店号（1-27），语文园地为 null
+  title: text('title'),
+  type: text('type').notNull(), // 'text' 课文 | 'garden' 语文园地
+  position: integer('position').notNull().default(0),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+}, table => [
+  unique('chinese_lesson_unit_position_unique').on(table.unitId, table.position),
+])
+
+// 4. 全局字库表（去重）
+export const chineseCharacter = pgTable('chinese_character', {
+  id: serial('id').primaryKey(),
+  character: text('character').unique().notNull(),
+  pinyin: text('pinyin'), // 主音
+  radical: text('radical'), // 部首
+  strokes: integer('strokes'), // 笔画数
+  structure: text('structure'), // 间架结构
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+})
+
+// 5. 字↔篇目关联表（区分一类/二类，关联表可覆盖多音字读音）
+export const chineseLessonCharacter = pgTable('chinese_lesson_character', {
+  lessonId: integer('lesson_id').references(() => chineseLesson.id).notNull(),
+  characterId: integer('character_id').references(() => chineseCharacter.id).notNull(),
+  category: text('category').notNull(), // 'one' 一类字 | 'two' 二类字
+  pinyin: text('pinyin'), // 可选，覆盖多音字本课读音
+  position: integer('position').notNull().default(0),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+}, table => [
+  primaryKey({ columns: [table.lessonId, table.characterId, table.category] }),
+])
+
+// 6. 词语库表（去重）
+export const chineseWord = pgTable('chinese_word', {
+  id: serial('id').primaryKey(),
+  word: text('word').unique().notNull(),
+  pinyin: text('pinyin'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+})
+
+// 7. 词语↔篇目关联表
+export const chineseLessonWord = pgTable('chinese_lesson_word', {
+  lessonId: integer('lesson_id').references(() => chineseLesson.id).notNull(),
+  wordId: integer('word_id').references(() => chineseWord.id).notNull(),
+  position: integer('position').notNull().default(0),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+}, table => [
+  primaryKey({ columns: [table.lessonId, table.wordId] }),
+])
+
+// ===== 类型导出 =====
+
+// 教材表
+export type ChineseTextbook = typeof chineseTextbook.$inferSelect
+export type NewChineseTextbook = typeof chineseTextbook.$inferInsert
+
+// 单元表
+export type ChineseUnit = typeof chineseUnit.$inferSelect
+export type NewChineseUnit = typeof chineseUnit.$inferInsert
+
+// 篇目表
+export type ChineseLesson = typeof chineseLesson.$inferSelect
+export type NewChineseLesson = typeof chineseLesson.$inferInsert
+
+// 字库表
+export type ChineseCharacter = typeof chineseCharacter.$inferSelect
+export type NewChineseCharacter = typeof chineseCharacter.$inferInsert
+
+// 字↔篇目关联表
+export type ChineseLessonCharacter = typeof chineseLessonCharacter.$inferSelect
+export type NewChineseLessonCharacter = typeof chineseLessonCharacter.$inferInsert
+
+// 词语库表
+export type ChineseWord = typeof chineseWord.$inferSelect
+export type NewChineseWord = typeof chineseWord.$inferInsert
+
+// 词语↔篇目关联表
+export type ChineseLessonWord = typeof chineseLessonWord.$inferSelect
+export type NewChineseLessonWord = typeof chineseLessonWord.$inferInsert
