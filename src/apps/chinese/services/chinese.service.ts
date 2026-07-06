@@ -116,11 +116,11 @@ export async function listChineseLessons(textbookId: number): Promise<ChineseUni
 
 /** 课文生字/词语内容 */
 export interface ChineseLessonContent {
-  /** 一类字（写字表），无拼音 */
-  yilei: string[]
-  /** 二类字（识字表），含本课上下文拼音 */
+  /** 一类字（写字表），拼音取 lesson 覆盖 → 字库主音（可能为 null） */
+  yilei: { char: string, pinyin: string | null }[]
+  /** 二类字（识字表），拼音取 lesson 覆盖 → 字库主音 */
   erlei: { char: string, pinyin: string | null }[]
-  /** 词语表（供未来语文应用使用） */
+  /** 词语表（DB 无拼音，客户端用 cnchar 计算） */
   words: string[]
 }
 
@@ -133,16 +133,19 @@ export async function getChineseLessonContent(lessonId: number): Promise<Chinese
     character: chineseCharacter.character,
     category: chineseLessonCharacter.category,
     pinyin: chineseLessonCharacter.pinyin,
+    mainPinyin: chineseCharacter.pinyin,
     position: chineseLessonCharacter.position,
   }).from(chineseLessonCharacter).innerJoin(chineseCharacter, eq(chineseCharacter.id, chineseLessonCharacter.characterId)).where(eq(chineseLessonCharacter.lessonId, lessonId)).orderBy(asc(chineseLessonCharacter.category), asc(chineseLessonCharacter.position))
 
-  const yilei: string[] = []
+  const yilei: { char: string, pinyin: string | null }[] = []
   const erlei: { char: string, pinyin: string | null }[] = []
   for (const r of charRows) {
+    // 优先 lesson 覆盖读音（多音字本课语境），否则回退字库主音
+    const py = r.pinyin ?? r.mainPinyin
     if (r.category === 'one')
-      yilei.push(r.character)
+      yilei.push({ char: r.character, pinyin: py })
     else if (r.category === 'two')
-      erlei.push({ char: r.character, pinyin: r.pinyin })
+      erlei.push({ char: r.character, pinyin: py })
   }
 
   const wordRows = await db.select({

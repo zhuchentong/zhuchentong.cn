@@ -1,0 +1,17 @@
+---
+import { WordTyper } from '@chinese/components/WordTyper'
+import ChineseLayout from '@chinese/layout.astro'
+
+const lessonId = Astro.url.searchParams.get('lessonId')
+const typeRaw = Astro.url.searchParams.get('type')
+const type = typeRaw === 'char' || typeRaw === 'all' ? typeRaw : 'word'
+
+// 无 lessonId 时重定向到选择页
+if (!lessonId) {
+  return Astro.redirect('/chinese/gallery')
+}
+---
+
+<ChineseLayout title="拼音打字练习">
+  <WordTyper client:load lessonId={Number(lessonId)} type={type} />
+</ChineseLayout>
