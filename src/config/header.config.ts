@@ -22,6 +22,10 @@ export const NavBarLinks = [
     link: '/english',
   },
   {
+    text: '语文',
+    link: '/chinese',
+  },
+  {
     text: '历史朝代',
     link: '/history/dynasty',
   },
