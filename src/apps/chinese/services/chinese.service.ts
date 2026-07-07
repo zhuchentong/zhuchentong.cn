@@ -1,10 +1,11 @@
-import { asc, eq } from 'drizzle-orm'
+import { asc, count, eq } from 'drizzle-orm'
 
 import { db } from '@/database'
 import {
   chineseCharacter,
   chineseLesson,
   chineseLessonCharacter,
+  chineseLessonText,
   chineseLessonWord,
   chineseTextbook,
   chineseUnit,
@@ -72,6 +73,8 @@ export interface ChineseLessonItem {
   lessonNumber: number | null
   title: string | null
   type: string
+  /** 是否有课文文本数据（type=text 练习可用） */
+  hasText: boolean
 }
 
 /** 单元（含其下篇目） */
@@ -95,7 +98,8 @@ export async function listChineseLessons(textbookId: number): Promise<ChineseUni
     lessonNumber: chineseLesson.lessonNumber,
     lessonTitle: chineseLesson.title,
     type: chineseLesson.type,
-  }).from(chineseLesson).innerJoin(chineseUnit, eq(chineseUnit.id, chineseLesson.unitId)).where(eq(chineseUnit.textbookId, textbookId)).orderBy(asc(chineseUnit.position), asc(chineseLesson.position))
+    textCount: count(chineseLessonText.id),
+  }).from(chineseLesson).innerJoin(chineseUnit, eq(chineseUnit.id, chineseLesson.unitId)).leftJoin(chineseLessonText, eq(chineseLessonText.lessonId, chineseLesson.id)).where(eq(chineseUnit.textbookId, textbookId)).groupBy(chineseUnit.id, chineseLesson.id).orderBy(asc(chineseUnit.position), asc(chineseLesson.position))
 
   const map = new Map<number, ChineseUnitGroup>()
   for (const r of rows) {
@@ -109,9 +113,19 @@ export async function listChineseLessons(textbookId: number): Promise<ChineseUni
       lessonNumber: r.lessonNumber,
       title: r.lessonTitle,
       type: r.type,
+      hasText: Number(r.textCount) > 0,
     })
   }
   return [...map.values()]
+}
+
+/** 课文文本条目（课文句段/古诗/园地条目） */
+export interface ChineseLessonTextItem {
+  category: 'passage' | 'poem' | 'idiom'
+  title: string | null
+  author: string | null
+  dynasty: string | null
+  content: string
 }
 
 /** 课文生字/词语内容 */
@@ -122,10 +136,12 @@ export interface ChineseLessonContent {
   erlei: { char: string, pinyin: string | null }[]
   /** 词语表（DB 无拼音，客户端用 cnchar 计算） */
   words: string[]
+  /** 课文文本条目（按句/首/条切分，客户端用 cnchar 计算拼音） */
+  texts: ChineseLessonTextItem[]
 }
 
 /**
- * 查询某篇目的一类字/二类字/词语
+ * 查询某篇目的一类字/二类字/词语/课文文本
  * position 在导入时按类别独立编号，故按 category+position 排序保证各类内部顺序
  */
 export async function getChineseLessonContent(lessonId: number): Promise<ChineseLessonContent> {
@@ -152,5 +168,13 @@ export async function getChineseLessonContent(lessonId: number): Promise<Chinese
     word: chineseWord.word,
   }).from(chineseLessonWord).innerJoin(chineseWord, eq(chineseWord.id, chineseLessonWord.wordId)).where(eq(chineseLessonWord.lessonId, lessonId)).orderBy(asc(chineseLessonWord.position))
 
-  return { yilei, erlei, words: wordRows.map(r => r.word) }
+  const textRows = await db.select({
+    category: chineseLessonText.category,
+    title: chineseLessonText.title,
+    author: chineseLessonText.author,
+    dynasty: chineseLessonText.dynasty,
+    content: chineseLessonText.content,
+  }).from(chineseLessonText).where(eq(chineseLessonText.lessonId, lessonId)).orderBy(asc(chineseLessonText.position))
+
+  return { yilei, erlei, words: wordRows.map(r => r.word), texts: textRows as ChineseLessonTextItem[] }
 }

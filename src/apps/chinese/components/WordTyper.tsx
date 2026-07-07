@@ -15,17 +15,26 @@ import { Progress } from '@/components/ui/progress'
 import { Switch } from '@/components/ui/switch'
 import * as AppStore from '@/stores/app.store'
 
-type PracticeType = 'word' | 'char' | 'all'
+type PracticeType = 'word' | 'char' | 'all' | 'text'
 
 interface WordTyperProps {
   lessonId: number
   type: PracticeType
 }
 
+interface LessonTextItem {
+  category: 'passage' | 'poem' | 'idiom'
+  title: string | null
+  author: string | null
+  dynasty: string | null
+  content: string
+}
+
 interface LessonContent {
   yilei: { char: string, pinyin: string | null }[]
   erlei: { char: string, pinyin: string | null }[]
   words: string[]
+  texts: LessonTextItem[]
 }
 
 /** 「按任意键开始」半透明遮罩 */
@@ -55,6 +64,53 @@ function charToItem(c: { char: string, pinyin: string | null }, category: string
 function wordToItem(word: string): TypingItem {
   const pinyin = getWordPinyin(word)
   return { display: word, pinyin, target: toPinyinTarget(pinyin), category: 'word' }
+}
+
+/**
+ * 按子句切分（逗号/分号），保留结尾标点
+ * "一道残阳铺水中，半江瑟瑟半江红。" → ["一道残阳铺水中，", "半江瑟瑟半江红。"]
+ */
+function splitSubclause(text: string): string[] {
+  const out: string[] = []
+  let cur = ''
+  for (const ch of text) {
+    cur += ch
+    if (/[，；,;]/.test(ch)) {
+      const s = cur.trim()
+      if (s)
+        out.push(s)
+      cur = ''
+    }
+  }
+  const rest = cur.trim()
+  if (rest)
+    out.push(rest)
+  return out
+}
+
+/**
+ * 把一条课文文本（passage/poem/idiom）切分为多个 TypingItem
+ * - 古诗：按 \n 分行后再按逗号切，每子句填 meta（标题/朝代/作者）作 display 上方提示
+ * - 散文/成语：直接按逗号切子句
+ * 顺序保持原文顺序（由调用方保证 shuffle=false）
+ */
+function textToItems(it: LessonTextItem): TypingItem[] {
+  const meta = it.title
+    ? { title: it.title ?? undefined, dynasty: it.dynasty ?? undefined, author: it.author ?? undefined }
+    : undefined
+
+  const lines = it.category === 'poem' ? it.content.split('\n') : [it.content]
+  const items: TypingItem[] = []
+  for (const line of lines) {
+    for (const sub of splitSubclause(line)) {
+      const pinyin = getWordPinyin(sub)
+      const target = toPinyinTarget(pinyin)
+      if (!target)
+        continue
+      items.push({ display: sub, pinyin, target, category: it.category, meta })
+    }
+  }
+  return items
 }
 
 /** 打字区单个字符 token：ch=去调字母，idx=扁平索引(对齐 inputStatus)，gapBefore=音节首字母前需间隔 */
@@ -94,11 +150,18 @@ export function WordTyper({ lessonId, type }: WordTyperProps) {
     if (!content)
       return []
     const list: TypingItem[] = []
-    if (type === 'word' || type === 'all')
-      list.push(...content.words.map(wordToItem))
-    if (type === 'char' || type === 'all') {
-      list.push(...content.yilei.map(c => charToItem(c, 'one')))
-      list.push(...content.erlei.map(c => charToItem(c, 'two')))
+    if (type === 'text') {
+      // 课文：按原文顺序切子句，meta 承载古诗题作者
+      for (const t of content.texts)
+        list.push(...textToItems(t))
+    }
+    else {
+      if (type === 'word' || type === 'all')
+        list.push(...content.words.map(wordToItem))
+      if (type === 'char' || type === 'all') {
+        list.push(...content.yilei.map(c => charToItem(c, 'one')))
+        list.push(...content.erlei.map(c => charToItem(c, 'two')))
+      }
     }
     // 过滤掉无有效拼音的条目（cnchar 查不到的生僻字）
     return list.filter(it => it.target.length > 0)
@@ -117,6 +180,8 @@ export function WordTyper({ lessonId, type }: WordTyperProps) {
     audio: { correct: correctAudio, incorrect: incorrectAudio, keydown: keydownAudio },
     onSpeak,
     onExit,
+    // 课文按原文顺序练习（保阅读逻辑），字/词打乱巩固记忆
+    shuffle: type !== 'text',
   })
 
   // 卸载取消朗读
@@ -162,7 +227,7 @@ export function WordTyper({ lessonId, type }: WordTyperProps) {
   // === 完成阶段 ===
   if (engine.phase === 'finished') {
     const errorList = Array.from(engine.errors)
-    const typeLabel = type === 'word' ? '词语' : type === 'char' ? '生字' : '全部'
+    const typeLabel = type === 'word' ? '词语' : type === 'char' ? '生字' : type === 'text' ? '课文' : '全部'
     return (
       <div className="flex h-full items-center justify-center bg-background p-6">
         <Card className="w-full max-w-lg">
@@ -228,6 +293,28 @@ export function WordTyper({ lessonId, type }: WordTyperProps) {
   const showPinyinHint = !hidePinyin || engine.showAnswer
   const pinyinHintClass = engine.showAnswer ? 'text-amber-500' : 'text-muted-foreground'
 
+  // 字号自适应：按当前条目汉字数分档（标点不计入）
+  const hanLen = cur
+    ? Array.from(cur.display).filter(c => /[\u4E00-\u9FFF]/.test(c)).length
+    : 0
+  const displaySizeClass = hanLen <= 4
+    ? 'text-7xl tracking-widest'
+    : hanLen <= 8
+      ? 'text-5xl tracking-wide'
+      : hanLen <= 12
+        ? 'text-4xl tracking-normal'
+        : 'text-3xl tracking-normal'
+  const pinyinSizeClass = hanLen <= 4
+    ? 'text-5xl'
+    : hanLen <= 8
+      ? 'text-4xl'
+      : 'text-3xl'
+  const pinyinHintSizeClass = hanLen <= 4
+    ? 'text-2xl'
+    : hanLen <= 8
+      ? 'text-xl'
+      : 'text-lg'
+
   return (
     <div className={`relative flex h-full flex-col bg-background transition-colors ${engine.wrongFlash ? 'bg-red-50 dark:bg-red-950/30' : ''}`}>
       {!engine.started && <StartOverlay />}
@@ -235,7 +322,7 @@ export function WordTyper({ lessonId, type }: WordTyperProps) {
       {/* 功能条 */}
       <div className="flex items-center justify-between border-b border-border px-4 py-2">
         <span className="text-sm text-muted-foreground">
-          {type === 'word' ? '词语练习' : type === 'char' ? '生字练习' : '综合练习'}
+          {type === 'word' ? '词语练习' : type === 'char' ? '生字练习' : type === 'text' ? '课文练习' : '综合练习'}
         </span>
         <div className="flex items-center gap-3">
           {/* 默写模式：隐藏拼音提示，显示「答案」按钮 */}
@@ -280,21 +367,32 @@ export function WordTyper({ lessonId, type }: WordTyperProps) {
       </div>
 
       {/* 主内容区 */}
-      <div className="flex flex-1 flex-col items-center justify-center">
+      <div className="flex flex-1 flex-col items-center justify-center px-6">
         {cur && (
-          <div className="mb-8 text-center">
+          <div className="mb-8 max-w-5xl text-center">
+            {/* 古诗题/作者提示（meta，不参与打字） */}
+            {cur.meta?.title && (
+              <p className="mb-3 text-sm text-muted-foreground">
+                《
+                {cur.meta.title}
+                》
+                {cur.meta.dynasty ?? ''}
+                ·
+                {cur.meta.author ?? ''}
+              </p>
+            )}
             {/* 带调拼音提示（教材式注音，置于汉字上方） */}
             {showPinyinHint && (
-              <p className={`mb-3 text-2xl ${pinyinHintClass}`}>
+              <p className={`mb-3 ${pinyinHintSizeClass} ${pinyinHintClass}`}>
                 {cur.pinyin}
               </p>
             )}
             {/* 中文展示 */}
-            <div className="mb-6 font-medium text-7xl tracking-widest text-foreground">
+            <div className={`mb-6 font-medium text-foreground ${displaySizeClass}`}>
               {cur.display}
             </div>
             {/* 拼音打字进度：按音节分组，默写模式下划线遮蔽 */}
-            <div className="font-mono text-5xl font-bold tracking-[0.15em]">
+            <div className={`font-mono ${pinyinSizeClass} font-bold leading-relaxed tracking-[0.1em]`}>
               {tokens.map((t) => {
                 const status = engine.inputStatus[t.idx]
                 const isCurrent = t.idx === engine.charIndex

@@ -15,6 +15,7 @@ interface LessonItem {
   lessonNumber: number | null
   title: string | null
   type: string
+  hasText: boolean
 }
 
 interface UnitGroup {
@@ -23,12 +24,13 @@ interface UnitGroup {
   lessons: LessonItem[]
 }
 
-type PracticeType = 'word' | 'char' | 'all'
+type PracticeType = 'word' | 'char' | 'all' | 'text'
 
 const TYPE_TABS: { value: PracticeType, label: string }[] = [
   { value: 'word', label: '词语' },
   { value: 'char', label: '生字' },
   { value: 'all', label: '全部' },
+  { value: 'text', label: '课文' },
 ]
 
 export function TextbookLessonSelector() {
@@ -68,7 +70,10 @@ export function TextbookLessonSelector() {
     }
   }
 
-  const handleLessonClick = (lessonId: number) => {
+  const handleLessonClick = (lessonId: number, hasText: boolean) => {
+    // 课文模式下，无课文数据的篇目禁用点击
+    if (practiceType === 'text' && !hasText)
+      return
     window.location.href = `/chinese/typing?lessonId=${lessonId}&type=${practiceType}`
   }
 
@@ -159,20 +164,29 @@ export function TextbookLessonSelector() {
                               {unit.unitTitle ? ` · ${unit.unitTitle}` : ''}
                             </h2>
                             <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-                              {unit.lessons.map(ls => (
-                                <button
-                                  key={ls.id}
-                                  className="flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-left text-sm transition-colors hover:border-foreground/20 hover:bg-accent"
-                                  onClick={() => handleLessonClick(ls.id)}
-                                >
-                                  <span className="text-muted-foreground">
-                                    {ls.type === 'garden'
-                                      ? <Icon icon="icon-park-outline:tree-one" className="size-4" />
-                                      : ls.lessonNumber ?? '·'}
-                                  </span>
-                                  <span className="truncate">{ls.title ?? '未命名'}</span>
-                                </button>
-                              ))}
+                              {unit.lessons.map((ls) => {
+                                const disabled = practiceType === 'text' && !ls.hasText
+                                return (
+                                  <button
+                                    key={ls.id}
+                                    className={`flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-left text-sm transition-colors ${
+                                      disabled
+                                        ? 'cursor-not-allowed border-dashed border-border/50 text-muted-foreground/40'
+                                        : 'hover:border-foreground/20 hover:bg-accent'
+                                    }`}
+                                    disabled={disabled}
+                                    title={disabled ? '无课文内容' : undefined}
+                                    onClick={() => handleLessonClick(ls.id, ls.hasText)}
+                                  >
+                                    <span className="text-muted-foreground">
+                                      {ls.type === 'garden'
+                                        ? <Icon icon="icon-park-outline:tree-one" className="size-4" />
+                                        : ls.lessonNumber ?? '·'}
+                                    </span>
+                                    <span className="truncate">{ls.title ?? '未命名'}</span>
+                                  </button>
+                                )
+                              })}
                             </div>
                           </div>
                         ))}

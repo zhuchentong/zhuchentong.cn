@@ -183,6 +183,22 @@ export const chineseLessonWord = pgTable('chinese_lesson_word', {
   primaryKey({ columns: [table.lessonId, table.wordId] }),
 ])
 
+// 8. 课文文本↔篇目表（课文段落/古诗/语文园地条目，按句/首/条切分）
+export const chineseLessonText = pgTable('chinese_lesson_text', {
+  id: serial('id').primaryKey(),
+  lessonId: integer('lesson_id').references(() => chineseLesson.id).notNull(),
+  // 'passage' 课文句段 | 'poem' 古诗（含园地古诗） | 'idiom' 成语/谚语/名言
+  category: text('category').notNull(),
+  title: text('title'), // 古诗题（如「暮江吟」），散文/谚语为 null
+  author: text('author'), // 作者（如「王维」）
+  dynasty: text('dynasty'), // 朝代（如「唐」）
+  content: text('content').notNull(), // 文本正文（一句/一首/一条）
+  position: integer('position').notNull().default(0),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+}, table => [
+  unique('chinese_lesson_text_lesson_position_unique').on(table.lessonId, table.position),
+])
+
 // ===== 类型导出 =====
 
 // 教材表
@@ -212,3 +228,7 @@ export type NewChineseWord = typeof chineseWord.$inferInsert
 // 词语↔篇目关联表
 export type ChineseLessonWord = typeof chineseLessonWord.$inferSelect
 export type NewChineseLessonWord = typeof chineseLessonWord.$inferInsert
+
+// 课文文本表
+export type ChineseLessonText = typeof chineseLessonText.$inferSelect
+export type NewChineseLessonText = typeof chineseLessonText.$inferInsert

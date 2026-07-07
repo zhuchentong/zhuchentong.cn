@@ -4,7 +4,9 @@ import ChineseLayout from '@chinese/layout.astro'
 
 const lessonId = Astro.url.searchParams.get('lessonId')
 const typeRaw = Astro.url.searchParams.get('type')
-const type = typeRaw === 'char' || typeRaw === 'all' ? typeRaw : 'word'
+const type: 'word' | 'char' | 'all' | 'text' = ['char', 'all', 'word', 'text'].includes(typeRaw as string)
+  ? (typeRaw as 'word' | 'char' | 'all' | 'text')
+  : 'word'
 
 // 无 lessonId 时重定向到选择页
 if (!lessonId) {

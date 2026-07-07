@@ -1,0 +1,380 @@
+[
+  {
+    "unitNumber": 1,
+    "lessonNumber": 1,
+    "isGarden": false,
+    "items": [
+      {
+        "category": "passage",
+        "title": null,
+        "dynasty": null,
+        "author": null,
+        "content": "午后一点左右，从远处传来隆隆的响声，好像闷雷滚动。顿时人声鼎沸，有人告诉我们，潮来了！我们踮着脚往东望去，江面还是风平浪静，看不出有什么变化。过了一会儿，响声越来越大，只见东边水天相接的地方出现了一条白线，人群又沸腾起来。那条白线很快向我们移来，逐渐拉长，变粗，横贯江面。再近些，只见白浪翻滚，形成一堵两长多高的水墙。浪潮越来越近，犹如千万匹白色战马齐头并进，浩浩荡荡地飞奔而来；那声音如同山崩地裂，好像大地都被震得颤动起来。"
+      }
+    ]
+  },
+  {
+    "unitNumber": 1,
+    "lessonNumber": 2,
+    "isGarden": false,
+    "items": [
+      {
+        "category": "passage",
+        "title": null,
+        "dynasty": null,
+        "author": null,
+        "content": "细细的溪水，流着山草和野花的香味，流着月光。灰白色的鹅卵石，布满河床。哟，卵石间有多少可爱的小水塘啊，每个小水塘，都抱着一个月亮！哦，阿妈，白天你在溪里洗衣裳，而我，用树叶做小船，运载许多新鲜的花瓣……哦，阿妈，我们到溪边去吧，我们去看看小水塘，看看水塘里的月亮，看看我采过鲜花的地方。"
+      }
+    ]
+  },
+  {
+    "unitNumber": 1,
+    "lessonNumber": null,
+    "isGarden": true,
+    "items": [
+      {
+        "category": "poem",
+        "title": "鹿柴",
+        "dynasty": "唐",
+        "author": "王维",
+        "content": "空山不见人，但闻人语响。\n返景入深林，复照青苔上。"
+      }
+    ]
+  },
+  {
+    "unitNumber": 2,
+    "lessonNumber": null,
+    "isGarden": true,
+    "items": [
+      {
+        "category": "idiom",
+        "title": null,
+        "dynasty": null,
+        "author": null,
+        "content": "好问则裕，自用则小。——《尚书》"
+      },
+      {
+        "category": "idiom",
+        "title": null,
+        "dynasty": null,
+        "author": null,
+        "content": "博学之，审问之，慎思之，明辨之，笃行之。——《礼记》"
+      },
+      {
+        "category": "idiom",
+        "title": null,
+        "dynasty": null,
+        "author": null,
+        "content": "智能之士，不学不成，不问不知。——[汉]王充"
+      },
+      {
+        "category": "idiom",
+        "title": null,
+        "dynasty": null,
+        "author": null,
+        "content": "人非生而知之者，孰能无惑?——[唐]韩愈"
+      }
+    ]
+  },
+  {
+    "unitNumber": 3,
+    "lessonNumber": 9,
+    "isGarden": false,
+    "items": [
+      {
+        "category": "poem",
+        "title": "暮江吟",
+        "dynasty": "唐",
+        "author": "白居易",
+        "content": "一道残阳铺水中，半江瑟瑟半江红。\n可怜九月初三夜，露似真珠月似弓。"
+      },
+      {
+        "category": "poem",
+        "title": "题西林壁",
+        "dynasty": "宋",
+        "author": "苏轼",
+        "content": "横看成岭侧成峰，远近高低各不同。\n不识庐山真面目，只缘身在此山中。"
+      },
+      {
+        "category": "poem",
+        "title": "雪梅",
+        "dynasty": "宋",
+        "author": "卢梅坡",
+        "content": "梅雪争春未肯降，骚人阁笔费评章。\n梅须逊雪三分白，雪却输梅一段香。"
+      }
+    ]
+  },
+  {
+    "unitNumber": 3,
+    "lessonNumber": null,
+    "isGarden": true,
+    "items": [
+      {
+        "category": "idiom",
+        "title": null,
+        "dynasty": null,
+        "author": null,
+        "content": "立了秋，把扇丢。"
+      },
+      {
+        "category": "idiom",
+        "title": null,
+        "dynasty": null,
+        "author": null,
+        "content": "二八月，乱穿衣。"
+      },
+      {
+        "category": "idiom",
+        "title": null,
+        "dynasty": null,
+        "author": null,
+        "content": "夏雨少，秋霜早。"
+      },
+      {
+        "category": "idiom",
+        "title": null,
+        "dynasty": null,
+        "author": null,
+        "content": "八月里来雁门开，雁儿脚上带霜来。"
+      },
+      {
+        "category": "idiom",
+        "title": null,
+        "dynasty": null,
+        "author": null,
+        "content": "一场秋雨一场寒，十场秋雨要穿棉。"
+      },
+      {
+        "category": "idiom",
+        "title": null,
+        "dynasty": null,
+        "author": null,
+        "content": "八月暖，九月温，十月还有小阳春。"
+      }
+    ]
+  },
+  {
+    "unitNumber": 4,
+    "lessonNumber": 13,
+    "isGarden": false,
+    "items": [
+      {
+        "category": "passage",
+        "title": null,
+        "dynasty": null,
+        "author": null,
+        "content": "炎帝之少女，名曰女娃。女娃游于东海，溺而不返，故为精卫，常衔西山之木石，以堙于东海。"
+      }
+    ]
+  },
+  {
+    "unitNumber": 4,
+    "lessonNumber": null,
+    "isGarden": true,
+    "items": [
+      {
+        "category": "poem",
+        "title": "嫦娥",
+        "dynasty": "唐",
+        "author": "李商隐",
+        "content": "云母屏风烛影深，长河渐落晓星沉。\n嫦娥应悔偷灵药，碧海青天夜夜心。"
+      }
+    ]
+  },
+  {
+    "unitNumber": 6,
+    "lessonNumber": null,
+    "isGarden": true,
+    "items": [
+      {
+        "category": "idiom",
+        "title": null,
+        "dynasty": null,
+        "author": null,
+        "content": "尺有所短，寸有所长。"
+      },
+      {
+        "category": "idiom",
+        "title": null,
+        "dynasty": null,
+        "author": null,
+        "content": "机不可失，时不再来。"
+      },
+      {
+        "category": "idiom",
+        "title": null,
+        "dynasty": null,
+        "author": null,
+        "content": "差之毫厘，谬以千里。"
+      },
+      {
+        "category": "idiom",
+        "title": null,
+        "dynasty": null,
+        "author": null,
+        "content": "病从口入，祸从口出。"
+      },
+      {
+        "category": "idiom",
+        "title": null,
+        "dynasty": null,
+        "author": null,
+        "content": "一言既出，驷马难追。"
+      },
+      {
+        "category": "idiom",
+        "title": null,
+        "dynasty": null,
+        "author": null,
+        "content": "比上不足，比下有余。"
+      }
+    ]
+  },
+  {
+    "unitNumber": 7,
+    "lessonNumber": 21,
+    "isGarden": false,
+    "items": [
+      {
+        "category": "poem",
+        "title": "出塞",
+        "dynasty": "唐",
+        "author": "王昌龄",
+        "content": "秦时明月汉时关，万里长征人未还。\n但使龙城飞将在，不教胡马度阴山。"
+      },
+      {
+        "category": "poem",
+        "title": "凉州词",
+        "dynasty": "唐",
+        "author": "王翰",
+        "content": "葡萄美酒夜光杯，欲饮琵琶马上催。\n醉卧沙场君莫笑，古来征战几人回？"
+      },
+      {
+        "category": "poem",
+        "title": "夏日绝句",
+        "dynasty": "宋",
+        "author": "李清照",
+        "content": "生当作人杰，死亦为鬼雄。\n至今思项羽，不肯过江东。"
+      }
+    ]
+  },
+  {
+    "unitNumber": 7,
+    "lessonNumber": null,
+    "isGarden": true,
+    "items": [
+      {
+        "category": "poem",
+        "title": "别董大",
+        "dynasty": "唐",
+        "author": "高适",
+        "content": "千里黄云白日曛，北风吹雁雪纷纷。\n莫愁前路无知己，天下谁人不识君？"
+      }
+    ]
+  },
+  {
+    "unitNumber": 8,
+    "lessonNumber": 25,
+    "isGarden": false,
+    "items": [
+      {
+        "category": "passage",
+        "title": null,
+        "dynasty": null,
+        "author": null,
+        "content": "王戎七岁，尝与诸小儿游。看道边李树多子折枝，诸儿竞走取之，唯戎不动。人问之，答曰：“树在道边而多子，此必苦李。”取之，信然。"
+      }
+    ]
+  },
+  {
+    "unitNumber": 8,
+    "lessonNumber": null,
+    "isGarden": true,
+    "items": [
+      {
+        "category": "idiom",
+        "title": null,
+        "dynasty": null,
+        "author": null,
+        "content": "眉清目秀"
+      },
+      {
+        "category": "idiom",
+        "title": null,
+        "dynasty": null,
+        "author": null,
+        "content": "亭亭玉立"
+      },
+      {
+        "category": "idiom",
+        "title": null,
+        "dynasty": null,
+        "author": null,
+        "content": "明眸皓齿"
+      },
+      {
+        "category": "idiom",
+        "title": null,
+        "dynasty": null,
+        "author": null,
+        "content": "文质彬彬"
+      },
+      {
+        "category": "idiom",
+        "title": null,
+        "dynasty": null,
+        "author": null,
+        "content": "相貌堂堂"
+      },
+      {
+        "category": "idiom",
+        "title": null,
+        "dynasty": null,
+        "author": null,
+        "content": "威风凛凛"
+      },
+      {
+        "category": "idiom",
+        "title": null,
+        "dynasty": null,
+        "author": null,
+        "content": "膀大腰圆"
+      },
+      {
+        "category": "idiom",
+        "title": null,
+        "dynasty": null,
+        "author": null,
+        "content": "浓眉大眼"
+      },
+      {
+        "category": "idiom",
+        "title": null,
+        "dynasty": null,
+        "author": null,
+        "content": "白发苍苍"
+      },
+      {
+        "category": "idiom",
+        "title": null,
+        "dynasty": null,
+        "author": null,
+        "content": "鹤发童颜"
+      },
+      {
+        "category": "idiom",
+        "title": null,
+        "dynasty": null,
+        "author": null,
+        "content": "慈眉善目"
+      },
+      {
+        "category": "idiom",
+        "title": null,
+        "dynasty": null,
+        "author": null,
+        "content": "步履蹒跚"
+      }
+    ]
+  }
+]

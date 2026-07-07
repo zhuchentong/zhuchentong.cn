@@ -29,8 +29,13 @@ function parsePolyPinyin(raw: string): string[] {
 
 /**
  * 取单个汉字的默认带调拼音（多音字取首个读音）
+ *
+ * 注意：cnchar.spell 对中文标点（，。——《》等）会返回标点本身而非空，
+ * 因此必须先用汉字范围预过滤，否则标点会污染 target 串导致打字永远不匹配。
  */
 export function getCharPinyin(ch: string): string {
+  if (!/[\u4E00-\u9FFF]/.test(ch))
+    return ''
   const result = cnchar.spell(ch, 'poly', 'array', 'tone', 'low')
   if (!result.length)
     return ''

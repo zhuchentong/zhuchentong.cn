@@ -43,6 +43,13 @@
       "when": 1782962779448,
       "tag": "0005_worthless_zarda",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1783387718642,
+      "tag": "0006_superb_beyonder",
+      "breakpoints": true
     }
   ]
 }
