@@ -12,8 +12,8 @@ export interface TypingItem {
   target: string
   /** 类别标签，用于错题展示 */
   category: string
-  /** 可选元数据（古诗题/作者/朝代），仅用于 display 上方提示，不参与打字 */
-  meta?: { title?: string, dynasty?: string, author?: string }
+  /** 可选元数据（古诗题/作者/朝代/成语出处），仅用于 display 上方提示，不参与打字 */
+  meta?: { title?: string, dynasty?: string, author?: string, source?: string }
 }
 
 type CharStatus = 'idle' | 'correct' | 'wrong'

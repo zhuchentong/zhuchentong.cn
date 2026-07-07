@@ -89,13 +89,25 @@ function splitSubclause(text: string): string[] {
 }
 
 /**
+ * 从内容中剥离引用出处（——后的部分）
+ * "自用则小。——《尚书》" → { body: "自用则小。", source: "《尚书》" }
+ * "好问则裕，"（无出处）→ { body: "好问则裕，", source: null }
+ */
+function extractSource(content: string): { body: string, source: string | null } {
+  // 排除 em dash 字符避免回溯，body 部分不含 ——
+  const m = content.match(/^([^—]+)——(.+)$/)
+  return m ? { body: m[1], source: m[2] } : { body: content, source: null }
+}
+
+/**
  * 把一条课文文本（passage/poem/idiom）切分为多个 TypingItem
  * - 古诗：按 \n 分行后再按逗号切，每子句填 meta（标题/朝代/作者）作 display 上方提示
  * - 散文/成语：直接按逗号切子句
+ * - 含 —— 出处的成语：出处剥离到 meta.source，不参与打字
  * 顺序保持原文顺序（由调用方保证 shuffle=false）
  */
 function textToItems(it: LessonTextItem): TypingItem[] {
-  const meta = it.title
+  const meta: TypingItem['meta'] = it.title
     ? { title: it.title ?? undefined, dynasty: it.dynasty ?? undefined, author: it.author ?? undefined }
     : undefined
 
@@ -103,11 +115,14 @@ function textToItems(it: LessonTextItem): TypingItem[] {
   const items: TypingItem[] = []
   for (const line of lines) {
     for (const sub of splitSubclause(line)) {
-      const pinyin = getWordPinyin(sub)
+      // 剥离引用出处（——《XXX》/——[X]XXX），出处进 meta.source
+      const { body, source } = extractSource(sub)
+      const pinyin = getWordPinyin(body)
       const target = toPinyinTarget(pinyin)
       if (!target)
         continue
-      items.push({ display: sub, pinyin, target, category: it.category, meta })
+      const itemMeta = source ? { ...meta, source } : meta
+      items.push({ display: body, pinyin, target, category: it.category, meta: itemMeta })
     }
   }
   return items
@@ -134,6 +149,39 @@ function buildSyllableTokens(pinyin: string): RenderToken[] {
     })
   })
   return out
+}
+
+/**
+ * 逐字渲染 display 内容：汉字正常 inline-block，标点弱化（opacity-40）
+ * - 句末标点（在最后一个汉字之后）：w-0 + translateX 不占布局位置，与拼音行对齐
+ * - 句中标点（在汉字之间）：保持正常占位避免与后续汉字重叠
+ */
+function renderDisplayChars(display: string) {
+  const chars = Array.from(display)
+  const lastHanIdx = chars.reduce((last, ch, i) =>
+    /[\u4E00-\u9FFF]/.test(ch) ? i : last, -1)
+  return chars.map((ch, i) => {
+    if (/[\u4E00-\u9FFF]/.test(ch)) {
+      // eslint-disable-next-line react/no-array-index-key -- 字符位置稳定，display 内容不可变
+      return <span key={i} className="inline-block">{ch}</span>
+    }
+    // 标点：句末（最后一个汉字之后）用 w-0 不占位，句中保持占位
+    const isTrailing = i > lastHanIdx
+    if (isTrailing) {
+      return (
+        <span
+          // eslint-disable-next-line react/no-array-index-key -- 句末标点位置稳定
+          key={i}
+          className="inline-block w-0 overflow-visible opacity-40"
+          style={{ transform: 'translateX(0.3em)' }}
+        >
+          {ch}
+        </span>
+      )
+    }
+    // eslint-disable-next-line react/no-array-index-key -- 句中标点位置稳定
+    return <span key={i} className="inline-block opacity-40">{ch}</span>
+  })
 }
 
 export function WordTyper({ lessonId, type }: WordTyperProps) {
@@ -293,27 +341,12 @@ export function WordTyper({ lessonId, type }: WordTyperProps) {
   const showPinyinHint = !hidePinyin || engine.showAnswer
   const pinyinHintClass = engine.showAnswer ? 'text-amber-500' : 'text-muted-foreground'
 
-  // 字号自适应：按当前条目汉字数分档（标点不计入）
-  const hanLen = cur
-    ? Array.from(cur.display).filter(c => /[\u4E00-\u9FFF]/.test(c)).length
-    : 0
-  const displaySizeClass = hanLen <= 4
-    ? 'text-7xl tracking-widest'
-    : hanLen <= 8
-      ? 'text-5xl tracking-wide'
-      : hanLen <= 12
-        ? 'text-4xl tracking-normal'
-        : 'text-3xl tracking-normal'
-  const pinyinSizeClass = hanLen <= 4
-    ? 'text-5xl'
-    : hanLen <= 8
-      ? 'text-4xl'
-      : 'text-3xl'
-  const pinyinHintSizeClass = hanLen <= 4
-    ? 'text-2xl'
-    : hanLen <= 8
-      ? 'text-xl'
-      : 'text-lg'
+  // 字号：课文（type='text'）统一固定字号避免跳变；字/词保持大号聚焦
+  const displaySizeClass = type === 'text'
+    ? 'text-5xl tracking-wide'
+    : 'text-7xl tracking-widest'
+  const pinyinSizeClass = type === 'text' ? 'text-4xl' : 'text-5xl'
+  const pinyinHintSizeClass = type === 'text' ? 'text-xl' : 'text-2xl'
 
   return (
     <div className={`relative flex h-full flex-col bg-background transition-colors ${engine.wrongFlash ? 'bg-red-50 dark:bg-red-950/30' : ''}`}>
@@ -370,7 +403,7 @@ export function WordTyper({ lessonId, type }: WordTyperProps) {
       <div className="flex flex-1 flex-col items-center justify-center px-6">
         {cur && (
           <div className="mb-8 max-w-5xl text-center">
-            {/* 古诗题/作者提示（meta，不参与打字） */}
+            {/* meta 提示（古诗题/作者 或 成语出处，不参与打字） */}
             {cur.meta?.title && (
               <p className="mb-3 text-sm text-muted-foreground">
                 《
@@ -381,6 +414,12 @@ export function WordTyper({ lessonId, type }: WordTyperProps) {
                 {cur.meta.author ?? ''}
               </p>
             )}
+            {cur.meta?.source && (
+              <p className="mb-3 text-sm text-muted-foreground">
+                ——
+                {cur.meta.source}
+              </p>
+            )}
             {/* 带调拼音提示（教材式注音，置于汉字上方） */}
             {showPinyinHint && (
               <p className={`mb-3 ${pinyinHintSizeClass} ${pinyinHintClass}`}>
@@ -389,7 +428,12 @@ export function WordTyper({ lessonId, type }: WordTyperProps) {
             )}
             {/* 中文展示 */}
             <div className={`mb-6 font-medium text-foreground ${displaySizeClass}`}>
-              {cur.display}
+              {type === 'text'
+                ? (
+                  // 课文模式：逐字渲染，标点弱化且句末标点不占位
+                    renderDisplayChars(cur.display)
+                  )
+                : cur.display}
             </div>
             {/* 拼音打字进度：按音节分组，默写模式下划线遮蔽 */}
             <div className={`font-mono ${pinyinSizeClass} font-bold leading-relaxed tracking-[0.1em]`}>
