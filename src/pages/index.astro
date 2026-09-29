@@ -1,67 +1,153 @@
 ---
 import MainLayout from '@/layouts/MainLayout.astro'
-import Icon from '@/components/widgets/Icon.tsx'
+import { LayoutConfig } from '@/config/layout.config'
 
 const cards = [
   {
     href: '/copybook/hanzi',
-    icon: 'icon-park-outline:edit',
     title: '字帖',
     desc: '生成汉字田字格、米字格描红字帖',
   },
   {
     href: '/workbook/pinyin',
-    icon: 'icon-park-outline:notebook',
     title: '练习册',
     desc: '拼音声母韵母练习题生成',
   },
   {
     href: '/english',
-    icon: 'icon-park-outline:book-open',
     title: '单词',
     desc: '英语单词与课文句子学习',
   },
   {
     href: '/chinese',
-    icon: 'icon-park-outline:chinese',
     title: '语文',
     desc: '中文词语与生字拼音打字练习',
   },
   {
     href: '/history/dynasty',
-    icon: 'icon-park-outline:history',
     title: '历史朝代',
     desc: '多文明历史朝代时间轴对比',
   },
 ]
+
+// 内容区可用最小高度 = 视口 - 头部 - 底部 - Content 上下内边距（默认 20px × 2），用于整屏垂直居中
+const minH = `calc(100vh - ${LayoutConfig.header.height + LayoutConfig.footer.height + 40}px)`
 ---
 
 <MainLayout title="首页">
-  <section class="flex min-h-[60vh] items-center justify-center py-20">
-    <div class="grid w-full max-w-4xl gap-6 px-4 sm:grid-cols-2 lg:grid-cols-3">
+  <div class="relative flex flex-col items-center justify-center" style={{ minHeight: minH }}>
+    <!-- 环境背景光斑：径向渐变 alpha 衰减替代 filter blur，性能更友好 -->
+    <div class="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
+      <div class="ambient-blob ambient-blob-a"></div>
+      <div class="ambient-blob ambient-blob-b"></div>
+    </div>
+
+    <!-- Hero -->
+    <header class="enter-rise relative text-center">
+      <h1 class="text-5xl font-semibold tracking-[0.15em] sm:text-6xl">前端小馆</h1>
+      <p class="mt-5 text-balance text-base text-muted-foreground sm:text-lg">给孩子的学习小工具</p>
+    </header>
+
+    <!-- 功能入口：卡片默认隐形，hover 浮现边框并轻微上浮 -->
+    <div class="relative mt-16 grid w-full max-w-4xl gap-4 px-4 sm:mt-20 sm:grid-cols-2 lg:grid-cols-3">
       {
-        cards.map((card) => (
+        cards.map((card, i) => (
           <a
             href={card.href}
-            class="group flex flex-col items-center gap-4 rounded-xl border border-border bg-card p-8 text-center transition-all hover:border-foreground/20 hover:shadow-lg"
+            class="group enter-rise flex flex-col items-center gap-4 rounded-2xl border border-transparent p-8 text-center transition-[translate,border-color,box-shadow] duration-300 hover:-translate-y-1 hover:border-foreground/10 hover:shadow-xl hover:shadow-foreground/5 focus-visible:outline-2 focus-visible:outline-offset-4 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+            style={`animation-delay: ${200 + i * 80}ms`}
           >
-            <div class="flex size-16 items-center justify-center rounded-full bg-muted transition-colors group-hover:bg-primary/10">
-              <Icon
-                icon={card.icon}
-                class="size-8 text-muted-foreground transition-colors group-hover:text-primary"
-                client:load
-              />
-            </div>
             <div>
               <h2 class="text-lg font-semibold">{card.title}</h2>
               <p class="mt-1 text-sm text-muted-foreground">{card.desc}</p>
             </div>
-            <span class="mt-auto text-sm font-medium text-primary opacity-0 transition-opacity group-hover:opacity-100">
-              进入 →
+            <span
+              class="mt-2 inline-flex -translate-x-1 items-center gap-1 text-sm font-medium text-foreground/60 opacity-0 transition-[translate,opacity] duration-300 group-hover:translate-x-0 group-hover:opacity-100"
+              aria-hidden="true"
+            >
+              进入 <span aria-hidden="true">→</span>
             </span>
           </a>
         ))
       }
     </div>
-  </section>
+  </div>
 </MainLayout>
+
+<style>
+  /* 入场动画：仅插值 opacity + transform，避免 filter 合成开销 */
+  .enter-rise {
+    animation: enter-rise 0.7s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+  }
+
+  @keyframes enter-rise {
+    from {
+      opacity: 0;
+      transform: translateY(1rem);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .ambient-blob {
+    position: absolute;
+    width: 24rem;
+    height: 24rem;
+    border-radius: 9999px;
+    /* 常驻合成层，避免反复层提升/降级 */
+    will-change: transform;
+    /* 渐变在盒内 70% 处衰减到 0，配合中心留边距，避免被容器裁剪出直边 */
+    background: radial-gradient(
+      circle closest-side,
+      color-mix(in srgb, var(--foreground) 4%, transparent),
+      transparent 70%
+    );
+  }
+
+  .ambient-blob-a {
+    top: 4rem;
+    left: 1rem;
+    animation: blob-breathe-a 26s ease-in-out infinite alternate;
+  }
+
+  .ambient-blob-b {
+    right: 1rem;
+    bottom: 4rem;
+    animation: blob-breathe-b 32s ease-in-out infinite alternate;
+  }
+
+  /* 呼吸用 translate + opacity（均可合成器驱动），不用 scale 以避免周期性重栅格化 */
+  @keyframes blob-breathe-a {
+    from {
+      transform: translate3d(0, 0, 0);
+      opacity: 0.7;
+    }
+    to {
+      transform: translate3d(2rem, 1.5rem, 0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes blob-breathe-b {
+    from {
+      transform: translate3d(0, 0, 0);
+      opacity: 1;
+    }
+    to {
+      transform: translate3d(-2rem, -1.5rem, 0);
+      opacity: 0.7;
+    }
+  }
+
+  /* 降低动态效果偏好：入场直接显示、光斑静止 */
+  @media (prefers-reduced-motion: reduce) {
+    .enter-rise {
+      animation: none;
+    }
+    .ambient-blob {
+      animation: none;
+    }
+  }
+</style>
