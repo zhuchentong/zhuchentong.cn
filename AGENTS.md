@@ -103,7 +103,7 @@ Astro pages ship zero JS by default. React components hydrate independently with
 
 ## Deployment
 
-CI: `.github/workflows/release.yaml` — push to `master` 触发 Docker 镜像构建并推送到 Docker Hub（tag `latest`），随后调用面板 webhook 触发部署。依赖 GitHub secrets：`DOCKERHUB_USERNAME`、`DOCKERHUB_TOKEN`、`PANEL_TOKEN`、`PANEL_WEBHOOK`。手动部署备选：本地 build the Docker image from `Dockerfile` (multi-stage `node:24-alpine`, standalone SSR on port 4000, `HOST=0.0.0.0`).
+**No CI** — 部署链路全自动：push 到 `master` → 阿里云 ACR（容器镜像服务）自动构建镜像 → ACR 触发器通知服务器拉取新镜像并重启容器。GitHub Actions 已移除（旧 workflow 推 Docker Hub + webhook 的链路已废弃）。手动部署备选：本地 build the Docker image from `Dockerfile` (multi-stage `node:24-alpine`, standalone SSR on port 4000, `HOST=0.0.0.0`).
 
 ## Conventions
 
