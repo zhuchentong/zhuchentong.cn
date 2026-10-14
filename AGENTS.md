@@ -89,6 +89,18 @@ Design docs live in `docs/` (copybook feature/font-subset plans, wordbook DB sch
 
 Astro pages ship zero JS by default. React components hydrate independently with client directives (`client:load`, `client:idle`, `client:visible`, `client:only="react"`).
 
+## 浏览器自动化（agent-browser CLI）
+
+经 shell 直接调用 `agent-browser`，不依赖浏览器 MCP（schema 零开销，快照落盘按需读取）：
+
+- `agent-browser open http://localhost:4321` — 打开页面（先 `pnpm dev`）
+- `agent-browser snapshot -i` — a11y 快照 + `@e` ref，仅在需要定位元素时调用
+- `agent-browser click @e12` 或 `agent-browser click "button[data-next]"` — 点击（ref 或唯一 CSS 选择器）
+- `agent-browser screenshot shots/x.png --if-changed` — 截图，画面未变化时自动跳过省 token（`shots/` 目录需先 `mkdir -p shots`，不会自动创建）。注意：首页等带动画的页面每帧像素都不同，`--if-changed` 不会跳过；静态页（如字帖页）正常跳过
+- `agent-browser console` / `agent-browser errors` — 查看控制台与页面报错
+- `agent-browser batch "open ..." "click ..." "screenshot ..."` — 多命令合并为一次调用
+- 多步操作结束后 `agent-browser close`
+
 ## Deployment
 
 **No CI** — the old `.github/workflows/release.yaml` was removed. Deployment is manual: build the Docker image from `Dockerfile` (multi-stage `node:24-alpine`, standalone SSR on port 4000, `HOST=0.0.0.0`).
